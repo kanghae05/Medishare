@@ -53,6 +53,7 @@ public class SecurityConfiguration {
                             .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                             .requestMatchers("/board/**", "/image/list.do", "/image/view.do").permitAll()
                             .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")
+                            .requestMatchers("/report/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
                             .requestMatchers("/upload/**").permitAll()
                             .requestMatchers("/txt/**").permitAll()

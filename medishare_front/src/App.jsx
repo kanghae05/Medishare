@@ -4,6 +4,7 @@ import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
 import BoardComp from "./components/board/BoardComp"
 import MemberComp from "./components/member/MemberComp"
+import ReportComp from "./components/report/ReportComp"
 import PacsComp from "./components/pacs/PacsComp"
 
 function App() {
@@ -14,15 +15,13 @@ function App() {
       <TopNavi />
 
       <div className="container pt-5">
-      {/* 라이팅 - 메뉴별 */}
+        {/* 라이팅 - 메뉴별 */}
         <Routes>
           <Route path="/" element={<Home />} />
           <Route path="/board/*" element={<BoardComp />} />
           <Route path="/member/*" element={<MemberComp />} />
-
-          {/* PACS */}
+          <Route path="/report/*" element={<ReportComp />} />
           <Route path="/pacs/*" element={<PacsComp />} />
-
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

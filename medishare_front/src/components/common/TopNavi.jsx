@@ -41,6 +41,11 @@ function TopNavi(){
             <li className="nav-item">
               <NavLink to={"/"} className="nav-link">Home</NavLink>&nbsp;
             </li>
+            {token && (
+              <li className="nav-item">
+                <NavLink to="/report/list" className="nav-link">판독소견서</NavLink>
+              </li>
+            )}
 
           </ul>
           <ul className="navbar-nav ms-auto">
