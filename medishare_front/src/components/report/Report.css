@@ -1,0 +1,5 @@
+.report-page { max-width: 1000px; margin: 0 auto; }
+.report-row { cursor: pointer; }
+.report-row:hover { background-color: #f3f8ff; }
+.report-text { white-space: pre-wrap; line-height: 1.7; }
+.report-form textarea { resize: vertical; }
