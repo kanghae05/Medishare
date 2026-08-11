@@ -127,4 +127,69 @@ CREATE TABLE coop_request (
     FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
     FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(study_id),
     FOREIGN KEY (report_id) REFERENCES report(report_id)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+
+-- 1. 공지사항 (Notices)
+CREATE TABLE IF NOT EXISTS `notices` (
+    `notice_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '공지사항 ID',
+    `writer_id` BIGINT NOT NULL COMMENT '작성자 ID (users.user_id 매핑용)',
+    `title` VARCHAR(255) NOT NULL COMMENT '공지 제목',
+    `content` TEXT NOT NULL COMMENT '공지 본문',
+    `is_pinned` TINYINT(1) DEFAULT 0 COMMENT '상단 고정 여부 (1:고정, 0:일반)',
+    `views` INT DEFAULT 0 COMMENT '조회수',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    `is_deleted` TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='공지사항';
+
+
+-- 2. 특이케이스 라이브러리 메인 (Special Cases)
+CREATE TABLE IF NOT EXISTS `special_cases` (
+    `case_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '케이스 ID',
+    `writer_id` BIGINT NOT NULL COMMENT '작성자 ID (users.user_id 매핑용)',
+    `title` VARCHAR(255) NOT NULL COMMENT '제목',
+    `modality` VARCHAR(20) NOT NULL COMMENT '촬영 장비 (CT, MRI 등)',
+    `body_part` VARCHAR(50) NOT NULL COMMENT '촬영 부위',
+    `disease_code` VARCHAR(20) NULL COMMENT '질환 코드',
+    `findings` TEXT NOT NULL COMMENT '판독 소견',
+    `impression` TEXT NOT NULL COMMENT '최종 결론',
+    `thumbnail_url` VARCHAR(500) NULL COMMENT '대표 썸네일 URL',
+    `views` INT DEFAULT 0 COMMENT '조회수',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    `is_deleted` TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)'
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='특이케이스 라이브러리';
+
+
+-- 3. PACS 연동 키 (PACS Links)
+CREATE TABLE IF NOT EXISTS `case_pacs_links` (
+    `pacs_link_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'PACS 연동 ID',
+    `case_id` BIGINT NOT NULL COMMENT '케이스 ID',
+    `study_instance_uid` VARCHAR(128) NOT NULL COMMENT 'PACS Study Instance UID',
+    `series_instance_uid` VARCHAR(128) NULL COMMENT 'PACS Series Instance UID',
+    `patient_id_masked` VARCHAR(50) NULL COMMENT '비식별 환자 ID',
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '연동 일시',
+    CONSTRAINT `fk_pacs_case` FOREIGN KEY (`case_id`) REFERENCES `special_cases` (`case_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='PACS 연동 식별키';
+
+
+-- 4. 케이스 태그 (Case Tags)
+CREATE TABLE IF NOT EXISTS `case_tags` (
+    `tag_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '태그 ID',
+    `case_id` BIGINT NOT NULL COMMENT '케이스 ID',
+    `tag_name` VARCHAR(50) NOT NULL COMMENT '태그명',
+    CONSTRAINT `fk_tags_case` FOREIGN KEY (`case_id`) REFERENCES `special_cases` (`case_id`) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='검색 태그';
+
+
+----------------------회원 테이블 생성 후
+-- 공지사항 작성자에 회원 외래키 연결
+ALTER TABLE `notices`
+ADD CONSTRAINT `fk_notices_writer` 
+FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+-- 특이케이스 작성자에 회원 외래키 연결
+ALTER TABLE `special_cases`
+ADD CONSTRAINT `fk_cases_writer` 
+FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
