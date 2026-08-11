@@ -14,6 +14,7 @@ public class StudyVO {
 
     // PacsStudyRepository에서 바로 VO 객체로 받기 위한 생성자
     public StudyVO(
+            Long no,
             String orthancStudyId,
             String patientId,
             String patientName,
@@ -26,6 +27,7 @@ public class StudyVO {
             Integer seriesCount,
             Boolean stable) {
 
+        this.no = no;
         this.orthancStudyId = orthancStudyId;
 
         this.patientId = patientId;
@@ -41,6 +43,9 @@ public class StudyVO {
         this.seriesCount = seriesCount;
         this.stable = Boolean.TRUE.equals(stable);
     }
+
+    // pacs_study primary key. Other modules use this value as the foreign key.
+    private Long no;
 
     // Orthanc Study ID
     private String orthancStudyId;
