@@ -1,4 +1,4 @@
-— PACS 환자 테이블
+-- PACS 환자 테이블
 CREATE TABLE pacs_patient (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_patient_id VARCHAR(100) NOT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE pacs_patient (
 );
 
 
-— PACS 검사(Study) 테이블
+-- PACS 검사(Study) 테이블
 CREATE TABLE pacs_study (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_study_id VARCHAR(100) NOT NULL,
@@ -40,7 +40,7 @@ CREATE TABLE pacs_study (
 );
 
 
-— PACS 시리즈(Series) 테이블
+-- PACS 시리즈(Series) 테이블
 CREATE TABLE pacs_series (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_series_id VARCHAR(100) NOT NULL,
