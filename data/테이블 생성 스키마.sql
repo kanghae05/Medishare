@@ -59,3 +59,33 @@ CREATE TABLE pacs_series (
         FOREIGN KEY (study_no)
         REFERENCES pacs_study(no)
 );
+
+
+-- 회원 연동 후 판독소견서 테이블
+CREATE TABLE report (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+
+    study_no BIGINT NOT NULL,
+    member_id VARCHAR(255) NOT NULL,
+
+    title VARCHAR(200) NOT NULL,
+    findings LONGTEXT NOT NULL,
+    impression LONGTEXT,
+    status VARCHAR(10) NOT NULL DEFAULT 'DRAFT',
+
+    write_date DATETIME,
+    update_date DATETIME,
+
+    PRIMARY KEY (no),
+
+    INDEX idx_report_study_no (study_no),
+    INDEX idx_report_member_id (member_id),
+
+    CONSTRAINT fk_report_study
+        FOREIGN KEY (study_no)
+        REFERENCES pacs_study(no),
+
+    CONSTRAINT fk_report_member
+        FOREIGN KEY (member_id)
+        REFERENCES member(id)
+);
