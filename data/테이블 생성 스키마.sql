@@ -206,7 +206,69 @@ ALTER TABLE `notices`
 ADD CONSTRAINT `fk_notices_writer` 
 FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
+
 -- 특이케이스 작성자에 회원 외래키 연결
 ALTER TABLE `special_cases`
 ADD CONSTRAINT `fk_cases_writer` 
 FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
+
+
+-- ============================================================
+-- 1. 의료진 스케줄 (Doctor Schedules)
+-- ============================================================
+
+CREATE TABLE IF NOT EXISTS `doctor_schedules` (
+    `schedule_id` BIGINT AUTO_INCREMENT PRIMARY KEY
+        COMMENT '스케줄 ID',
+
+    `doctor_id` BIGINT NOT NULL
+        COMMENT '의료진 ID (users.user_id 매핑용)',
+
+    `schedule_date` DATE NOT NULL
+        COMMENT '스케줄 날짜',
+
+    `start_time` TIME NOT NULL
+        COMMENT '스케줄 시작 시간',
+
+    `end_time` TIME NOT NULL
+        COMMENT '스케줄 종료 시간',
+
+    `schedule_type` VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE'
+        COMMENT '스케줄 상태 (AVAILABLE: 협진 가능, RESERVED: 협진 예정, UNAVAILABLE: 협진 불가)',
+
+    `memo` VARCHAR(500) NULL
+        COMMENT '스케줄 관련 메모',
+
+    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        COMMENT '생성 일시',
+
+    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
+        ON UPDATE CURRENT_TIMESTAMP
+        COMMENT '수정 일시',
+
+    `is_deleted` TINYINT(1) DEFAULT 0
+        COMMENT '삭제 여부 (1:삭제, 0:정상)',
+
+    INDEX `idx_schedule_doctor` (`doctor_id`),
+
+    INDEX `idx_schedule_date` (`schedule_date`),
+
+    INDEX `idx_schedule_doctor_date`
+        (`doctor_id`, `schedule_date`),
+
+    INDEX `idx_schedule_type`
+        (`schedule_type`)
+
+) ENGINE=InnoDB
+DEFAULT CHARSET=utf8mb4
+COMMENT='의료진 협진 가능 일정 및 스케줄 관리';
+
+
+-- ============================================================
+-- 2. 회원 테이블 생성 후 FK 연결
+-- ============================================================
+
+ALTER TABLE `doctor_schedules`
+ADD CONSTRAINT `fk_doctor_schedules_doctor`
+FOREIGN KEY (`doctor_id`)
+REFERENCES `users` (`user_id`);
