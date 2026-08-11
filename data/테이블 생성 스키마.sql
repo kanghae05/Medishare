@@ -89,3 +89,42 @@ CREATE TABLE report (
         FOREIGN KEY (member_id)
         REFERENCES member(id)
 );
+
+
+-- 협진 요청 테이블
+CREATE TABLE coop_request (
+    coop_request_id   INT AUTO_INCREMENT PRIMARY KEY,
+    req_doctor_id     INT NOT NULL,
+    recv_type         ENUM('지정의사','진료과') NOT NULL,
+    recv_doctor_id    INT NULL,
+    recv_dept_id      INT NULL,
+    accept_doctor_id  INT NULL,
+    patient_id        INT NOT NULL,
+    pacs_study_id     INT NOT NULL,
+    report_id         INT NULL,
+    req_content       TEXT NOT NULL,
+    status            ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
+    req_time          DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resp_time         DATETIME NULL,
+    reject_reason     TEXT NULL,
+    is_read           BOOLEAN NOT NULL DEFAULT FALSE,
+    read_time         DATETIME NULL,
+ 
+    CONSTRAINT chk_recv_type_match CHECK (
+        (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
+        OR
+        (recv_type = '진료과' AND recv_dept_id IS NOT NULL AND recv_doctor_id IS NULL)
+    ),
+    CONSTRAINT chk_req_recv_diff CHECK (req_doctor_id <> recv_doctor_id),
+    CONSTRAINT chk_reject_reason CHECK (
+        (status = '거절' AND reject_reason IS NOT NULL) OR (status <> '거절')
+    ),
+ 
+    FOREIGN KEY (req_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (recv_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (accept_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (recv_dept_id) REFERENCES department(dept_id),
+    FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
+    FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(study_id),
+    FOREIGN KEY (report_id) REFERENCES report(report_id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
