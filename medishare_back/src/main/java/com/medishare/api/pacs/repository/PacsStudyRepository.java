@@ -21,6 +21,7 @@ public interface PacsStudyRepository
 
     @Query("""
         select new com.medishare.api.pacs.vo.StudyVO(
+            s.no,
             s.orthancStudyId,
             p.patientId,
             p.patientName,
