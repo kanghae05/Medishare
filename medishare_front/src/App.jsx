@@ -4,6 +4,7 @@ import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
 import BoardComp from "./components/board/BoardComp"
 import MemberComp from "./components/member/MemberComp"
+import PacsComp from "./components/pacs/PacsComp"
 
 function App() {
 
@@ -18,9 +19,14 @@ function App() {
           <Route path="/" element={<Home />} />
           <Route path="/board/*" element={<BoardComp />} />
           <Route path="/member/*" element={<MemberComp />} />
+
+          {/* PACS */}
+          <Route path="/pacs/*" element={<PacsComp />} />
+
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>
+
       {/* 맨 아래 회사 소개 & 카피라이트 : /src/components/common/Footer.jsx */}
     </>
   )
