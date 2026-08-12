@@ -6,6 +6,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.web.SecurityFilterChain;
@@ -17,14 +18,17 @@ import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import java.util.List;
 
 @Configuration
+@EnableMethodSecurity
 public class SecurityConfiguration {
 
     private final JwtTokenProvider jwtTokenProvider;
+    private final CustomAccessDeniedHandler customAccessDeniedHandler;
 
     // 생성자를 이용한 세팅
     @Autowired
-    public SecurityConfiguration(JwtTokenProvider jwtTokenProvider){
+    public SecurityConfiguration(JwtTokenProvider jwtTokenProvider, CustomAccessDeniedHandler customAccessDeniedHandler){
         this.jwtTokenProvider = jwtTokenProvider;
+        this.customAccessDeniedHandler = customAccessDeniedHandler;
     }
 
     @Bean // 리턴되는 객체(SecurityFilterChain)를 등록해서 사용한다.
@@ -54,6 +58,8 @@ public class SecurityConfiguration {
                             .requestMatchers("/board/**", "/image/list.do", "/image/view.do").permitAll()
                             .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")
                             .requestMatchers("/report/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/pacs/departments/**", "/pacs/members/**").hasRole("ADMIN")
+                            .requestMatchers("/pacs/roles/**", "/pacs/permissions/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
                             .requestMatchers("/coop/**").permitAll()
                             .requestMatchers("/upload/**").permitAll()
@@ -72,7 +78,7 @@ public class SecurityConfiguration {
                 .exceptionHandling((exceptionHanling) ->
                         exceptionHanling
                                 .authenticationEntryPoint(new CustomAuthenticationEntryPoint())
-                                .accessDeniedHandler(new CustomAccessDeniedHandler()));
+                                .accessDeniedHandler(customAccessDeniedHandler));
 
         return httpSecurity.build();
 

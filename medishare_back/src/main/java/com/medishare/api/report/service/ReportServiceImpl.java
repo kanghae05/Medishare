@@ -2,6 +2,7 @@ package com.medishare.api.report.service;
 
 import com.medishare.api.member.entity.Member;
 import com.medishare.api.member.repository.QMemberRepository;
+import com.medishare.api.member.service.PacsChangeHistoryService;
 import com.medishare.api.report.entity.Report;
 import com.medishare.api.report.repository.QReportRepository;
 import com.medishare.api.report.vo.ReportVO;
@@ -18,6 +19,7 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     private final QReportRepository qReportRepository;
     private final QMemberRepository qMemberRepository;
+    private final PacsChangeHistoryService pacsChangeHistoryService;
 
     @Override
     @Transactional
@@ -28,7 +30,9 @@ public class ReportServiceImpl implements ReportService {
                 .studyNo(vo.getStudyNo()).title(vo.getTitle())
                 .findings(vo.getFindings()).impression(vo.getImpression())
                 .status(vo.getStatus()).member(member).build();
-        return toVO(qReportRepository.save(report));
+        Report savedReport = qReportRepository.save(report);
+        pacsChangeHistoryService.recordReportChange(loginMemberId, null, savedReport, "CREATE", null);
+        return toVO(savedReport);
     }
 
     @Override
@@ -41,21 +45,25 @@ public class ReportServiceImpl implements ReportService {
 
     @Override
     @Transactional
-    public ReportVO update(Long no, ReportVO vo, String loginMemberId) {
+    public ReportVO update(Long no, ReportVO vo, String loginMemberId, String changeReason) {
         Report report = getReport(no);
         validateOwnerOrAdmin(report, loginMemberId);
+        String beforeData = pacsChangeHistoryService.snapshot(report);
         report.setTitle(vo.getTitle());
         report.setFindings(vo.getFindings());
         report.setImpression(vo.getImpression());
         report.setStatus(vo.getStatus());
+        pacsChangeHistoryService.recordReportChange(loginMemberId, beforeData, report, "UPDATE", changeReason);
         return toVO(report);
     }
 
     @Override
     @Transactional
-    public void delete(Long no, String loginMemberId) {
+    public void delete(Long no, String loginMemberId, String changeReason) {
         Report report = getReport(no);
         validateOwnerOrAdmin(report, loginMemberId);
+        String beforeData = pacsChangeHistoryService.snapshot(report);
+        pacsChangeHistoryService.recordReportChange(loginMemberId, beforeData, report, "DELETE", changeReason);
         qReportRepository.delete(report);
     }
 
