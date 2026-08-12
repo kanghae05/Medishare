@@ -7,12 +7,16 @@ import MemberComp from "./components/member/MemberComp"
 import ReportComp from "./components/report/ReportComp"
 import PacsComp from "./components/pacs/PacsComp"
 import CoopComp from "./components/coop/CoopComp"
+<<<<<<< Updated upstream
 import NoticeList from "./pages/Notice/NoticeList"
 import NoticeDetail from "./pages/Notice/NoticeDetail"
 import NoticeForm from "./pages/Notice/NoticeForm"
 import SpecialCaseList from "./pages/SpecialCase/SpecialCaseList"
 import SpecialCaseDetail from "./pages/SpecialCase/SpecialCaseDetail"
 import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
+=======
+import DPartComp from "./components/dpart/DPartComp"
+>>>>>>> Stashed changes
 
 function App() {
 
@@ -39,6 +43,7 @@ function App() {
           <Route path="/report/*" element={<ReportComp />} />
           <Route path="/pacs/*" element={<PacsComp />} />
           <Route path="/coop/*" element={<CoopComp />} />
+<<<<<<< Updated upstream
           {/* Notice module routes */}
           <Route path="/notices" element={<NoticeList />} />
           <Route path="/notices/new" element={<NoticeForm />} />
@@ -49,6 +54,9 @@ function App() {
           <Route path="/special-cases/new" element={<SpecialCaseCreate />} />
           <Route path="/special-cases/:caseId" element={<SpecialCaseDetail currentUser={currentUser} />} />
           <Route path="/special-cases/:caseId/edit" element={<SpecialCaseCreate />} />
+=======
+          <Route path="/d/*" element={<DPartComp />} />
+>>>>>>> Stashed changes
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>
