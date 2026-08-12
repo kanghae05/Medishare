@@ -1,11 +1,16 @@
 package com.medishare.api.coop.controller;
 
+import com.medishare.api.coop.entity.PacsStudyRef;
+import com.medishare.api.coop.repository.PacsStudyRefRepository;
 import com.medishare.api.coop.service.CoopRequestService;
+import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
@@ -21,6 +26,8 @@ import java.util.Map;
 public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
+    private final PacsStudyRefRepository pacsStudyRefRepository;
+    private final OrthancImageService orthancImageService;
 
     // ------------------------------------------------------------------
     // 로그인 사용자 정보 추출
@@ -30,11 +37,11 @@ public class CoopRequestController {
     // ------------------------------------------------------------------
 
     private Long currentDoctorId(Authentication authentication) {
-        return 1L; // TODO: 테스트용 임시값, 로그인 연동되면 원상복구
+        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
     }
 
     private Long currentDeptId(Authentication authentication) {
-        return 1L; // TODO: 테스트용 임시값, 로그인 연동되면 원상복구
+        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
     }
 
     // ------------------------------------------------------------------
@@ -166,6 +173,40 @@ public class CoopRequestController {
         Long doctorId = currentDoctorId(authentication);
         int result = coopRequestService.cancel(no, doctorId);
         return Map.of("result", result == 1 ? "ok" : "fail");
+    }
+
+    // ------------------------------------------------------------------
+    // 검사 이미지 (Orthanc 프록시)
+    // TODO: PACS 담당자가 정식 검사/이미지 조회 API를 만들면 이 두 메서드는 삭제하고
+    // 그쪽 API를 호출하도록 바꾼다. (PacsStudyRef, OrthancImageService도 같이 삭제)
+    // ------------------------------------------------------------------
+
+    // 이 검사에 이미지가 몇 장 있는지 (프론트 이전/다음, 슬라이더 범위 계산용)
+    @GetMapping("/study/{studyNo}/instances.do")
+    public Map<String, Object> instanceCount(@PathVariable Long studyNo) {
+        String orthancStudyId = resolveOrthancStudyId(studyNo);
+        List<String> instanceIds = orthancImageService.listInstanceIds(orthancStudyId);
+        return Map.of("count", instanceIds.size());
+    }
+
+    // index번째(0부터 시작) 이미지를 PNG로 반환
+    @GetMapping("/study/{studyNo}/instance/{index}/preview.do")
+    public ResponseEntity<byte[]> instancePreview(@PathVariable Long studyNo, @PathVariable int index) {
+        String orthancStudyId = resolveOrthancStudyId(studyNo);
+        List<String> instanceIds = orthancImageService.listInstanceIds(orthancStudyId);
+
+        if (index < 0 || index >= instanceIds.size()) {
+            throw new RuntimeException("해당 순번의 이미지가 존재하지 않습니다.");
+        }
+
+        byte[] image = orthancImageService.fetchPreview(instanceIds.get(index));
+        return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
+    }
+
+    private String resolveOrthancStudyId(Long studyNo) {
+        PacsStudyRef study = pacsStudyRefRepository.findById(studyNo)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 검사입니다."));
+        return study.getOrthancStudyId();
     }
 
     // ------------------------------------------------------------------

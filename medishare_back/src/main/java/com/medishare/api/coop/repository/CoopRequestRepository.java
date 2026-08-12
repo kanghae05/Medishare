@@ -9,6 +9,30 @@ import org.springframework.data.repository.query.Param;
 
 public interface CoopRequestRepository extends JpaRepository<CoopRequest, Long>, CoopRequestRepositoryCustom {
 
+    @Query("""
+            SELECT COUNT(c)
+            FROM CoopRequest c
+            WHERE (:doctorId IS NULL OR c.reqDoctorId = :doctorId OR c.recvDoctorId = :doctorId OR c.acceptDoctorId = :doctorId)
+              AND (:startDateTime IS NULL OR c.reqTime >= :startDateTime)
+              AND (:endDateTime IS NULL OR c.reqTime < :endDateTime)
+            """)
+    long countConsultations(@Param("doctorId") Long doctorId,
+                            @Param("startDateTime") java.time.LocalDateTime startDateTime,
+                            @Param("endDateTime") java.time.LocalDateTime endDateTime);
+
+    @Query("""
+            SELECT COUNT(c)
+            FROM CoopRequest c
+            WHERE c.status = :status
+              AND (:doctorId IS NULL OR c.reqDoctorId = :doctorId OR c.recvDoctorId = :doctorId OR c.acceptDoctorId = :doctorId)
+              AND (:startDateTime IS NULL OR c.reqTime >= :startDateTime)
+              AND (:endDateTime IS NULL OR c.reqTime < :endDateTime)
+            """)
+    long countConsultationsByStatus(@Param("status") CoopStatus status,
+                                    @Param("doctorId") Long doctorId,
+                                    @Param("startDateTime") java.time.LocalDateTime startDateTime,
+                                    @Param("endDateTime") java.time.LocalDateTime endDateTime);
+
     /*
     수락 처리 (지정의사 / 진료과 공통)
     - WHERE status='요청' 조건으로, 먼저 반영된 트랜잭션만 성공한다.

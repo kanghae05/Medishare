@@ -1,0 +1,484 @@
+.dpart-shell {
+  background: #f4f7fa;
+  color: #172331;
+  margin: -8px -12px 32px;
+  min-height: calc(100vh - 96px);
+}
+
+.dpart-layout {
+  display: grid;
+  gap: 24px;
+  grid-template-columns: 228px minmax(0, 1fr);
+  padding: 24px 0;
+}
+
+.dpart-sidebar,
+.dpart-table-wrap,
+.dpart-panel,
+.dpart-stat-card {
+  background: #ffffff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+}
+
+.dpart-sidebar {
+  height: fit-content;
+  padding: 16px;
+  position: sticky;
+  top: 72px;
+}
+
+.dpart-brand {
+  align-items: center;
+  border-bottom: 1px solid #e6ecf1;
+  display: flex;
+  gap: 12px;
+  padding-bottom: 14px;
+}
+
+.dpart-brand-mark {
+  align-items: center;
+  background: #0f766e;
+  border-radius: 8px;
+  color: #ffffff;
+  display: inline-flex;
+  font-weight: 800;
+  height: 36px;
+  justify-content: center;
+  width: 36px;
+}
+
+.dpart-brand strong,
+.dpart-brand span {
+  display: block;
+}
+
+.dpart-brand span {
+  color: #647482;
+  font-size: 13px;
+}
+
+.dpart-menu {
+  display: grid;
+  gap: 6px;
+  padding-top: 14px;
+}
+
+.dpart-menu a {
+  border-radius: 7px;
+  color: #40505f;
+  font-weight: 700;
+  padding: 10px 12px;
+  text-decoration: none;
+}
+
+.dpart-menu a.active,
+.dpart-menu a:hover {
+  background: #e6f3f1;
+  color: #0f766e;
+}
+
+.dpart-main {
+  min-width: 0;
+}
+
+.dpart-page-head {
+  align-items: flex-start;
+  display: flex;
+  gap: 16px;
+  justify-content: space-between;
+  margin-bottom: 18px;
+}
+
+.dpart-page-head h1 {
+  font-size: 26px;
+  font-weight: 800;
+  letter-spacing: 0;
+  margin: 0;
+}
+
+.dpart-page-head p {
+  color: #647482;
+  margin: 6px 0 0;
+}
+
+.dpart-primary,
+.dpart-secondary,
+.dpart-row-actions button,
+.dpart-icon-button {
+  border-radius: 7px;
+  font-weight: 700;
+}
+
+.dpart-primary {
+  background: #0f766e;
+  border: 1px solid #0f766e;
+  color: #ffffff;
+  padding: 9px 16px;
+}
+
+.dpart-primary:disabled {
+  opacity: 0.65;
+}
+
+.dpart-secondary {
+  background: #ffffff;
+  border: 1px solid #cfdae3;
+  color: #40505f;
+  padding: 8px 13px;
+}
+
+.dpart-filter-band {
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.dpart-filter-band input,
+.dpart-form input,
+.dpart-form select,
+.dpart-form textarea {
+  border: 1px solid #cfdae3;
+  border-radius: 7px;
+  color: #172331;
+  padding: 8px 10px;
+}
+
+.dpart-segment {
+  background: #eef3f6;
+  border-radius: 8px;
+  display: inline-flex;
+  padding: 3px;
+}
+
+.dpart-segment button {
+  background: transparent;
+  border: 0;
+  border-radius: 6px;
+  color: #526371;
+  font-weight: 700;
+  padding: 7px 12px;
+}
+
+.dpart-segment button.active {
+  background: #ffffff;
+  box-shadow: 0 1px 3px rgba(15, 35, 45, 0.12);
+  color: #0f766e;
+}
+
+.dpart-alert {
+  border-radius: 8px;
+  font-weight: 700;
+  margin-bottom: 12px;
+  padding: 11px 14px;
+}
+
+.dpart-alert.success {
+  background: #e4f5ef;
+  color: #0f684e;
+}
+
+.dpart-alert.error {
+  background: #fdeceb;
+  color: #a43d37;
+}
+
+.dpart-state {
+  background: #ffffff;
+  border: 1px dashed #c7d3dc;
+  border-radius: 8px;
+  color: #647482;
+  font-weight: 700;
+  padding: 42px 16px;
+  text-align: center;
+}
+
+.dpart-table-wrap {
+  overflow: auto;
+}
+
+.dpart-table-wrap.flat {
+  border: 0;
+}
+
+.dpart-table {
+  border-collapse: collapse;
+  width: 100%;
+}
+
+.dpart-table th,
+.dpart-table td {
+  border-bottom: 1px solid #e7edf2;
+  padding: 13px 14px;
+  text-align: left;
+  vertical-align: middle;
+}
+
+.dpart-table th {
+  color: #526371;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.dpart-row-actions {
+  display: flex;
+  gap: 7px;
+}
+
+.dpart-row-actions button {
+  background: #ffffff;
+  border: 1px solid #cfdae3;
+  color: #40505f;
+  padding: 6px 10px;
+}
+
+.dpart-row-actions button.danger {
+  border-color: #efc3c0;
+  color: #a43d37;
+}
+
+.dpart-badge {
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 4px 10px;
+  white-space: nowrap;
+}
+
+.dpart-badge.status-AVAILABLE {
+  background: #e4f5ef;
+  border-color: #b7dfcf;
+  color: #0f684e;
+}
+
+.dpart-badge.status-RESERVED {
+  background: #e8f0fd;
+  border-color: #bfd1f0;
+  color: #285c9a;
+}
+
+.dpart-badge.status-UNAVAILABLE {
+  background: #f2f2ef;
+  border-color: #d8d8d0;
+  color: #686862;
+}
+
+.dpart-modal-backdrop {
+  align-items: center;
+  background: rgba(18, 31, 43, 0.42);
+  display: flex;
+  inset: 0;
+  justify-content: center;
+  padding: 20px;
+  position: fixed;
+  z-index: 1050;
+}
+
+.dpart-modal {
+  background: #ffffff;
+  border-radius: 8px;
+  box-shadow: 0 20px 60px rgba(10, 25, 40, 0.26);
+  max-width: 520px;
+  width: 100%;
+}
+
+.dpart-modal-head {
+  align-items: center;
+  border-bottom: 1px solid #e6ecf1;
+  display: flex;
+  justify-content: space-between;
+  padding: 16px 18px;
+}
+
+.dpart-modal-head h3 {
+  font-size: 20px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.dpart-icon-button {
+  background: #eef3f6;
+  border: 0;
+  height: 30px;
+  width: 30px;
+}
+
+.dpart-form {
+  display: grid;
+  gap: 13px;
+  padding: 18px;
+}
+
+.dpart-form label {
+  display: grid;
+  gap: 6px;
+}
+
+.dpart-form label span {
+  color: #526371;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dpart-form-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+.dpart-modal-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  padding-top: 4px;
+}
+
+.dpart-stat-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 14px;
+}
+
+.dpart-stat-card {
+  padding: 16px;
+}
+
+.dpart-stat-card span {
+  color: #647482;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dpart-stat-card strong {
+  display: block;
+  font-size: 30px;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin-top: 8px;
+}
+
+.dpart-stat-card.tone-green strong { color: #0f766e; }
+.dpart-stat-card.tone-blue strong { color: #2563a8; }
+.dpart-stat-card.tone-warning strong { color: #b26b00; }
+.dpart-stat-card.tone-red strong { color: #a43d37; }
+.dpart-stat-card.tone-gray strong { color: #65717c; }
+
+.dpart-panel {
+  margin-bottom: 14px;
+  padding: 18px;
+}
+
+.dpart-panel h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 14px;
+}
+
+.dpart-bars {
+  display: grid;
+  gap: 12px;
+}
+
+.dpart-bar-row {
+  align-items: center;
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 90px minmax(0, 1fr) 48px;
+}
+
+.dpart-bar-row span,
+.dpart-bar-row strong {
+  color: #40505f;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dpart-bar-track {
+  background: #eef3f6;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.dpart-bar-fill {
+  border-radius: inherit;
+  height: 100%;
+}
+
+.dpart-bar-fill.tone-green { background: #0f766e; }
+.dpart-bar-fill.tone-blue { background: #2563a8; }
+.dpart-bar-fill.tone-warning { background: #d99526; }
+.dpart-bar-fill.tone-red { background: #bf514b; }
+.dpart-bar-fill.tone-gray { background: #7b8791; }
+
+.dpart-timeline {
+  display: grid;
+  gap: 12px;
+}
+
+.dpart-timeline-item {
+  border-left: 3px solid #0f766e;
+  display: grid;
+  gap: 14px;
+  grid-template-columns: 130px minmax(0, 1fr);
+  padding-left: 14px;
+}
+
+.dpart-timeline-item time {
+  color: #526371;
+  font-weight: 800;
+}
+
+.dpart-timeline-item p {
+  margin: 8px 0 0;
+}
+
+.dpart-toggle {
+  align-items: center;
+  color: #40505f;
+  display: inline-flex;
+  font-weight: 700;
+  gap: 7px;
+}
+
+@media (max-width: 900px) {
+  .dpart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dpart-sidebar {
+    position: static;
+  }
+
+  .dpart-menu {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dpart-stat-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 600px) {
+  .dpart-page-head,
+  .dpart-filter-band {
+    align-items: stretch;
+    flex-direction: column;
+  }
+
+  .dpart-form-grid,
+  .dpart-stat-grid,
+  .dpart-timeline-item {
+    grid-template-columns: 1fr;
+  }
+}

@@ -3,9 +3,13 @@ package com.medishare.api.coop.service;
 import com.medishare.api.coop.entity.CoopRequest;
 import com.medishare.api.coop.entity.CoopRequestDeptReject;
 import com.medishare.api.coop.entity.CoopStatus;
+import com.medishare.api.coop.entity.PacsPatientRef;
+import com.medishare.api.coop.entity.PacsStudyRef;
 import com.medishare.api.coop.entity.RecvType;
 import com.medishare.api.coop.repository.CoopRequestDeptRejectRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
+import com.medishare.api.coop.repository.PacsPatientRefRepository;
+import com.medishare.api.coop.repository.PacsStudyRefRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
@@ -30,10 +34,12 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
+    private final PacsPatientRefRepository pacsPatientRefRepository;
+    private final PacsStudyRefRepository pacsStudyRefRepository;
 
-    // TODO(3번 회원관리 연동): 의사명/환자명/진료과명 조회, 소속 진료과 의사 수 조회는
+    // TODO(3번 회원관리 연동): 의사명/진료과명 조회, 소속 진료과 의사 수 조회는
     // MemberRepository / DepartmentRepository가 준비되면 아래 enrich* / resolveDeptDoctorCount에 연결한다.
-    // 그 전까지는 이름 필드가 비어있는 상태로 응답이 나가는 게 정상이다.
+    // 환자명/검사설명은 PacsPatientRef/PacsStudyRef(임시 조회용)로 우선 채운다.
 
     // ------------------------------------------------------------------
     // 조회
@@ -329,13 +335,13 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return result;
     }
 
-    /*
-        진료과 요청에서 "이 조회자가 본 화면 기준 상태"를 계산한다 (DB에는 저장하지 않음).
-        - 본인이 수락자면 "수락"
-        - 본인이 거절했으면 "거절" (전체 상태와 무관하게 본인 화면에는 이렇게 보임)
-        - 그 외에 이미 다른 의사가 수락해버렸으면 "종료" (기회를 놓친 것)
-        - 그 외에는 실제 status 그대로
-    */
+    /**
+     * 진료과 요청에서 "이 조회자가 본 화면 기준 상태"를 계산한다 (DB에는 저장하지 않음).
+     * - 본인이 수락자면 "수락"
+     * - 본인이 거절했으면 "거절" (전체 상태와 무관하게 본인 화면에는 이렇게 보임)
+     * - 그 외에 이미 다른 의사가 수락해버렸으면 "종료" (기회를 놓친 것)
+     * - 그 외에는 실제 status 그대로
+     */
     private void applyDisplayStatus(CoopRequestVO vo, CoopRequest c, Long viewerDoctorId) {
         if (c.getRecvType() == RecvType.지정의사) {
             vo.setDisplayStatus(c.getStatus().name());
@@ -389,8 +395,30 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         vo.setRejectReason(c.getRejectReason());
         vo.setIsRead(c.isRead());
         vo.setReadTime(c.getReadTime() == null ? null : c.getReadTime().format(DATETIME_FMT));
-        // TODO(3번/PACS/6번 연동): reqDoctorName, recvDoctorName, recvDeptName,
-        // acceptDoctorName, patientName, pacsStudyLabel 채우기
+
+        // 환자명 (PacsPatientRef 임시 조회 - PACS 정식 API 나오면 교체)
+        pacsPatientRefRepository.findById(c.getPatientId())
+                .ifPresent(p -> vo.setPatientName(p.getPatientName()));
+
+        // 검사 설명 + 촬영일 (PacsStudyRef 임시 조회 - PACS 정식 API 나오면 교체)
+        pacsStudyRefRepository.findById(c.getPacsStudyId())
+                .ifPresent(s -> {
+                    String label = s.getStudyDescription();
+                    if (s.getStudyDate() != null && !s.getStudyDate().isBlank()) {
+                        label = (label == null ? "" : label + " ") + formatStudyDate(s.getStudyDate());
+                    }
+                    vo.setPacsStudyLabel(label);
+                });
+
+        // TODO(3번 회원관리 연동): reqDoctorName, recvDoctorName, recvDeptName, acceptDoctorName 채우기
         return vo;
+    }
+
+    /** pacs_study.study_date는 "20260810" 형태(DICOM 날짜)라 화면용으로 "2026-08-10"로 바꿔준다. */
+    private String formatStudyDate(String rawDate) {
+        if (rawDate == null || rawDate.length() != 8) {
+            return rawDate;
+        }
+        return rawDate.substring(0, 4) + "-" + rawDate.substring(4, 6) + "-" + rawDate.substring(6, 8);
     }
 }
