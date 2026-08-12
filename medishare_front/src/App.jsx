@@ -6,6 +6,7 @@ import BoardComp from "./components/board/BoardComp"
 import MemberComp from "./components/member/MemberComp"
 import ReportComp from "./components/report/ReportComp"
 import PacsComp from "./components/pacs/PacsComp"
+import CoopComp from "./components/coop/CoopComp"
 
 function App() {
 
@@ -22,6 +23,7 @@ function App() {
           <Route path="/member/*" element={<MemberComp />} />
           <Route path="/report/*" element={<ReportComp />} />
           <Route path="/pacs/*" element={<PacsComp />} />
+          <Route path="/coop/*" element={<CoopComp />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

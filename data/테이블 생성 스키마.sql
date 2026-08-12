@@ -1,4 +1,112 @@
--- PACS 환자 테이블
+-- ============================================================
+-- 0. DB 초기화
+-- ============================================================
+DROP DATABASE IF EXISTS medi;
+CREATE DATABASE medi CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+USE medi;
+
+
+-- ============================================================
+-- 1. 진료과
+-- ============================================================
+CREATE TABLE department (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    department_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_department_name (department_name)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 2. 회원 (의사/관리자 등 전체 계정)
+-- ============================================================
+CREATE TABLE member (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    login_id VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    member_name VARCHAR(200) NOT NULL,
+    email VARCHAR(200),
+    phone VARCHAR(30),
+    department_no BIGINT,
+    position VARCHAR(100),
+    specialty VARCHAR(200),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_member_login_id (login_id),
+    UNIQUE KEY uk_member_email (email),
+
+    CONSTRAINT fk_member_department
+        FOREIGN KEY (department_no)
+        REFERENCES department(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 3. 역할 / 권한
+-- ============================================================
+CREATE TABLE role (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    role_code VARCHAR(50) NOT NULL,
+    role_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_role_code (role_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE member_role (
+    member_no BIGINT NOT NULL,
+    role_no BIGINT NOT NULL,
+    assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (member_no, role_no),
+
+    CONSTRAINT fk_member_role_member
+        FOREIGN KEY (member_no)
+        REFERENCES member(no),
+
+    CONSTRAINT fk_member_role_role
+        FOREIGN KEY (role_no)
+        REFERENCES role(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE permission (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    permission_code VARCHAR(100) NOT NULL,
+    permission_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_permission_code (permission_code)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE role_permission (
+    role_no BIGINT NOT NULL,
+    permission_no BIGINT NOT NULL,
+
+    PRIMARY KEY (role_no, permission_no),
+
+    CONSTRAINT fk_role_permission_role
+        FOREIGN KEY (role_no)
+        REFERENCES role(no),
+
+    CONSTRAINT fk_role_permission_permission
+        FOREIGN KEY (permission_no)
+        REFERENCES permission(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 4. PACS
+-- ============================================================
 CREATE TABLE pacs_patient (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_patient_id VARCHAR(100) NOT NULL,
@@ -10,10 +118,8 @@ CREATE TABLE pacs_patient (
 
     PRIMARY KEY (no),
     UNIQUE KEY uk_pacs_patient_orthanc_patient_id (orthanc_patient_id)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- PACS 검사(Study) 테이블
 CREATE TABLE pacs_study (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_study_id VARCHAR(100) NOT NULL,
@@ -37,10 +143,8 @@ CREATE TABLE pacs_study (
     CONSTRAINT fk_pacs_study_patient
         FOREIGN KEY (patient_no)
         REFERENCES pacs_patient(no)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- PACS 시리즈(Series) 테이블
 CREATE TABLE pacs_series (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_series_id VARCHAR(100) NOT NULL,
@@ -58,15 +162,17 @@ CREATE TABLE pacs_series (
     CONSTRAINT fk_pacs_series_study
         FOREIGN KEY (study_no)
         REFERENCES pacs_study(no)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- 회원 연동 후 판독소견서 테이블
+-- ============================================================
+-- 5. 판독소견서
+-- ============================================================
 CREATE TABLE report (
     no BIGINT NOT NULL AUTO_INCREMENT,
 
     study_no BIGINT NOT NULL,
-    member_id VARCHAR(255) NOT NULL,
+    member_id BIGINT NOT NULL,
 
     title VARCHAR(200) NOT NULL,
     findings LONGTEXT NOT NULL,
@@ -87,22 +193,130 @@ CREATE TABLE report (
 
     CONSTRAINT fk_report_member
         FOREIGN KEY (member_id)
-        REFERENCES member(id)
-);
+        REFERENCES member(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
--- 협진 요청 테이블
+-- ============================================================
+-- 6. 공지사항 / 특이케이스 라이브러리
+-- ============================================================
+CREATE TABLE notices (
+    notice_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '공지사항 ID',
+    writer_id BIGINT NOT NULL COMMENT '작성자 ID (member.no 매핑)',
+    title VARCHAR(255) NOT NULL COMMENT '공지 제목',
+    content TEXT NOT NULL COMMENT '공지 본문',
+    is_pinned TINYINT(1) DEFAULT 0 COMMENT '상단 고정 여부 (1:고정, 0:일반)',
+    views INT DEFAULT 0 COMMENT '조회수',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)',
+
+    CONSTRAINT fk_notices_writer
+        FOREIGN KEY (writer_id) REFERENCES member(no) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='공지사항';
+
+CREATE TABLE special_cases (
+    case_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '케이스 ID',
+    writer_id BIGINT NOT NULL COMMENT '작성자 ID (member.no 매핑)',
+    title VARCHAR(255) NOT NULL COMMENT '제목',
+    modality VARCHAR(20) NOT NULL COMMENT '촬영 장비 (CT, MRI 등)',
+    body_part VARCHAR(50) NOT NULL COMMENT '촬영 부위',
+    disease_code VARCHAR(20) NULL COMMENT '질환 코드',
+    findings TEXT NOT NULL COMMENT '판독 소견',
+    impression TEXT NOT NULL COMMENT '최종 결론',
+    thumbnail_url VARCHAR(500) NULL COMMENT '대표 썸네일 URL',
+    views INT DEFAULT 0 COMMENT '조회수',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)',
+
+    CONSTRAINT fk_cases_writer
+        FOREIGN KEY (writer_id) REFERENCES member(no) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='특이케이스 라이브러리';
+
+CREATE TABLE case_pacs_links (
+    pacs_link_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'PACS 연동 ID',
+    case_id BIGINT NOT NULL COMMENT '케이스 ID',
+    study_instance_uid VARCHAR(128) NOT NULL COMMENT 'PACS Study Instance UID',
+    series_instance_uid VARCHAR(128) NULL COMMENT 'PACS Series Instance UID',
+    patient_id_masked VARCHAR(50) NULL COMMENT '비식별 환자 ID',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '연동 일시',
+    CONSTRAINT fk_pacs_case FOREIGN KEY (case_id) REFERENCES special_cases (case_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='PACS 연동 식별키';
+
+CREATE TABLE case_tags (
+    tag_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '태그 ID',
+    case_id BIGINT NOT NULL COMMENT '케이스 ID',
+    tag_name VARCHAR(50) NOT NULL COMMENT '태그명',
+    CONSTRAINT fk_tags_case FOREIGN KEY (case_id) REFERENCES special_cases (case_id) ON DELETE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='검색 태그';
+
+
+-- ============================================================
+-- 7. 의료 데이터 접근/변경 이력
+-- ============================================================
+CREATE TABLE data_access_log (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    member_no BIGINT NOT NULL,
+    patient_no BIGINT,
+    study_no BIGINT,
+    data_type VARCHAR(50) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    access_result VARCHAR(20) NOT NULL,
+    ip_address VARCHAR(45),
+    accessed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (no),
+
+    CONSTRAINT fk_data_access_log_member
+        FOREIGN KEY (member_no) REFERENCES member(no),
+
+    CONSTRAINT fk_data_access_log_patient
+        FOREIGN KEY (patient_no) REFERENCES pacs_patient(no),
+
+    CONSTRAINT fk_data_access_log_study
+        FOREIGN KEY (study_no) REFERENCES pacs_study(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+CREATE TABLE data_change_history (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    member_no BIGINT NOT NULL,
+    patient_no BIGINT,
+    study_no BIGINT,
+    data_type VARCHAR(50) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    before_data TEXT,
+    after_data TEXT,
+    change_reason VARCHAR(500),
+    changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (no),
+
+    CONSTRAINT fk_data_change_history_member
+        FOREIGN KEY (member_no) REFERENCES member(no),
+
+    CONSTRAINT fk_data_change_history_patient
+        FOREIGN KEY (patient_no) REFERENCES pacs_patient(no),
+
+    CONSTRAINT fk_data_change_history_study
+        FOREIGN KEY (study_no) REFERENCES pacs_study(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 8. 협진요청
+-- ============================================================
 CREATE TABLE coop_request (
-    coop_request_id    INT AUTO_INCREMENT PRIMARY KEY,
-    req_doctor_id      INT NOT NULL,
+    coop_request_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
+    req_doctor_id		  BIGINT NOT NULL,
     recv_type          ENUM('지정의사','진료과') NOT NULL,
-    recv_doctor_id     INT NULL,
-    recv_dept_id       INT NULL,
-    accept_doctor_id   INT NULL,
-    patient_id         INT NOT NULL,
-    pacs_study_id      INT NOT NULL,
-    report_id          INT NULL,
-    origin_request_id  INT NULL,
+    recv_doctor_id     BIGINT NULL,
+    recv_dept_id       BIGINT NULL,
+    accept_doctor_id   BIGINT NULL,
+    patient_id         BIGINT NOT NULL,
+    pacs_study_id      BIGINT NOT NULL,
+    report_id          BIGINT NULL,
+    origin_request_id  BIGINT NULL,
     req_content        TEXT NOT NULL,
     status             ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
     req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -110,7 +324,7 @@ CREATE TABLE coop_request (
     reject_reason      TEXT NULL,
     is_read            BOOLEAN NOT NULL DEFAULT FALSE,
     read_time          DATETIME NULL,
- 
+
     CONSTRAINT chk_recv_type_match CHECK (
         (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
         OR
@@ -120,155 +334,26 @@ CREATE TABLE coop_request (
     CONSTRAINT chk_reject_reason CHECK (
         (status = '거절' AND reject_reason IS NOT NULL) OR (status <> '거절')
     ),
- 
-    FOREIGN KEY (req_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (recv_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (accept_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (recv_dept_id) REFERENCES department(dept_id),
-    FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
-    FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(study_id),
-    FOREIGN KEY (report_id) REFERENCES report(report_id),
+
+    FOREIGN KEY (req_doctor_id) REFERENCES member(no),
+    FOREIGN KEY (recv_doctor_id) REFERENCES member(no),
+    FOREIGN KEY (accept_doctor_id) REFERENCES member(no),
+    FOREIGN KEY (recv_dept_id) REFERENCES department(no),
+    FOREIGN KEY (patient_id) REFERENCES pacs_patient(no),
+    FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(no),
+    FOREIGN KEY (report_id) REFERENCES report(no),
     FOREIGN KEY (origin_request_id) REFERENCES coop_request(coop_request_id)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-
--- 협진요청 진료과 거절기록 테이블
 CREATE TABLE coop_request_dept_reject (
-    id                INT AUTO_INCREMENT PRIMARY KEY,
-    coop_request_id   INT NOT NULL,
-    doctor_id         INT NOT NULL,
+    id                BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coop_request_id   BIGINT NOT NULL,
+    doctor_id         BIGINT NOT NULL,
     reject_reason     TEXT NOT NULL,
     rejected_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- 
+
     UNIQUE (coop_request_id, doctor_id),
- 
+
     FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id)
+    FOREIGN KEY (doctor_id) REFERENCES member(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-
--- 1. 공지사항 (Notices)
-CREATE TABLE IF NOT EXISTS `notices` (
-    `notice_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '공지사항 ID',
-    `writer_id` BIGINT NOT NULL COMMENT '작성자 ID (users.user_id 매핑용)',
-    `title` VARCHAR(255) NOT NULL COMMENT '공지 제목',
-    `content` TEXT NOT NULL COMMENT '공지 본문',
-    `is_pinned` TINYINT(1) DEFAULT 0 COMMENT '상단 고정 여부 (1:고정, 0:일반)',
-    `views` INT DEFAULT 0 COMMENT '조회수',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    `is_deleted` TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='공지사항';
-
-
--- 2. 특이케이스 라이브러리 메인 (Special Cases)
-CREATE TABLE IF NOT EXISTS `special_cases` (
-    `case_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '케이스 ID',
-    `writer_id` BIGINT NOT NULL COMMENT '작성자 ID (users.user_id 매핑용)',
-    `title` VARCHAR(255) NOT NULL COMMENT '제목',
-    `modality` VARCHAR(20) NOT NULL COMMENT '촬영 장비 (CT, MRI 등)',
-    `body_part` VARCHAR(50) NOT NULL COMMENT '촬영 부위',
-    `disease_code` VARCHAR(20) NULL COMMENT '질환 코드',
-    `findings` TEXT NOT NULL COMMENT '판독 소견',
-    `impression` TEXT NOT NULL COMMENT '최종 결론',
-    `thumbnail_url` VARCHAR(500) NULL COMMENT '대표 썸네일 URL',
-    `views` INT DEFAULT 0 COMMENT '조회수',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
-    `is_deleted` TINYINT(1) DEFAULT 0 COMMENT '삭제 여부 (1:삭제, 0:정상)'
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='특이케이스 라이브러리';
-
-
--- 3. PACS 연동 키 (PACS Links)
-CREATE TABLE IF NOT EXISTS `case_pacs_links` (
-    `pacs_link_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT 'PACS 연동 ID',
-    `case_id` BIGINT NOT NULL COMMENT '케이스 ID',
-    `study_instance_uid` VARCHAR(128) NOT NULL COMMENT 'PACS Study Instance UID',
-    `series_instance_uid` VARCHAR(128) NULL COMMENT 'PACS Series Instance UID',
-    `patient_id_masked` VARCHAR(50) NULL COMMENT '비식별 환자 ID',
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '연동 일시',
-    CONSTRAINT `fk_pacs_case` FOREIGN KEY (`case_id`) REFERENCES `special_cases` (`case_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='PACS 연동 식별키';
-
-
--- 4. 케이스 태그 (Case Tags)
-CREATE TABLE IF NOT EXISTS `case_tags` (
-    `tag_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '태그 ID',
-    `case_id` BIGINT NOT NULL COMMENT '케이스 ID',
-    `tag_name` VARCHAR(50) NOT NULL COMMENT '태그명',
-    CONSTRAINT `fk_tags_case` FOREIGN KEY (`case_id`) REFERENCES `special_cases` (`case_id`) ON DELETE CASCADE
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='검색 태그';
-
-
-----------------------회원 테이블 생성 후
--- 공지사항 작성자에 회원 외래키 연결
-ALTER TABLE `notices`
-ADD CONSTRAINT `fk_notices_writer` 
-FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
-
--- 특이케이스 작성자에 회원 외래키 연결
-ALTER TABLE `special_cases`
-ADD CONSTRAINT `fk_cases_writer` 
-FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
-
-
--- ============================================================
--- 1. 의료진 스케줄 (Doctor Schedules)
--- ============================================================
-
-CREATE TABLE IF NOT EXISTS `doctor_schedules` (
-    `schedule_id` BIGINT AUTO_INCREMENT PRIMARY KEY
-        COMMENT '스케줄 ID',
-
-    `doctor_id` BIGINT NOT NULL
-        COMMENT '의료진 ID (users.user_id 매핑용)',
-
-    `schedule_date` DATE NOT NULL
-        COMMENT '스케줄 날짜',
-
-    `start_time` TIME NOT NULL
-        COMMENT '스케줄 시작 시간',
-
-    `end_time` TIME NOT NULL
-        COMMENT '스케줄 종료 시간',
-
-    `schedule_type` VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE'
-        COMMENT '스케줄 상태 (AVAILABLE: 협진 가능, RESERVED: 협진 예정, UNAVAILABLE: 협진 불가)',
-
-    `memo` VARCHAR(500) NULL
-        COMMENT '스케줄 관련 메모',
-
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        COMMENT '생성 일시',
-
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP
-        COMMENT '수정 일시',
-
-    `is_deleted` TINYINT(1) DEFAULT 0
-        COMMENT '삭제 여부 (1:삭제, 0:정상)',
-
-    INDEX `idx_schedule_doctor` (`doctor_id`),
-
-    INDEX `idx_schedule_date` (`schedule_date`),
-
-    INDEX `idx_schedule_doctor_date`
-        (`doctor_id`, `schedule_date`),
-
-    INDEX `idx_schedule_type`
-        (`schedule_type`)
-
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COMMENT='의료진 협진 가능 일정 및 스케줄 관리';
-
-
--- ============================================================
--- 2. 회원 테이블 생성 후 FK 연결
--- ============================================================
-
-ALTER TABLE `doctor_schedules`
-ADD CONSTRAINT `fk_doctor_schedules_doctor`
-FOREIGN KEY (`doctor_id`)
-REFERENCES `users` (`user_id`);
