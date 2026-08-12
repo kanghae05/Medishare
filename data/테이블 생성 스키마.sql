@@ -357,8 +357,6 @@ CREATE TABLE coop_request_dept_reject (
     FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
     FOREIGN KEY (doctor_id) REFERENCES member(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-<<<<<<< Updated upstream
-=======
 
 
 -- ============================================================
@@ -381,4 +379,3 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
     INDEX idx_schedule_doctor_date (doctor_id, schedule_date),
     INDEX idx_schedule_type (schedule_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
->>>>>>> Stashed changes
