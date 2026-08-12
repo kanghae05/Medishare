@@ -17,45 +17,100 @@ public class PacsStudy {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "no")
     private Long no;
 
-    @Column(length = 100, unique = true, nullable = false)
+
+    @Column(
+            name = "orthanc_study_id",
+            length = 100,
+            unique = true,
+            nullable = false
+    )
     private String orthancStudyId;
 
-    @Column(length = 128, unique = true)
+
+    @Column(
+            name = "study_instance_uid",
+            length = 128,
+            unique = true
+    )
     private String studyInstanceUID;
 
-    @Column(length = 64)
+
+    @Column(
+            name = "accession_number",
+            length = 64
+    )
     private String accessionNumber;
 
-    @Column(length = 20)
+
+    @Column(
+            name = "study_date",
+            length = 20
+    )
     private String studyDate;
 
-    @Column(length = 20)
+
+    @Column(
+            name = "study_time",
+            length = 20
+    )
     private String studyTime;
 
-    @Column(length = 500)
+
+    @Column(
+            name = "study_description",
+            length = 500
+    )
     private String studyDescription;
 
-    @Column(length = 200)
+
+    @Column(
+            name = "referring_physician_name",
+            length = 200
+    )
     private String referringPhysicianName;
 
-    @Column(length = 500)
+
+    @Column(
+            name = "requested_procedure_description",
+            length = 500
+    )
     private String requestedProcedureDescription;
 
-    @Column(length = 64)
+
+    @Column(
+            name = "study_id",
+            length = 64
+    )
     private String studyID;
 
+
+    @Column(name = "stable")
     private Boolean stable;
 
+
+    @Column(name = "series_count")
+    @Builder.Default
     private Integer seriesCount = 0;
 
+
+    @Column(name = "instance_count")
+    @Builder.Default
     private Integer instanceCount = 0;
 
+
+    // 환자
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "patient_no", nullable = false)
+    @JoinColumn(
+            name = "patient_no",
+            nullable = false
+    )
     private PacsPatient patient;
 
+
+    // Study에 포함된 Series
     @OneToMany(
             mappedBy = "study",
             cascade = CascadeType.ALL,
@@ -63,5 +118,6 @@ public class PacsStudy {
             fetch = FetchType.LAZY
     )
     @Builder.Default
-    private List<PacsSeries> seriesList = new ArrayList<>();
+    private List<PacsSeries> seriesList =
+            new ArrayList<>();
 }

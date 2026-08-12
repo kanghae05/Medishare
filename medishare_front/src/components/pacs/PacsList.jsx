@@ -1,6 +1,46 @@
 import { useEffect, useState } from "react";
 import api from "../common/api";
 
+
+// =========================================================
+// PACS Study 썸네일
+// =========================================================
+function StudyThumbnail({ orthancStudyId }) {
+
+  const [failed, setFailed] = useState(false);
+
+  if (!orthancStudyId || failed) {
+    return (
+      <span className="text-secondary">
+        없음
+      </span>
+    );
+  }
+
+  const thumbnailUrl =
+    `${api.defaults.baseURL}/pacs/thumbnail/${
+      encodeURIComponent(orthancStudyId)
+    }`;
+
+  return (
+    <img
+      src={thumbnailUrl}
+      alt="PACS Study Thumbnail"
+      style={{
+        width: "90px",
+        height: "90px",
+        objectFit: "contain",
+        backgroundColor: "#000",
+        borderRadius: "4px"
+      }}
+      onError={() => {
+        setFailed(true);
+      }}
+    />
+  );
+}
+
+
 function PacsList() {
 
   // =========================================================
@@ -39,7 +79,6 @@ function PacsList() {
           response.data
         );
 
-
         if (Array.isArray(response.data)) {
 
           setStudyList(response.data);
@@ -47,7 +86,6 @@ function PacsList() {
         } else {
 
           setStudyList([]);
-
         }
 
       } catch (error) {
@@ -87,7 +125,7 @@ function PacsList() {
 
 
   // =========================================================
-  // 새로고침 버튼용 Study 목록 조회
+  // Study 목록 새로고침
   // =========================================================
 
   const getStudyList = async () => {
@@ -105,7 +143,6 @@ function PacsList() {
         response.data
       );
 
-
       if (Array.isArray(response.data)) {
 
         setStudyList(response.data);
@@ -113,7 +150,6 @@ function PacsList() {
       } else {
 
         setStudyList([]);
-
       }
 
     } catch (error) {
@@ -152,7 +188,7 @@ function PacsList() {
 
 
   // =========================================================
-  // DICOM 파일 Orthanc 업로드
+  // DICOM → Orthanc 업로드
   // =========================================================
 
   const uploadDicom = async () => {
@@ -226,7 +262,6 @@ function PacsList() {
         );
 
       if (input) {
-
         input.value = "";
       }
 
@@ -249,7 +284,7 @@ function PacsList() {
 
 
   // =========================================================
-  // Orthanc → MariaDB 전체 동기화
+  // Orthanc → MariaDB 동기화
   // =========================================================
 
   const syncStudyList = async () => {
@@ -261,7 +296,6 @@ function PacsList() {
 
 
     if (!result) {
-
       return;
     }
 
@@ -297,7 +331,6 @@ function PacsList() {
         "PACS 동기화 오류 : ",
         error
       );
-
 
       alert(
         "DB 테이블이 아직 생성되지 않았거나 동기화 중 오류가 발생했습니다."
@@ -339,7 +372,7 @@ function PacsList() {
 
 
   // =========================================================
-  // 표시용 함수
+  // 화면 표시용 함수
   // =========================================================
 
   const displayValue = (value) => {
@@ -353,12 +386,10 @@ function PacsList() {
       return "-";
     }
 
-
     return value;
   };
 
 
-  // DICOM 날짜
   // 20000101 → 2000-01-01
   const formatDicomDate = (date) => {
 
@@ -370,16 +401,14 @@ function PacsList() {
       return "-";
     }
 
-
     return `${date.substring(0, 4)}-${date.substring(4, 6)}-${date.substring(6, 8)}`;
   };
 
 
-  // DICOM 시간
+  // 093000 → 09:30:00
   const formatDicomTime = (time) => {
 
     if (!time) {
-
       return "-";
     }
 
@@ -389,7 +418,6 @@ function PacsList() {
 
 
     if (value.length < 4) {
-
       return value;
     }
 
@@ -426,9 +454,7 @@ function PacsList() {
       <div className="card mb-4">
 
         <div className="card-header fw-bold">
-
           DICOM 파일 업로드
-
         </div>
 
 
@@ -489,7 +515,6 @@ function PacsList() {
                 {selectedFile.name}
 
               </div>
-
             )
           }
 
@@ -512,15 +537,11 @@ function PacsList() {
         <div>
 
           <h3 className="mb-1">
-
             PACS Study 목록
-
           </h3>
 
           <div className="text-secondary">
-
             총 {studyList.length}건
-
           </div>
 
         </div>
@@ -535,9 +556,7 @@ function PacsList() {
               getStudyList
             }
           >
-
             새로고침
-
           </button>
 
 
@@ -548,9 +567,7 @@ function PacsList() {
               syncStudyList
             }
           >
-
             Orthanc 동기화
-
           </button>
 
         </div>
@@ -562,14 +579,9 @@ function PacsList() {
         errorMessage
         && (
 
-          <div
-            className="alert alert-warning"
-          >
-
+          <div className="alert alert-warning">
             {errorMessage}
-
           </div>
-
         )
       }
 
@@ -593,6 +605,10 @@ function PacsList() {
 
               <th className="text-center">
                 번호
+              </th>
+
+              <th className="text-center">
+                썸네일
               </th>
 
               <th>
@@ -649,13 +665,10 @@ function PacsList() {
                 <tr>
 
                   <td
-                    colSpan="11"
+                    colSpan="12"
                     className="text-center py-5"
                   >
-
-                    PACS Study 목록을
-                    불러오는 중입니다.
-
+                    PACS Study 목록을 불러오는 중입니다.
                   </td>
 
                 </tr>
@@ -667,17 +680,14 @@ function PacsList() {
                 <tr>
 
                   <td
-                    colSpan="11"
+                    colSpan="12"
                     className="
                       text-center
                       py-5
                       text-secondary
                     "
                   >
-
-                    조회된 PACS Study가
-                    없습니다.
-
+                    조회된 PACS Study가 없습니다.
                   </td>
 
                 </tr>
@@ -696,13 +706,25 @@ function PacsList() {
                       }
                     >
 
+                      {/* 번호 */}
+                      <td className="text-center">
+                        {index + 1}
+                      </td>
+
+
+                      {/* 썸네일 */}
                       <td className="text-center">
 
-                        {index + 1}
+                        <StudyThumbnail
+                          orthancStudyId={
+                            study.orthancStudyId
+                          }
+                        />
 
                       </td>
 
 
+                      {/* Patient ID */}
                       <td>
 
                         {
@@ -714,6 +736,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* Patient Name */}
                       <td>
 
                         {
@@ -725,6 +748,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* 성별 */}
                       <td className="text-center">
 
                         {
@@ -736,6 +760,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* 생년월일 */}
                       <td className="text-center">
 
                         {
@@ -747,6 +772,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* Study Date */}
                       <td className="text-center">
 
                         {
@@ -758,6 +784,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* Study Time */}
                       <td className="text-center">
 
                         {
@@ -769,6 +796,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* Study Description */}
                       <td>
 
                         {
@@ -781,6 +809,7 @@ function PacsList() {
                       </td>
 
 
+                      {/* Series */}
                       <td className="text-center">
 
                         {
@@ -791,35 +820,22 @@ function PacsList() {
                       </td>
 
 
+                      {/* Stable */}
                       <td className="text-center">
 
                         {
                           study.stable
                           ? (
 
-                            <span
-                              className="
-                                badge
-                                text-bg-success
-                              "
-                            >
-
+                            <span className="badge text-bg-success">
                               Stable
-
                             </span>
 
                           )
                           : (
 
-                            <span
-                              className="
-                                badge
-                                text-bg-warning
-                              "
-                            >
-
+                            <span className="badge text-bg-warning">
                               Updating
-
                             </span>
 
                           )
@@ -828,15 +844,12 @@ function PacsList() {
                       </td>
 
 
+                      {/* OHIF */}
                       <td className="text-center">
 
                         <button
                           type="button"
-                          className="
-                            btn
-                            btn-sm
-                            btn-primary
-                          "
+                          className="btn btn-sm btn-primary"
                           onClick={
                             () =>
                               openViewer(
@@ -844,9 +857,7 @@ function PacsList() {
                               )
                           }
                         >
-
                           영상 보기
-
                         </button>
 
                       </td>
@@ -855,7 +866,6 @@ function PacsList() {
 
                   )
                 )
-
               )
             }
 
@@ -866,7 +876,6 @@ function PacsList() {
       </div>
 
     </div>
-
   );
 }
 
