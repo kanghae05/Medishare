@@ -53,19 +53,27 @@ public class PacsServiceImpl implements PacsService {
     @Transactional(readOnly = true)
     public StudyVO getStudyDetail(String studyId) {
 
-        if (studyId == null || studyId.isBlank()) {
+        if (
+                studyId == null
+                        || studyId.isBlank()
+        ) {
 
             throw new IllegalArgumentException(
                     "Orthanc Study ID는 필수입니다."
             );
         }
 
+
         log.info(
                 "[getStudyDetail] DB Study 상세 조회 - orthancStudyId={}",
                 studyId
         );
 
-        return pacsStudyRepository.getStudyDetail(studyId);
+
+        return pacsStudyRepository
+                .getStudyDetail(
+                        studyId
+                );
     }
 
 
@@ -90,12 +98,16 @@ public class PacsServiceImpl implements PacsService {
             MultipartFile file
     ) {
 
-        if (file == null || file.isEmpty()) {
+        if (
+                file == null
+                        || file.isEmpty()
+        ) {
 
             throw new IllegalArgumentException(
                     "업로드할 DICOM 파일이 없습니다."
             );
         }
+
 
         try {
 
@@ -104,10 +116,13 @@ public class PacsServiceImpl implements PacsService {
                     file.getOriginalFilename()
             );
 
+
             Map<String, Object> result =
                     orthancWebClient
                             .post()
-                            .uri("/instances")
+                            .uri(
+                                    "/instances"
+                            )
                             .contentType(
                                     MediaType.APPLICATION_OCTET_STREAM
                             )
@@ -123,12 +138,15 @@ public class PacsServiceImpl implements PacsService {
                             )
                             .block();
 
+
             log.info(
                     "[uploadDicom] DICOM 업로드 완료 - result={}",
                     result
             );
 
+
             return result;
+
 
         } catch (Exception e) {
 
@@ -136,6 +154,7 @@ public class PacsServiceImpl implements PacsService {
                     "[uploadDicom] DICOM 업로드 실패",
                     e
             );
+
 
             throw new RuntimeException(
                     "DICOM 파일 업로드에 실패했습니다.",
@@ -163,6 +182,7 @@ public class PacsServiceImpl implements PacsService {
                     "Orthanc Study ID는 필수입니다."
             );
         }
+
 
         try {
 
@@ -243,7 +263,7 @@ public class PacsServiceImpl implements PacsService {
                     instanceIds.get(0);
 
 
-            // 6. Orthanc Preview API를 통해 PNG 이미지 조회
+            // 6. Orthanc Preview API → PNG
             byte[] thumbnail =
                     orthancWebClient
                             .get()
@@ -281,6 +301,7 @@ public class PacsServiceImpl implements PacsService {
 
             return thumbnail;
 
+
         } catch (Exception e) {
 
             log.error(
@@ -288,6 +309,7 @@ public class PacsServiceImpl implements PacsService {
                     orthancStudyId,
                     e
             );
+
 
             throw new RuntimeException(
                     "PACS Study 썸네일 조회에 실패했습니다.",
@@ -299,8 +321,16 @@ public class PacsServiceImpl implements PacsService {
 
     // =========================================================
     // Orthanc PACS 서버 → DB 메타데이터 동기화
+    //
+    // 신규 Study
+    //      → DB INSERT
+    //
+    // 기존 Study
+    //      → Orthanc 최신 상태로 UPDATE
+    //      → Stable / Series Count / Instance Count 갱신
     // =========================================================
     @Override
+    @Transactional
     public StudySaveResultVO saveStudyFromOrthanc(
             String orthancStudyId
     ) {
@@ -308,7 +338,10 @@ public class PacsServiceImpl implements PacsService {
         List<String> orthancStudyIds;
 
 
-        // 특정 Study ID가 전달되면 해당 Study만 동기화
+        // =====================================================
+        // 특정 Study만 동기화
+        // =====================================================
+
         if (
                 orthancStudyId != null
                         && !orthancStudyId.isBlank()
@@ -317,17 +350,23 @@ public class PacsServiceImpl implements PacsService {
             orthancStudyIds =
                     new ArrayList<>();
 
+
             orthancStudyIds.add(
                     orthancStudyId
             );
 
         } else {
 
-            // Study ID가 없으면 Orthanc의 전체 Study 조회
+            // =================================================
+            // Orthanc 전체 Study 동기화
+            // =================================================
+
             orthancStudyIds =
                     orthancWebClient
                             .get()
-                            .uri("/studies")
+                            .uri(
+                                    "/studies"
+                            )
                             .retrieve()
                             .bodyToMono(
                                     new ParameterizedTypeReference<
@@ -336,6 +375,7 @@ public class PacsServiceImpl implements PacsService {
                                     }
                             )
                             .block();
+
 
             if (orthancStudyIds == null) {
 
@@ -356,25 +396,18 @@ public class PacsServiceImpl implements PacsService {
         int failedCount = 0;
 
 
+        // =====================================================
+        // Study 하나씩 동기화
+        // =====================================================
+
         for (String studyId : orthancStudyIds) {
 
             try {
 
-                // 이미 DB에 있는 Orthanc Study
-                if (
-                        pacsStudyRepository
-                                .existsByOrthancStudyId(
-                                        studyId
-                                )
-                ) {
+                // =================================================
+                // 1. Orthanc에서 최신 Study 정보 조회
+                // =================================================
 
-                    skippedCount++;
-
-                    continue;
-                }
-
-
-                // Orthanc에서 Study 상세 조회
                 Map<String, Object> studyDetailData =
                         getStudyFromOrthanc(
                                 studyId
@@ -389,7 +422,10 @@ public class PacsServiceImpl implements PacsService {
                 }
 
 
-                // Study DICOM Tags
+                // =================================================
+                // 2. Study DICOM Tags
+                // =================================================
+
                 Map<String, String> studyTags =
                         getStringMap(
                                 studyDetailData,
@@ -404,7 +440,142 @@ public class PacsServiceImpl implements PacsService {
                         );
 
 
-                // StudyInstanceUID 중복 검사
+                // =================================================
+                // 3. 기존 Study 조회
+                // =================================================
+
+                PacsStudy existingStudy =
+                        pacsStudyRepository
+                                .findByOrthancStudyId(
+                                        studyId
+                                )
+                                .orElse(null);
+
+
+                // =================================================
+                // 4. 기존 Study → UPDATE
+                // =================================================
+
+                if (existingStudy != null) {
+
+                    log.info(
+                            "[saveStudyFromOrthanc] 기존 Study 갱신 - studyId={}",
+                            studyId
+                    );
+
+
+                    // Study UID
+                    existingStudy
+                            .setStudyInstanceUID(
+                                    studyInstanceUID
+                            );
+
+
+                    // Accession Number
+                    existingStudy
+                            .setAccessionNumber(
+                                    getTag(
+                                            studyTags,
+                                            "AccessionNumber"
+                                    )
+                            );
+
+
+                    // Study Date
+                    existingStudy
+                            .setStudyDate(
+                                    getTag(
+                                            studyTags,
+                                            "StudyDate"
+                                    )
+                            );
+
+
+                    // Study Time
+                    existingStudy
+                            .setStudyTime(
+                                    getTag(
+                                            studyTags,
+                                            "StudyTime"
+                                    )
+                            );
+
+
+                    // Study Description
+                    existingStudy
+                            .setStudyDescription(
+                                    getTag(
+                                            studyTags,
+                                            "StudyDescription"
+                                    )
+                            );
+
+
+                    // Referring Physician
+                    existingStudy
+                            .setReferringPhysicianName(
+                                    getTag(
+                                            studyTags,
+                                            "ReferringPhysicianName"
+                                    )
+                            );
+
+
+                    // Requested Procedure
+                    existingStudy
+                            .setRequestedProcedureDescription(
+                                    getTag(
+                                            studyTags,
+                                            "RequestedProcedureDescription"
+                                    )
+                            );
+
+
+                    // Study ID
+                    existingStudy
+                            .setStudyID(
+                                    getTag(
+                                            studyTags,
+                                            "StudyID"
+                                    )
+                            );
+
+
+                    // ★ Orthanc 최신 Stable 상태
+                    existingStudy
+                            .setStable(
+                                    getBoolean(
+                                            studyDetailData,
+                                            "IsStable"
+                                    )
+                            );
+
+
+                    // Study 저장
+                    pacsStudyRepository
+                            .save(
+                                    existingStudy
+                            );
+
+
+                    // Series + Instance 최신화
+                    saveSeriesList(
+                            studyDetailData,
+                            existingStudy
+                    );
+
+
+                    savedCount++;
+
+
+                    continue;
+                }
+
+
+                // =================================================
+                // 5. 신규 Study인데 UID가 이미 존재하면 Skip
+                // =================================================
+
                 if (
                         studyInstanceUID != null
                                 && !studyInstanceUID.isBlank()
@@ -420,14 +591,20 @@ public class PacsServiceImpl implements PacsService {
                 }
 
 
-                // Patient 저장 또는 조회
+                // =================================================
+                // 6. Patient 저장 / 조회
+                // =================================================
+
                 PacsPatient patient =
                         findOrCreatePatient(
                                 studyDetailData
                         );
 
 
-                // Study Entity 생성
+                // =================================================
+                // 7. 신규 Study Entity 생성
+                // =================================================
+
                 PacsStudy study =
                         createStudyEntity(
                                 studyDetailData,
@@ -436,13 +613,21 @@ public class PacsServiceImpl implements PacsService {
                         );
 
 
-                // Study 저장
+                // =================================================
+                // 8. 신규 Study 저장
+                // =================================================
+
                 PacsStudy savedStudy =
                         pacsStudyRepository
-                                .save(study);
+                                .save(
+                                        study
+                                );
 
 
-                // Series 저장
+                // =================================================
+                // 9. Series 저장
+                // =================================================
+
                 saveSeriesList(
                         studyDetailData,
                         savedStudy
@@ -451,18 +636,24 @@ public class PacsServiceImpl implements PacsService {
 
                 savedCount++;
 
+
             } catch (Exception e) {
 
                 failedCount++;
 
+
                 log.error(
-                        "[saveStudyFromOrthanc] Study 저장 실패 - studyId={}",
+                        "[saveStudyFromOrthanc] Study 동기화 실패 - studyId={}",
                         studyId,
                         e
                 );
             }
         }
 
+
+        // =====================================================
+        // 결과 반환
+        // =====================================================
 
         return StudySaveResultVO
                 .builder()
@@ -561,13 +752,15 @@ public class PacsServiceImpl implements PacsService {
 
 
                     return pacsPatientRepository
-                            .save(patient);
+                            .save(
+                                    patient
+                            );
                 });
     }
 
 
     // =========================================================
-    // Orthanc에서 Study 상세 조회
+    // Orthanc Study 상세 조회
     // =========================================================
     public Map<String, Object> getStudyFromOrthanc(
             String orthancStudyId
@@ -676,7 +869,9 @@ public class PacsServiceImpl implements PacsService {
                         .seriesCount(
                                 seriesIds.size()
                         )
-                        .instanceCount(0)
+                        .instanceCount(
+                                0
+                        )
                         .patient(
                                 patient
                         )
@@ -685,7 +880,9 @@ public class PacsServiceImpl implements PacsService {
 
         patient
                 .getStudyList()
-                .add(study);
+                .add(
+                        study
+                );
 
 
         return study;
@@ -693,7 +890,7 @@ public class PacsServiceImpl implements PacsService {
 
 
     // =========================================================
-    // Series 목록 저장
+    // Series 목록 저장 / 최신 정보 갱신
     // =========================================================
     private void saveSeriesList(
             Map<String, Object> studyData,
@@ -715,17 +912,9 @@ public class PacsServiceImpl implements PacsService {
                 : orthancSeriesIds
         ) {
 
-
-            if (
-                    pacsSeriesRepository
-                            .existsByOrthancSeriesId(
-                                    orthancSeriesId
-                            )
-            ) {
-
-                continue;
-            }
-
+            // =================================================
+            // Orthanc Series 상세 조회
+            // =================================================
 
             Map<String, Object> seriesData =
                     getSeriesFromOrthanc(
@@ -753,6 +942,93 @@ public class PacsServiceImpl implements PacsService {
                     );
 
 
+            List<String> instanceIds =
+                    getStringList(
+                            seriesData,
+                            "Instances"
+                    );
+
+
+            int instanceCount =
+                    instanceIds.size();
+
+
+            // 전체 Instance 개수 누적
+            totalInstanceCount +=
+                    instanceCount;
+
+
+            // =================================================
+            // 기존 Series 조회
+            // =================================================
+
+            PacsSeries existingSeries =
+                    pacsSeriesRepository
+                            .findByOrthancSeriesId(
+                                    orthancSeriesId
+                            )
+                            .orElse(null);
+
+
+            // =================================================
+            // 기존 Series → UPDATE
+            // =================================================
+
+            if (existingSeries != null) {
+
+                existingSeries
+                        .setSeriesInstanceUID(
+                                seriesInstanceUID
+                        );
+
+
+                existingSeries
+                        .setModality(
+                                getTag(
+                                        seriesTags,
+                                        "Modality"
+                                )
+                        );
+
+
+                existingSeries
+                        .setSeriesDescription(
+                                getTag(
+                                        seriesTags,
+                                        "SeriesDescription"
+                                )
+                        );
+
+
+                existingSeries
+                        .setSeriesNumber(
+                                getTag(
+                                        seriesTags,
+                                        "SeriesNumber"
+                                )
+                        );
+
+
+                existingSeries
+                        .setInstanceCount(
+                                instanceCount
+                        );
+
+
+                pacsSeriesRepository
+                        .save(
+                                existingSeries
+                        );
+
+
+                continue;
+            }
+
+
+            // =================================================
+            // 동일 SeriesInstanceUID가 이미 존재하면 Skip
+            // =================================================
+
             if (
                     seriesInstanceUID != null
                             && !seriesInstanceUID.isBlank()
@@ -766,16 +1042,9 @@ public class PacsServiceImpl implements PacsService {
             }
 
 
-            List<String> instanceIds =
-                    getStringList(
-                            seriesData,
-                            "Instances"
-                    );
-
-
-            int instanceCount =
-                    instanceIds.size();
-
+            // =================================================
+            // 신규 Series 생성
+            // =================================================
 
             PacsSeries series =
                     PacsSeries
@@ -815,37 +1084,47 @@ public class PacsServiceImpl implements PacsService {
 
             study
                     .getSeriesList()
-                    .add(series);
+                    .add(
+                            series
+                    );
 
 
             pacsSeriesRepository
-                    .save(series);
-
-
-            totalInstanceCount +=
-                    instanceCount;
+                    .save(
+                            series
+                    );
         }
 
 
-        study.setSeriesCount(
-                study
-                        .getSeriesList()
-                        .size()
-        );
+        // =====================================================
+        // Orthanc 기준 Series 개수
+        // =====================================================
+
+        study
+                .setSeriesCount(
+                        orthancSeriesIds.size()
+                );
 
 
-        study.setInstanceCount(
-                totalInstanceCount
-        );
+        // =====================================================
+        // Orthanc 기준 전체 Instance 개수
+        // =====================================================
+
+        study
+                .setInstanceCount(
+                        totalInstanceCount
+                );
 
 
         pacsStudyRepository
-                .save(study);
+                .save(
+                        study
+                );
     }
 
 
     // =========================================================
-    // Orthanc에서 Series 상세 조회
+    // Orthanc Series 상세 조회
     // =========================================================
     private Map<String, Object> getSeriesFromOrthanc(
             String orthancSeriesId
@@ -869,7 +1148,7 @@ public class PacsServiceImpl implements PacsService {
 
 
     // =========================================================
-    // Map -> Map<String, String>
+    // Map → Map<String, String>
     // =========================================================
     @SuppressWarnings("unchecked")
     private Map<String, String> getStringMap(
@@ -884,7 +1163,9 @@ public class PacsServiceImpl implements PacsService {
 
 
         Object value =
-                data.get(key);
+                data.get(
+                        key
+                );
 
 
         if (value instanceof Map<?, ?>) {
@@ -911,7 +1192,9 @@ public class PacsServiceImpl implements PacsService {
         }
 
 
-        return tags.get(key);
+        return tags.get(
+                key
+        );
     }
 
 
@@ -930,12 +1213,16 @@ public class PacsServiceImpl implements PacsService {
 
 
         Object value =
-                data.get(key);
+                data.get(
+                        key
+                );
 
 
         return value == null
                 ? null
-                : String.valueOf(value);
+                : String.valueOf(
+                value
+        );
     }
 
 
@@ -954,7 +1241,9 @@ public class PacsServiceImpl implements PacsService {
 
 
         Object value =
-                data.get(key);
+                data.get(
+                        key
+                );
 
 
         if (value instanceof Boolean booleanValue) {
@@ -991,7 +1280,9 @@ public class PacsServiceImpl implements PacsService {
 
 
         Object value =
-                data.get(key);
+                data.get(
+                        key
+                );
 
 
         if (value instanceof List<?>) {
