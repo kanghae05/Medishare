@@ -14,7 +14,7 @@ function formatDateTime(str) {
   return `${date.slice(5)} ${time}`;
 }
 
-function ReceivedCoopList() {
+function CoopRequestList() {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -284,4 +284,4 @@ function ReceivedCoopList() {
   );
 }
 
-export default ReceivedCoopList;
+export default CoopRequestList;
