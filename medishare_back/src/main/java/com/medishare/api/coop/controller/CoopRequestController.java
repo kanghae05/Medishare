@@ -30,11 +30,11 @@ public class CoopRequestController {
     // ------------------------------------------------------------------
 
     private Long currentDoctorId(Authentication authentication) {
-        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
+        return 1L; // TODO: 테스트용 임시값, 로그인 연동되면 원상복구
     }
 
     private Long currentDeptId(Authentication authentication) {
-        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
+        return 1L; // TODO: 테스트용 임시값, 로그인 연동되면 원상복구
     }
 
     // ------------------------------------------------------------------
