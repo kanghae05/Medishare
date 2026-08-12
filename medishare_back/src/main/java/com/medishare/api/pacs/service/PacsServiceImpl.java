@@ -146,6 +146,158 @@ public class PacsServiceImpl implements PacsService {
 
 
     // =========================================================
+    // Study 대표 썸네일 이미지 조회
+    // Study → 첫 Series → 첫 Instance → PNG Preview
+    // =========================================================
+    @Override
+    public byte[] getStudyThumbnail(
+            String orthancStudyId
+    ) {
+
+        if (
+                orthancStudyId == null
+                        || orthancStudyId.isBlank()
+        ) {
+
+            throw new IllegalArgumentException(
+                    "Orthanc Study ID는 필수입니다."
+            );
+        }
+
+        try {
+
+            log.info(
+                    "[getStudyThumbnail] 썸네일 조회 시작 - studyId={}",
+                    orthancStudyId
+            );
+
+
+            // 1. Orthanc Study 정보 조회
+            Map<String, Object> studyData =
+                    getStudyFromOrthanc(
+                            orthancStudyId
+                    );
+
+
+            if (studyData == null) {
+
+                throw new RuntimeException(
+                        "Study 정보를 찾을 수 없습니다."
+                );
+            }
+
+
+            // 2. Study 안의 Series ID 목록 조회
+            List<String> seriesIds =
+                    getStringList(
+                            studyData,
+                            "Series"
+                    );
+
+
+            if (seriesIds.isEmpty()) {
+
+                throw new RuntimeException(
+                        "Study에 Series가 없습니다."
+                );
+            }
+
+
+            // 3. 첫 번째 Series 정보 조회
+            String firstSeriesId =
+                    seriesIds.get(0);
+
+
+            Map<String, Object> seriesData =
+                    getSeriesFromOrthanc(
+                            firstSeriesId
+                    );
+
+
+            if (seriesData == null) {
+
+                throw new RuntimeException(
+                        "Series 정보를 찾을 수 없습니다."
+                );
+            }
+
+
+            // 4. Series 안의 Instance ID 목록 조회
+            List<String> instanceIds =
+                    getStringList(
+                            seriesData,
+                            "Instances"
+                    );
+
+
+            if (instanceIds.isEmpty()) {
+
+                throw new RuntimeException(
+                        "Series에 DICOM Instance가 없습니다."
+                );
+            }
+
+
+            // 5. 첫 번째 Instance를 대표 썸네일로 사용
+            String firstInstanceId =
+                    instanceIds.get(0);
+
+
+            // 6. Orthanc Preview API를 통해 PNG 이미지 조회
+            byte[] thumbnail =
+                    orthancWebClient
+                            .get()
+                            .uri(
+                                    "/instances/{id}/preview",
+                                    firstInstanceId
+                            )
+                            .accept(
+                                    MediaType.IMAGE_PNG
+                            )
+                            .retrieve()
+                            .bodyToMono(
+                                    byte[].class
+                            )
+                            .block();
+
+
+            if (
+                    thumbnail == null
+                            || thumbnail.length == 0
+            ) {
+
+                throw new RuntimeException(
+                        "썸네일 이미지 생성에 실패했습니다."
+                );
+            }
+
+
+            log.info(
+                    "[getStudyThumbnail] 썸네일 조회 완료 - studyId={}, size={}",
+                    orthancStudyId,
+                    thumbnail.length
+            );
+
+
+            return thumbnail;
+
+        } catch (Exception e) {
+
+            log.error(
+                    "[getStudyThumbnail] 썸네일 조회 실패 - studyId={}",
+                    orthancStudyId,
+                    e
+            );
+
+            throw new RuntimeException(
+                    "PACS Study 썸네일 조회에 실패했습니다.",
+                    e
+            );
+        }
+    }
+
+
+    // =========================================================
     // Orthanc PACS 서버 → DB 메타데이터 동기화
     // =========================================================
     @Override

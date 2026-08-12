@@ -22,7 +22,9 @@ public class PacsRestController {
     private final PacsService pacsService;
 
 
+    // =========================================================
     // PACS Study 목록 조회
+    // =========================================================
     @GetMapping("/list.do")
     public ResponseEntity<List<StudyVO>> getStudyList() {
 
@@ -32,7 +34,9 @@ public class PacsRestController {
     }
 
 
+    // =========================================================
     // PACS Study 상세 조회
+    // =========================================================
     @GetMapping("/view.do")
     public ResponseEntity<StudyVO> getStudyDetail(
             @RequestParam("id") String studyId
@@ -54,7 +58,9 @@ public class PacsRestController {
     }
 
 
+    // =========================================================
     // DICOM 파일 Orthanc 업로드
+    // =========================================================
     @PostMapping(
             value = "/upload.do",
             consumes = MediaType.MULTIPART_FORM_DATA_VALUE
@@ -79,7 +85,41 @@ public class PacsRestController {
     }
 
 
+    // =========================================================
+    // PACS Study 대표 썸네일 조회
+    // =========================================================
+    @GetMapping(
+            value = "/thumbnail/{studyId}",
+            produces = MediaType.IMAGE_PNG_VALUE
+    )
+    public ResponseEntity<byte[]> getStudyThumbnail(
+            @PathVariable String studyId
+    ) {
+
+        log.info(
+                "[getStudyThumbnail] studyId={}",
+                studyId
+        );
+
+        byte[] thumbnail =
+                pacsService.getStudyThumbnail(
+                        studyId
+                );
+
+        return ResponseEntity
+                .ok()
+                .contentType(
+                        MediaType.IMAGE_PNG
+                )
+                .body(
+                        thumbnail
+                );
+    }
+
+
+    // =========================================================
     // Orthanc 전체 Study → DB 동기화
+    // =========================================================
     @PostMapping("/sync.do")
     public ResponseEntity<StudySaveResultVO> syncAllStudies() {
 
@@ -94,7 +134,9 @@ public class PacsRestController {
     }
 
 
+    // =========================================================
     // Orthanc 특정 Study → DB 동기화
+    // =========================================================
     @PostMapping("/sync/{studyId}")
     public ResponseEntity<StudySaveResultVO> syncStudy(
             @PathVariable String studyId

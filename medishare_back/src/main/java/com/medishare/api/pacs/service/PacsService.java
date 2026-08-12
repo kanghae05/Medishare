@@ -23,4 +23,7 @@ public interface PacsService {
 
     // DICOM 파일을 Orthanc PACS 서버에 업로드
     Map<String, Object> uploadDicom(MultipartFile file);
+
+    // Study 대표 썸네일 이미지 조회
+    byte[] getStudyThumbnail(String orthancStudyId);
 }
