@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
-import "./coop.css";
+import "./Coop.css";
 
 // TODO: 의사/진료과/환자/검사 선택은 지금 숫자 ID 직접 입력이다.
 // 회원관리(의사·진료과 목록 API), PACS(환자·검사 목록 API)가 준비되면
