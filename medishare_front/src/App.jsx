@@ -13,6 +13,7 @@ import NoticeForm from "./pages/Notice/NoticeForm"
 import SpecialCaseList from "./pages/SpecialCase/SpecialCaseList"
 import SpecialCaseDetail from "./pages/SpecialCase/SpecialCaseDetail"
 import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
+import DPartComp from "./components/dpart/DPartComp"
 
 function App() {
 
@@ -49,6 +50,7 @@ function App() {
           <Route path="/special-cases/new" element={<SpecialCaseCreate />} />
           <Route path="/special-cases/:caseId" element={<SpecialCaseDetail currentUser={currentUser} />} />
           <Route path="/special-cases/:caseId/edit" element={<SpecialCaseCreate />} />
+          <Route path="/d/*" element={<DPartComp />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

@@ -355,3 +355,25 @@ CREATE TABLE coop_request_dept_reject (
     FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
     FOREIGN KEY (doctor_id) REFERENCES member(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+
+-- ============================================================
+-- 9. 의사 일정
+-- ============================================================
+CREATE TABLE IF NOT EXISTS doctor_schedules (
+    schedule_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '일정 ID',
+    doctor_id BIGINT NOT NULL COMMENT '의료진 ID',
+    schedule_date DATE NOT NULL COMMENT '일정 날짜',
+    start_time TIME NOT NULL COMMENT '일정 시작 시간',
+    end_time TIME NOT NULL COMMENT '일정 종료 시간',
+    schedule_type VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE' COMMENT 'AVAILABLE / RESERVED / UNAVAILABLE',
+    memo VARCHAR(500) NULL COMMENT '일정 메모',
+    created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '생성 일시',
+    updated_at DATETIME DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '수정 일시',
+    is_deleted TINYINT(1) DEFAULT 0 COMMENT '삭제 여부',
+
+    INDEX idx_schedule_doctor (doctor_id),
+    INDEX idx_schedule_date (schedule_date),
+    INDEX idx_schedule_doctor_date (doctor_id, schedule_date),
+    INDEX idx_schedule_type (schedule_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
