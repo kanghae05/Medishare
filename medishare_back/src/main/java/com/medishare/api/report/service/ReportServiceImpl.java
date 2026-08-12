@@ -24,7 +24,7 @@ public class ReportServiceImpl implements ReportService {
     @Override
     @Transactional
     public ReportVO write(ReportVO vo, String loginMemberId) {
-        Member member = qMemberRepository.findById(loginMemberId)
+        Member member = qMemberRepository.findMemberById(loginMemberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found."));
         Report report = Report.builder()
                 .studyNo(vo.getStudyNo()).title(vo.getTitle())
@@ -72,7 +72,8 @@ public class ReportServiceImpl implements ReportService {
     }
 
     private void validateOwnerOrAdmin(Report report, String loginMemberId) {
-        Member loginMember = qMemberRepository.findById(loginMemberId).orElseThrow(() -> new IllegalArgumentException("Member not found."));
+        Member loginMember = qMemberRepository.findMemberById(loginMemberId)
+                .orElseThrow(() -> new IllegalArgumentException("Member not found."));
         if (!loginMember.getRoles().contains("ROLE_ADMIN") && !report.getMember().getId().equals(loginMemberId)) {
             throw new AccessDeniedException("Only the author can modify this report.");
         }
