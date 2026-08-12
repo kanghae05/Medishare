@@ -36,6 +36,16 @@ function TopNavi() {
                 D Dashboard
               </NavLink>
             </li>
+            <li className="nav-item">
+              <NavLink to="/notices" className="nav-link">
+                공지사항
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink to="/special-cases" className="nav-link">
+                특이케이스
+              </NavLink>
+            </li>
             {token && (
               <>
                 <li className="nav-item">
@@ -50,16 +60,6 @@ function TopNavi() {
                 </li>
               </>
             )}
-<<<<<<< Updated upstream
-            <li className="nav-item">
-              <NavLink to="/notices" className="nav-link">공지사항</NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/special-cases" className="nav-link">특이케이스</NavLink>
-            </li>
-
-=======
->>>>>>> Stashed changes
           </ul>
           <ul className="navbar-nav ms-auto">
             {!token && (
