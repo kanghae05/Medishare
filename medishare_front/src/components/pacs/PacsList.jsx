@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import api from "../common/api";
 
 
@@ -43,6 +44,9 @@ function StudyThumbnail({ orthancStudyId }) {
 
 function PacsList() {
 
+  const navigate = useNavigate();
+
+
   // =========================================================
   // 상태값
   // =========================================================
@@ -78,6 +82,7 @@ function PacsList() {
           "PACS Study 목록 : ",
           response.data
         );
+
 
         if (Array.isArray(response.data)) {
 
@@ -142,6 +147,7 @@ function PacsList() {
         "PACS Study 목록 : ",
         response.data
       );
+
 
       if (Array.isArray(response.data)) {
 
@@ -332,10 +338,36 @@ function PacsList() {
         error
       );
 
+
       alert(
         "DB 테이블이 아직 생성되지 않았거나 동기화 중 오류가 발생했습니다."
       );
     }
+  };
+
+
+  // =========================================================
+  // PACS Study 상세 페이지 이동
+  // =========================================================
+
+  const openDetail = (study) => {
+
+    if (!study.orthancStudyId) {
+
+      alert(
+        "Orthanc Study ID가 없습니다."
+      );
+
+      return;
+    }
+
+    navigate(
+      `/pacs/view/${
+        encodeURIComponent(
+          study.orthancStudyId
+        )
+      }`
+    );
   };
 
 
@@ -648,7 +680,7 @@ function PacsList() {
               </th>
 
               <th className="text-center">
-                영상
+                기능
               </th>
 
             </tr>
@@ -844,21 +876,51 @@ function PacsList() {
                       </td>
 
 
-                      {/* OHIF */}
+                      {/* 상세 / OHIF */}
                       <td className="text-center">
 
-                        <button
-                          type="button"
-                          className="btn btn-sm btn-primary"
-                          onClick={
-                            () =>
+                        <div
+                          className="
+                            d-flex
+                            gap-2
+                            justify-content-center
+                          "
+                        >
+
+                          <button
+                            type="button"
+                            className="
+                              btn
+                              btn-sm
+                              btn-outline-secondary
+                            "
+                            onClick={() =>
+                              openDetail(
+                                study
+                              )
+                            }
+                          >
+                            상세보기
+                          </button>
+
+
+                          <button
+                            type="button"
+                            className="
+                              btn
+                              btn-sm
+                              btn-primary
+                            "
+                            onClick={() =>
                               openViewer(
                                 study
                               )
-                          }
-                        >
-                          영상 보기
-                        </button>
+                            }
+                          >
+                            영상 보기
+                          </button>
+
+                        </div>
 
                       </td>
 
