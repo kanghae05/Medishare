@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "pacs_role_permission")
+@Table(name = "role_permission")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsRolePermission {
     @EmbeddedId private PacsRolePermissionId id;

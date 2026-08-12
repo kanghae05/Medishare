@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pacs_data_change_history")
+@Table(name = "data_change_history")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsDataChangeHistory {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long no;

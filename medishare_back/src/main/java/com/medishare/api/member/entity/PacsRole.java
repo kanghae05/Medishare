@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "pacs_role")
+@Table(name = "role")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsRole {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

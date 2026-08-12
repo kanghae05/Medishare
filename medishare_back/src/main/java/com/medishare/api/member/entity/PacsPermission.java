@@ -4,7 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 @Entity
-@Table(name = "pacs_permission")
+@Table(name = "permission")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsPermission {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY)

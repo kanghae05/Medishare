@@ -7,7 +7,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "pacs_data_access_log")
+@Table(name = "data_access_log")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsDataAccessLog {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long no;
