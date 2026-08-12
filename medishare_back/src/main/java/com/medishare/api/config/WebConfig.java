@@ -4,10 +4,23 @@ import lombok.extern.log4j.Log4j2;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
+import com.medishare.api.member.service.PacsAccessLogInterceptor;
 
 @Configuration
 @Log4j2
 public class WebConfig implements WebMvcConfigurer {
+
+    private final PacsAccessLogInterceptor pacsAccessLogInterceptor;
+
+    public WebConfig(PacsAccessLogInterceptor pacsAccessLogInterceptor) {
+        this.pacsAccessLogInterceptor = pacsAccessLogInterceptor;
+    }
+
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
+        registry.addInterceptor(pacsAccessLogInterceptor).addPathPatterns("/pacs/list.do", "/pacs/view.do", "/pacs/thumbnail/**");
+    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {

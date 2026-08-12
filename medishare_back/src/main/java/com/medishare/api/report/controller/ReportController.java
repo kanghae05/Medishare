@@ -33,12 +33,14 @@ public class ReportController {
     }
 
     @PutMapping("/update.do/{no}")
-    public ReportVO update(@PathVariable Long no, @RequestBody ReportVO vo, @AuthenticationPrincipal Member member) {
-        return reportService.update(no, vo, member.getId());
+    public ReportVO update(@PathVariable Long no, @RequestBody ReportVO vo, @AuthenticationPrincipal Member member,
+                           @RequestParam(required = false) String changeReason) {
+        return reportService.update(no, vo, member.getId(), changeReason);
     }
 
     @DeleteMapping("/delete.do/{no}")
-    public void delete(@PathVariable Long no, @AuthenticationPrincipal Member member) {
-        reportService.delete(no, member.getId());
+    public void delete(@PathVariable Long no, @AuthenticationPrincipal Member member,
+                       @RequestParam(required = false) String changeReason) {
+        reportService.delete(no, member.getId(), changeReason);
     }
 }

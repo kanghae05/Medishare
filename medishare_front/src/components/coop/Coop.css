@@ -1,15 +1,91 @@
-/* 협진(coop) 도메인 공용 스타일 - 임상 신뢰감을 주는 딥틸 톤 (medishare 전용 토큰, 추후 공용 index.css로 옮길 수 있음) */
-.coop-page {
-  --coop-ink: #16232E;
-  --coop-muted: #5B6672;
-  --coop-border: #DCE2E7;
+/* 협진(coop) 도메인 공용 스타일 - 부트스트랩 기본 톤에 맞춘 무난한 팔레트 */
+:root {
+  --coop-ink: #212529;
+  --coop-muted: #6C757D;
+  --coop-border: #DEE2E6;
   --coop-card: #FFFFFF;
-  --coop-page-bg: #F5F7F9;
-  --coop-accent: #0F6E5E;
-  --coop-accent-hover: #0B5548;
-  --coop-accent-soft: #E4F2EF;
+  --coop-page-bg: #F8F9FA;
+  --coop-accent: #0D6EFD;
+  --coop-accent-hover: #0B5ED7;
+  --coop-accent-soft: #E7F1FF;
+}
+
+.coop-page {
   color: var(--coop-ink);
 }
+
+.coop-page-title {
+  font-size: 28px;
+  font-weight: 700;
+  color: var(--coop-ink);
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.coop-layout {
+  display: flex;
+  align-items: flex-start;
+  gap: 24px;
+  width: 100%;
+}
+.coop-sidebar {
+  width: 200px;
+  flex-shrink: 0;
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  border-radius: 6px;
+  padding: 16px;
+  position: sticky;
+  top: 16px;
+}
+.coop-sidebar-new {
+  display: block;
+  width: 100%;
+  text-align: center;
+  background: var(--coop-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13.5px;
+  padding: 9px 0;
+  border-radius: 4px;
+  text-decoration: none;
+  margin-bottom: 16px;
+  border: none;
+  cursor: pointer;
+}
+.coop-sidebar-new:hover { background: var(--coop-accent-hover); color: #fff; }
+
+.coop-sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
+.coop-sidebar-link {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 9px 12px;
+  border-radius: 4px;
+  color: var(--coop-muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-decoration: none;
+  transition: background 0.12s ease, color 0.12s ease;
+}
+.coop-sidebar-link:hover { background: var(--coop-page-bg); color: var(--coop-ink); }
+.coop-sidebar-link.active { background: var(--coop-accent-soft); color: var(--coop-accent-hover); }
+.coop-sidebar-link .count-badge {
+  background: var(--coop-accent);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 700;
+  min-width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 5px;
+}
+.coop-sidebar-link.active .count-badge { background: var(--coop-accent-hover); }
+
+.coop-content { flex: 1; min-width: 0; }
 
 .coop-header {
   display: flex;
@@ -41,7 +117,7 @@
   font-weight: 600;
   font-size: 13.5px;
   padding: 8px 16px;
-  border-radius: 8px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -58,7 +134,7 @@
 .coop-filter-panel {
   background: var(--coop-card);
   border: 1px solid var(--coop-border);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 16px 18px;
   margin-bottom: 16px;
 }
@@ -85,7 +161,7 @@
   font-size: 12.5px;
   font-weight: 600;
   padding: 5px 12px;
-  border-radius: 999px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
@@ -96,7 +172,7 @@
 }
 .coop-filter-date {
   border: 1px solid var(--coop-border);
-  border-radius: 6px;
+  border-radius: 4px;
   padding: 5px 8px;
   font-size: 13px;
   color: var(--coop-ink);
@@ -122,7 +198,7 @@
   font-weight: 700;
   font-size: 13px;
   padding: 7px 18px;
-  border-radius: 7px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .btn-coop-apply:hover { background: var(--coop-accent-hover); border-color: var(--coop-accent-hover); }
@@ -133,7 +209,7 @@
   font-weight: 600;
   font-size: 13px;
   padding: 7px 18px;
-  border-radius: 7px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .btn-coop-reset:hover { border-color: var(--coop-muted); color: var(--coop-ink); }
@@ -141,25 +217,25 @@
 /* ---------- 상태 pill ---------- */
 .coop-pill {
   display: inline-block;
-  border-radius: 999px;
+  border-radius: 4px;
   font-size: 12px;
-  font-weight: 700;
-  padding: 3px 12px;
+  font-weight: 600;
+  padding: 3px 10px;
   border: 1px solid transparent;
   white-space: nowrap;
 }
-.coop-pill.status-요청 { background: #FDF3DD; color: #8A5A00; border-color: #EDD7A0; }
-.coop-pill.status-수락 { background: #E3F3EC; color: #0F6E4A; border-color: #BFE3D0; }
-.coop-pill.status-거절 { background: #FBEAEA; color: #A23E3E; border-color: #E3B8B8; }
-.coop-pill.status-취소 { background: #F1F1EF; color: #6B6B66; border-color: #DAD9D3; }
-.coop-pill.status-만료 { background: #F1EEE4; color: #7A6A46; border-color: #DDD3B8; }
-.coop-pill.status-종료 { background: #ECEEF0; color: #55606B; border-color: #D3D7DC; }
+.coop-pill.status-요청 { background: #FFF3CD; color: #664D03; border-color: #FFE69C; }
+.coop-pill.status-수락 { background: #D1E7DD; color: #0F5132; border-color: #A3CFBB; }
+.coop-pill.status-거절 { background: #F8D7DA; color: #842029; border-color: #F1AEB5; }
+.coop-pill.status-취소 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
+.coop-pill.status-만료 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
+.coop-pill.status-종료 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
 
 /* ---------- 목록 ---------- */
 .coop-list-card {
   background: var(--coop-card);
   border: 1px solid var(--coop-border);
-  border-radius: 12px;
+  border-radius: 6px;
   overflow: hidden;
 }
 .coop-row {
@@ -215,7 +291,7 @@
   background: var(--coop-page-bg);
   border: 1px solid var(--coop-border);
   border-left: 3px solid var(--coop-accent);
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 6px 6px 0;
   padding: 12px 16px;
   margin-bottom: 20px;
 }
@@ -232,7 +308,7 @@
 }
 .coop-quote-reason {
   font-size: 13px;
-  color: #A23E3E;
+  color: #842029;
   margin-top: 6px;
   font-style: italic;
 }
@@ -240,7 +316,7 @@
 .coop-form {
   background: var(--coop-card);
   border: 1px solid var(--coop-border);
-  border-radius: 12px;
+  border-radius: 6px;
   padding: 24px;
 }
 .coop-form-row {
@@ -262,7 +338,7 @@
 .coop-form-textarea {
   flex: 1;
   border: 1px solid var(--coop-border);
-  border-radius: 7px;
+  border-radius: 4px;
   padding: 8px 12px;
   font-size: 13.5px;
   color: var(--coop-ink);
@@ -277,10 +353,10 @@
 .coop-form-textarea { resize: vertical; }
 
 .coop-form-error {
-  background: #FBEAEA;
-  border: 1px solid #E3B8B8;
-  color: #A23E3E;
-  border-radius: 7px;
+  background: #F8D7DA;
+  border: 1px solid #F1AEB5;
+  color: #842029;
+  border-radius: 4px;
   padding: 10px 14px;
   font-size: 13px;
   margin-top: 16px;
@@ -293,4 +369,77 @@
   margin-top: 24px;
   padding-top: 20px;
   border-top: 1px solid var(--coop-border);
+}
+
+.coop-direction-badge {
+  font-size: 11px;
+  font-weight: 700;
+  padding: 1px 8px;
+  border-radius: 999px;
+  margin-left: 2px;
+}
+.coop-direction-badge.in { background: var(--coop-accent-soft); color: var(--coop-accent-hover); }
+.coop-direction-badge.out { background: #E2E3E5; color: #41464B; }
+
+/* ---------- 상세(열람) 화면 ---------- */
+.coop-view-card {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  border-radius: 6px;
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.coop-view-row {
+  display: flex;
+  padding: 10px 0;
+  border-bottom: 1px solid var(--coop-border);
+  font-size: 13.5px;
+}
+.coop-view-row:last-child { border-bottom: none; }
+.coop-view-row.align-top { align-items: flex-start; }
+.coop-view-label {
+  width: 100px;
+  flex-shrink: 0;
+  font-weight: 700;
+  color: var(--coop-muted);
+}
+.coop-view-value { flex: 1; color: var(--coop-ink); white-space: pre-wrap; }
+.coop-view-value.coop-view-danger { color: #842029; }
+
+.coop-dept-reject-box {
+  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-border);
+  border-radius: 6px;
+  padding: 14px 18px;
+  margin-bottom: 16px;
+}
+.coop-dept-reject-item {
+  display: flex;
+  align-items: baseline;
+  gap: 10px;
+  padding: 6px 0;
+  font-size: 13px;
+  flex-wrap: wrap;
+}
+.coop-dept-reject-doctor { font-weight: 700; color: var(--coop-ink); }
+.coop-dept-reject-reason { color: var(--coop-muted); font-style: italic; flex: 1; }
+.coop-dept-reject-time { color: var(--coop-muted); font-size: 12px; }
+
+.btn-coop-danger {
+  background: transparent;
+  border: 1px solid #F1AEB5;
+  color: #842029;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 18px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.btn-coop-danger:hover { background: #842029; border-color: #842029; color: #fff; }
+.btn-coop-danger:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.coop-modal-error {
+  color: #842029;
+  font-size: 12.5px;
+  margin-top: 6px;
 }

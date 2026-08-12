@@ -2,7 +2,6 @@ package com.medishare.api.member.service;
 
 import com.medishare.api.member.entity.MemberDetails;
 import com.medishare.api.member.repository.QMemberRepository;
-import com.medishare.api.service.UserDetailsService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -20,7 +19,7 @@ public class MemberDetailsServiceImpl implements MemberDetailsService {
     public MemberDetails loadMemberById(String id) throws UsernameNotFoundException {
         log.info("[loadUserByUsername] loadUserByUsername 수행, id : {}", id);
         // getReferenceById 인 경우 ploxy를 사용해서 실제적으로 DB를 가져오지 않아서 문제가 생긴다.
-        return qMemberRepository.findById(id)
+        return qMemberRepository.findMemberById(id)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(id));
     }

@@ -1,20 +1,26 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
-import "./coop.css";
+import "./Coop.css";
 
-// coop_request.status ENUM 전체 - 기본 노출 목록은 취소를 제외한다 (받은 협진함 기본 규칙)
 const ALL_STATUSES = ["요청", "수락", "거절", "취소", "만료"];
-const DEFAULT_STATUSES = ["요청", "수락", "거절", "만료"];
+const DEFAULT_RECEIVED_STATUSES = ["요청", "수락", "거절", "만료"]; // 받은 협진함만 취소 기본 제외
+
+const MODE_CONFIG = {
+  received: { title: "받은 협진함", endpoint: "/coop/received.do", defaultStatuses: DEFAULT_RECEIVED_STATUSES, hasUnreadFilter: true },
+  sent:     { title: "보낸 협진함", endpoint: "/coop/sent.do",     defaultStatuses: ALL_STATUSES,          hasUnreadFilter: false },
+  all:      { title: "전체 협진 내역", endpoint: "/coop/all.do",   defaultStatuses: ALL_STATUSES,          hasUnreadFilter: false },
+};
 
 function formatDateTime(str) {
   if (!str) return "-";
-  // 서버가 "yyyy-MM-dd HH:mm" 형태로 내려준다 (CoopRequestServiceImpl 참고)
   const [date, time] = str.split(" ");
   return `${date.slice(5)} ${time}`;
 }
 
-function CoopRequestList() {
+// mode: "received" | "sent" | "all"
+function CoopRequestList({ mode }) {
+  const config = MODE_CONFIG[mode];
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
 
@@ -30,19 +36,34 @@ function CoopRequestList() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // 필터 패널 - 기본 숨김, 버튼 클릭 시에만 펼침
   const [filterOpen, setFilterOpen] = useState(false);
   const [draftStatuses, setDraftStatuses] = useState(
-    urlStatuses ? urlStatuses.split(",") : DEFAULT_STATUSES
+    urlStatuses ? urlStatuses.split(",") : config.defaultStatuses
   );
   const [draftUnreadOnly, setDraftUnreadOnly] = useState(urlUnreadOnly);
   const [draftFrom, setDraftFrom] = useState(urlFrom);
   const [draftTo, setDraftTo] = useState(urlTo);
 
-  const appliedStatuses = urlStatuses ? urlStatuses.split(",") : DEFAULT_STATUSES;
+  // mode가 바뀌면(같은 컴포넌트를 다른 라우트에서 재사용) 필터 초안도 그 모드 기본값으로 리셋
+  useEffect(() => {
+    let ignore = false;
+    queueMicrotask(() => {
+      if (ignore) return;
+      setDraftStatuses(urlStatuses ? urlStatuses.split(",") : config.defaultStatuses);
+      setDraftUnreadOnly(urlUnreadOnly);
+      setDraftFrom(urlFrom);
+      setDraftTo(urlTo);
+    });
+    return () => {
+      ignore = true;
+    };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode]);
+
+  const appliedStatuses = urlStatuses ? urlStatuses.split(",") : config.defaultStatuses;
   const isFilterModified =
-    appliedStatuses.length !== DEFAULT_STATUSES.length ||
-    !appliedStatuses.every((s) => DEFAULT_STATUSES.includes(s)) ||
+    appliedStatuses.length !== config.defaultStatuses.length ||
+    !appliedStatuses.every((s) => config.defaultStatuses.includes(s)) ||
     urlUnreadOnly ||
     urlFrom ||
     urlTo;
@@ -50,9 +71,6 @@ function CoopRequestList() {
   useEffect(() => {
     let ignore = false;
 
-    // setLoading/setError를 effect 본문에서 곧바로(동기적으로) 호출하면
-    // "Calling setState synchronously within an effect" 경고가 뜨므로
-    // 마이크로태스크로 한 틱 미뤄서 호출한다. (체감 동작은 동일)
     queueMicrotask(() => {
       if (!ignore) {
         setLoading(true);
@@ -60,16 +78,16 @@ function CoopRequestList() {
       }
     });
 
+    const params = {
+      page,
+      status: urlStatuses || undefined,
+      from: urlFrom || undefined,
+      to: urlTo || undefined,
+    };
+    if (config.hasUnreadFilter) params.unreadOnly = urlUnreadOnly || undefined;
+
     api
-      .get("/coop/received.do", {
-        params: {
-          page,
-          status: urlStatuses || undefined,
-          unreadOnly: urlUnreadOnly || undefined,
-          from: urlFrom || undefined,
-          to: urlTo || undefined,
-        },
-      })
+      .get(config.endpoint, { params })
       .then((res) => {
         if (ignore) return;
         setList(res.data.list || []);
@@ -85,7 +103,8 @@ function CoopRequestList() {
     return () => {
       ignore = true;
     };
-  }, [page, urlStatuses, urlUnreadOnly, urlFrom, urlTo]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [mode, page, urlStatuses, urlUnreadOnly, urlFrom, urlTo]);
 
   useEffect(() => {
     api
@@ -105,7 +124,7 @@ function CoopRequestList() {
     if (draftStatuses.length && draftStatuses.length !== ALL_STATUSES.length) {
       params.status = draftStatuses.join(",");
     }
-    if (draftUnreadOnly) params.unreadOnly = "true";
+    if (config.hasUnreadFilter && draftUnreadOnly) params.unreadOnly = "true";
     if (draftFrom) params.from = draftFrom;
     if (draftTo) params.to = draftTo;
     setSearchParams(params);
@@ -113,7 +132,7 @@ function CoopRequestList() {
   };
 
   const resetFilter = () => {
-    setDraftStatuses(DEFAULT_STATUSES);
+    setDraftStatuses(config.defaultStatuses);
     setDraftUnreadOnly(false);
     setDraftFrom("");
     setDraftTo("");
@@ -124,7 +143,7 @@ function CoopRequestList() {
   const goPage = (p) => {
     const params = { page: String(p) };
     if (urlStatuses) params.status = urlStatuses;
-    if (urlUnreadOnly) params.unreadOnly = "true";
+    if (config.hasUnreadFilter && urlUnreadOnly) params.unreadOnly = "true";
     if (urlFrom) params.from = urlFrom;
     if (urlTo) params.to = urlTo;
     setSearchParams(params);
@@ -134,7 +153,7 @@ function CoopRequestList() {
     <div className="coop-page">
       <div className="coop-header">
         <h3 className="coop-title">
-          받은 협진함
+          {config.title}
           {unreadCount > 0 && <span className="count-badge">{unreadCount}</span>}
         </h3>
         <button type="button" className="btn-coop-filter" onClick={() => setFilterOpen((v) => !v)}>
@@ -162,35 +181,19 @@ function CoopRequestList() {
           </div>
           <div className="coop-filter-row">
             <span className="coop-filter-label">기간</span>
-            <input
-              type="date"
-              className="coop-filter-date"
-              value={draftFrom}
-              onChange={(e) => setDraftFrom(e.target.value)}
-            />
+            <input type="date" className="coop-filter-date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} />
             <span style={{ color: "var(--coop-muted)" }}>~</span>
-            <input
-              type="date"
-              className="coop-filter-date"
-              value={draftTo}
-              onChange={(e) => setDraftTo(e.target.value)}
-            />
-            <label className="coop-filter-checkbox">
-              <input
-                type="checkbox"
-                checked={draftUnreadOnly}
-                onChange={(e) => setDraftUnreadOnly(e.target.checked)}
-              />
-              안읽음만 보기
-            </label>
+            <input type="date" className="coop-filter-date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} />
+            {config.hasUnreadFilter && (
+              <label className="coop-filter-checkbox">
+                <input type="checkbox" checked={draftUnreadOnly} onChange={(e) => setDraftUnreadOnly(e.target.checked)} />
+                안읽음만 보기
+              </label>
+            )}
           </div>
           <div className="coop-filter-actions">
-            <button type="button" className="btn-coop-reset" onClick={resetFilter}>
-              초기화
-            </button>
-            <button type="button" className="btn-coop-apply" onClick={applyFilter}>
-              적용
-            </button>
+            <button type="button" className="btn-coop-reset" onClick={resetFilter}>초기화</button>
+            <button type="button" className="btn-coop-apply" onClick={applyFilter}>적용</button>
           </div>
         </div>
       )}
@@ -200,35 +203,55 @@ function CoopRequestList() {
       ) : error ? (
         <div className="coop-empty">{error}</div>
       ) : list.length === 0 ? (
-        <div className="coop-empty">받은 협진 요청이 없습니다.</div>
+        <div className="coop-empty">
+          {mode === "received" ? "받은" : mode === "sent" ? "보낸" : ""} 협진 요청이 없습니다.
+        </div>
       ) : (
         <div className="coop-list-card">
-          {list.map((r) => (
-            <div
-              key={r.coopRequestId}
-              className="coop-row"
-              onClick={() => navigate(`/coop/view?no=${r.coopRequestId}`)}
-            >
-              <span className={"coop-row-unread-dot" + (r.isRead ? " hidden" : "")} />
-              <div className="coop-row-main">
-                <div className="coop-row-top">
-                  <span className={"coop-row-patient" + (r.isRead ? "" : " unread")}>
-                    {r.patientName || `환자 #${r.patientId}`}
-                  </span>
-                  <span className="coop-row-counterpart">
-                    {r.reqDoctorName || `요청의사 #${r.reqDoctorId}`} → 나
-                  </span>
+          {list.map((r) => {
+            const isIncoming = mode === "all" ? r.direction === "received" : mode === "received";
+
+            let counterpartName;
+            if (isIncoming) {
+              counterpartName = r.reqDoctorName || `요청의사 #${r.reqDoctorId}`;
+            } else if (r.acceptDoctorId) {
+              // 진료과 요청이든 지정의사 요청이든, 이미 수락한 의사가 있으면 그 사람이 상대방
+              counterpartName = r.acceptDoctorName || `의사 #${r.acceptDoctorId}`;
+            } else if (r.recvType === "지정의사") {
+              counterpartName = r.recvDoctorName || `의사 #${r.recvDoctorId}`;
+            } else {
+              // 진료과 요청 + 아직 수락 전 = 진짜로 "누가 받을지 미정"인 상태
+              counterpartName = (r.recvDeptName || `진료과 #${r.recvDeptId}`) + " (미정)";
+            }
+
+            return (
+              <div key={r.coopRequestId} className="coop-row" onClick={() => navigate(`/coop/view?no=${r.coopRequestId}`)}>
+                <span className={"coop-row-unread-dot" + (!isIncoming || r.isRead ? " hidden" : "")} />
+                <div className="coop-row-main">
+                  <div className="coop-row-top">
+                    <span className={"coop-row-patient" + (isIncoming && !r.isRead ? " unread" : "")}>
+                      {r.patientName || `환자 #${r.patientId}`}
+                    </span>
+                    <span className="coop-row-counterpart">
+                      {isIncoming ? `${counterpartName} → 나` : `나 → ${counterpartName}`}
+                    </span>
+                    {mode === "all" && (
+                      <span className={"coop-direction-badge" + (isIncoming ? " in" : " out")}>
+                        {isIncoming ? "받음" : "보냄"}
+                      </span>
+                    )}
+                  </div>
+                  <div className="coop-row-content">{r.reqContent}</div>
                 </div>
-                <div className="coop-row-content">{r.reqContent}</div>
+                <div className="coop-row-side">
+                  <span className={"coop-pill status-" + (r.displayStatus || r.status)}>
+                    {r.displayStatus || r.status}
+                  </span>
+                  <span className="coop-row-time">{formatDateTime(r.reqTime)}</span>
+                </div>
               </div>
-              <div className="coop-row-side">
-                <span className={"coop-pill status-" + (r.displayStatus || r.status)}>
-                  {r.displayStatus || r.status}
-                </span>
-                <span className="coop-row-time">{formatDateTime(r.reqTime)}</span>
-              </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -236,46 +259,21 @@ function CoopRequestList() {
         <nav className="mt-3">
           <ul className="pagination justify-content-center">
             <li className={"page-item" + (page === 1 ? " disabled" : "")}>
-              <button className="page-link" disabled={page === 1} onClick={() => goPage(1)}>
-                &laquo;
-              </button>
+              <button className="page-link" disabled={page === 1} onClick={() => goPage(1)}>&laquo;</button>
             </li>
             <li className={"page-item" + (pageObject.startPage === 1 ? " disabled" : "")}>
-              <button
-                className="page-link"
-                disabled={pageObject.startPage === 1}
-                onClick={() => goPage(pageObject.startPage - 1)}
-              >
-                &lt;
-              </button>
+              <button className="page-link" disabled={pageObject.startPage === 1} onClick={() => goPage(pageObject.startPage - 1)}>&lt;</button>
             </li>
-            {Array.from(
-              { length: pageObject.endPage - pageObject.startPage + 1 },
-              (_, i) => pageObject.startPage + i
-            ).map((p) => (
+            {Array.from({ length: pageObject.endPage - pageObject.startPage + 1 }, (_, i) => pageObject.startPage + i).map((p) => (
               <li key={p} className={"page-item " + (p === page ? "active" : "")}>
-                <button className="page-link" onClick={() => goPage(p)}>
-                  {p}
-                </button>
+                <button className="page-link" onClick={() => goPage(p)}>{p}</button>
               </li>
             ))}
             <li className={"page-item" + (pageObject.endPage === pageObject.totalPage ? " disabled" : "")}>
-              <button
-                className="page-link"
-                disabled={pageObject.endPage === pageObject.totalPage}
-                onClick={() => goPage(pageObject.endPage + 1)}
-              >
-                &gt;
-              </button>
+              <button className="page-link" disabled={pageObject.endPage === pageObject.totalPage} onClick={() => goPage(pageObject.endPage + 1)}>&gt;</button>
             </li>
             <li className={"page-item" + (page === pageObject.totalPage ? " disabled" : "")}>
-              <button
-                className="page-link"
-                disabled={page === pageObject.totalPage}
-                onClick={() => goPage(pageObject.totalPage)}
-              >
-                &raquo;
-              </button>
+              <button className="page-link" disabled={page === pageObject.totalPage} onClick={() => goPage(pageObject.totalPage)}>&raquo;</button>
             </li>
           </ul>
         </nav>

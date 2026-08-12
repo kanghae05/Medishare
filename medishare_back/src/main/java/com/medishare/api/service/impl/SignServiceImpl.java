@@ -12,6 +12,7 @@ import com.medishare.api.member.vo.MemberVO;
 import com.medishare.api.service.SignService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -82,7 +83,9 @@ public class SignServiceImpl implements SignService {
     @Override
     public SignInResultDto signIn(String id, String pw) throws RuntimeException {
         log.info("[signIn] signDataHandler 로 회원 정보 요청 - id : {}, pw : {}", id, pw);
-        Member member = qMemberRepository.getReferenceById(id);
+        Member member = qMemberRepository.findMemberById(id)
+                .orElseThrow(() ->
+                        new UsernameNotFoundException(id));
         log.info("[signIn] member : {}", member);
 
         log.info("[signIn] 패스워드 비교 수행");

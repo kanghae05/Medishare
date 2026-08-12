@@ -46,6 +46,12 @@ function TopNavi(){
                 <NavLink to="/report/list" className="nav-link">판독소견서</NavLink>
               </li>
             )}
+            <li className="nav-item">
+              <NavLink to="/notices" className="nav-link">공지사항</NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink to="/special-cases" className="nav-link">특이케이스</NavLink>
+            </li>
 
           </ul>
           <ul className="navbar-nav ms-auto">

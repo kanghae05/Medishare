@@ -9,6 +9,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import org.springframework.security.access.prepost.PreAuthorize;
 
 import java.util.List;
 import java.util.Map;
@@ -26,6 +27,7 @@ public class PacsRestController {
     // PACS Study 목록 조회
     // =========================================================
     @GetMapping("/list.do")
+    @PreAuthorize("@pacsAuthorization.hasPermission(authentication, 'IMAGE_VIEW')")
     public ResponseEntity<List<StudyVO>> getStudyList() {
 
         return ResponseEntity.ok(
@@ -38,6 +40,7 @@ public class PacsRestController {
     // PACS Study 상세 조회
     // =========================================================
     @GetMapping("/view.do")
+    @PreAuthorize("@pacsAuthorization.hasPermission(authentication, 'IMAGE_VIEW')")
     public ResponseEntity<StudyVO> getStudyDetail(
             @RequestParam("id") String studyId
     ) {
@@ -92,6 +95,7 @@ public class PacsRestController {
             value = "/thumbnail/{studyId}",
             produces = MediaType.IMAGE_PNG_VALUE
     )
+    @PreAuthorize("@pacsAuthorization.hasPermission(authentication, 'IMAGE_VIEW')")
     public ResponseEntity<byte[]> getStudyThumbnail(
             @PathVariable String studyId
     ) {
