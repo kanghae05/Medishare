@@ -239,7 +239,7 @@ CREATE TABLE case_pacs_links (
     case_id BIGINT NOT NULL COMMENT '케이스 ID',
     study_instance_uid VARCHAR(128) NOT NULL COMMENT 'PACS Study Instance UID',
     series_instance_uid VARCHAR(128) NULL COMMENT 'PACS Series Instance UID',
-    patient_id_masked VARCHAR(50) NULL COMMENT '비식별 환자 ID',
+    patient_id_masked VARCHAR(64) NULL COMMENT 'SHA-256 비식별 환자 ID',
     created_at DATETIME DEFAULT CURRENT_TIMESTAMP COMMENT '연동 일시',
     CONSTRAINT fk_pacs_case FOREIGN KEY (case_id) REFERENCES special_cases (case_id) ON DELETE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='PACS 연동 식별키';
