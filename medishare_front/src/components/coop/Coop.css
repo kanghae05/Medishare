@@ -1,0 +1,211 @@
+/* 협진(coop) 도메인 공용 스타일 - 임상 신뢰감을 주는 딥틸 톤 (medishare 전용 토큰, 추후 공용 index.css로 옮길 수 있음) */
+.coop-page {
+  --coop-ink: #16232E;
+  --coop-muted: #5B6672;
+  --coop-border: #DCE2E7;
+  --coop-card: #FFFFFF;
+  --coop-page-bg: #F5F7F9;
+  --coop-accent: #0F6E5E;
+  --coop-accent-hover: #0B5548;
+  --coop-accent-soft: #E4F2EF;
+  color: var(--coop-ink);
+}
+
+.coop-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 16px;
+}
+.coop-title { font-size: 20px; font-weight: 700; margin: 0; }
+.coop-title .count-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 20px;
+  height: 20px;
+  padding: 0 6px;
+  margin-left: 8px;
+  border-radius: 999px;
+  background: var(--coop-accent);
+  color: #fff;
+  font-size: 12px;
+  font-weight: 700;
+  vertical-align: middle;
+}
+
+.btn-coop-filter {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  color: var(--coop-ink);
+  font-weight: 600;
+  font-size: 13.5px;
+  padding: 8px 16px;
+  border-radius: 8px;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease;
+}
+.btn-coop-filter:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
+.btn-coop-filter .dot {
+  width: 6px; height: 6px; border-radius: 50%;
+  background: var(--coop-accent);
+}
+
+/* ---------- 필터 패널 (기본 숨김, 버튼 클릭 시 펼쳐짐) ---------- */
+.coop-filter-panel {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  border-radius: 12px;
+  padding: 16px 18px;
+  margin-bottom: 16px;
+}
+.coop-filter-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+.coop-filter-row:last-child { margin-bottom: 0; }
+.coop-filter-label {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coop-muted);
+  width: 40px;
+  flex-shrink: 0;
+}
+.coop-chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
+.coop-chip {
+  border: 1px solid var(--coop-border);
+  background: var(--coop-page-bg);
+  color: var(--coop-muted);
+  font-size: 12.5px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 999px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+.coop-chip.active {
+  background: var(--coop-accent-soft);
+  border-color: var(--coop-accent);
+  color: var(--coop-accent-hover);
+}
+.coop-filter-date {
+  border: 1px solid var(--coop-border);
+  border-radius: 6px;
+  padding: 5px 8px;
+  font-size: 13px;
+  color: var(--coop-ink);
+}
+.coop-filter-checkbox {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--coop-ink);
+  cursor: pointer;
+}
+.coop-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  margin-top: 4px;
+}
+.btn-coop-apply {
+  background: var(--coop-accent);
+  border: 1px solid var(--coop-accent);
+  color: #fff;
+  font-weight: 700;
+  font-size: 13px;
+  padding: 7px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.btn-coop-apply:hover { background: var(--coop-accent-hover); border-color: var(--coop-accent-hover); }
+.btn-coop-reset {
+  background: transparent;
+  border: 1px solid var(--coop-border);
+  color: var(--coop-muted);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 7px 18px;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.btn-coop-reset:hover { border-color: var(--coop-muted); color: var(--coop-ink); }
+
+/* ---------- 상태 pill ---------- */
+.coop-pill {
+  display: inline-block;
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 3px 12px;
+  border: 1px solid transparent;
+  white-space: nowrap;
+}
+.coop-pill.status-요청 { background: #FDF3DD; color: #8A5A00; border-color: #EDD7A0; }
+.coop-pill.status-수락 { background: #E3F3EC; color: #0F6E4A; border-color: #BFE3D0; }
+.coop-pill.status-거절 { background: #FBEAEA; color: #A23E3E; border-color: #E3B8B8; }
+.coop-pill.status-취소 { background: #F1F1EF; color: #6B6B66; border-color: #DAD9D3; }
+.coop-pill.status-만료 { background: #F1EEE4; color: #7A6A46; border-color: #DDD3B8; }
+.coop-pill.status-종료 { background: #ECEEF0; color: #55606B; border-color: #D3D7DC; }
+
+/* ---------- 목록 ---------- */
+.coop-list-card {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+.coop-row {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 18px;
+  border-bottom: 1px solid var(--coop-border);
+  cursor: pointer;
+  transition: background 0.12s ease;
+}
+.coop-row:last-child { border-bottom: none; }
+.coop-row:hover { background: var(--coop-page-bg); }
+
+.coop-row-unread-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--coop-accent);
+  flex-shrink: 0;
+}
+.coop-row-unread-dot.hidden { visibility: hidden; }
+
+.coop-row-main { flex: 1; min-width: 0; }
+.coop-row-top { display: flex; align-items: baseline; margin-bottom: 3px; }
+.coop-row-patient { font-size: 14.5px; color: var(--coop-ink); margin-right: 8px; }
+.coop-row-patient.unread { font-weight: 700; }
+.coop-row-counterpart { font-size: 12.5px; color: var(--coop-muted); }
+.coop-row-content {
+  font-size: 13px;
+  color: var(--coop-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.coop-row-side {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  flex-shrink: 0;
+}
+.coop-row-time { font-size: 12px; color: var(--coop-muted); }
+
+.coop-empty {
+  text-align: center;
+  padding: 48px 16px;
+  color: var(--coop-muted);
+  font-size: 14px;
+}

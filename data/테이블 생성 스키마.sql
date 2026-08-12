@@ -308,22 +308,22 @@ CREATE TABLE data_change_history (
 -- ============================================================
 CREATE TABLE coop_request (
     coop_request_id    BIGINT AUTO_INCREMENT PRIMARY KEY,
-    req_doctor_id       BIGINT NOT NULL,
-    recv_type            ENUM('지정의사','진료과') NOT NULL,
-    recv_doctor_id        BIGINT NULL,
-    recv_dept_id           BIGINT NULL,
-    accept_doctor_id        BIGINT NULL,
-    patient_id                BIGINT NOT NULL,
-    pacs_study_id               BIGINT NOT NULL,
-    report_id                     BIGINT NULL,
-    origin_request_id               BIGINT NULL,
-    req_content                       TEXT NOT NULL,
-    status                              ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
-    req_time                             DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    resp_time                              DATETIME NULL,
-    reject_reason                             TEXT NULL,
-    is_read                                     BOOLEAN NOT NULL DEFAULT FALSE,
-    read_time                                     DATETIME NULL,
+    req_doctor_id		  BIGINT NOT NULL,
+    recv_type          ENUM('지정의사','진료과') NOT NULL,
+    recv_doctor_id     BIGINT NULL,
+    recv_dept_id       BIGINT NULL,
+    accept_doctor_id   BIGINT NULL,
+    patient_id         BIGINT NOT NULL,
+    pacs_study_id      BIGINT NOT NULL,
+    report_id          BIGINT NULL,
+    origin_request_id  BIGINT NULL,
+    req_content        TEXT NOT NULL,
+    status             ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
+    req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resp_time          DATETIME NULL,
+    reject_reason      TEXT NULL,
+    is_read            BOOLEAN NOT NULL DEFAULT FALSE,
+    read_time          DATETIME NULL,
 
     CONSTRAINT chk_recv_type_match CHECK (
         (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
@@ -347,10 +347,10 @@ CREATE TABLE coop_request (
 
 CREATE TABLE coop_request_dept_reject (
     id                BIGINT AUTO_INCREMENT PRIMARY KEY,
-    coop_request_id    BIGINT NOT NULL,
-    doctor_id            BIGINT NOT NULL,
-    reject_reason          TEXT NOT NULL,
-    rejected_at              DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    coop_request_id   BIGINT NOT NULL,
+    doctor_id         BIGINT NOT NULL,
+    reject_reason     TEXT NOT NULL,
+    rejected_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE (coop_request_id, doctor_id),
 

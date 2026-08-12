@@ -55,6 +55,7 @@ public class SecurityConfiguration {
                             .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")
                             .requestMatchers("/report/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
+                            .requestMatchers("/coop/**").permitAll()
                             .requestMatchers("/upload/**").permitAll()
                             .requestMatchers("/txt/**").permitAll()
                             .requestMatchers("**exception**").permitAll()
