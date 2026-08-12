@@ -313,7 +313,6 @@ CREATE TABLE coop_request (
     recv_doctor_id     BIGINT NULL,
     recv_dept_id       BIGINT NULL,
     accept_doctor_id   BIGINT NULL,
-    patient_id         BIGINT NOT NULL,
     pacs_study_id      BIGINT NOT NULL,
     report_id          BIGINT NULL,
     origin_request_id  BIGINT NULL,
@@ -338,8 +337,7 @@ CREATE TABLE coop_request (
     FOREIGN KEY (req_doctor_id) REFERENCES member(no),
     FOREIGN KEY (recv_doctor_id) REFERENCES member(no),
     FOREIGN KEY (accept_doctor_id) REFERENCES member(no),
-    FOREIGN KEY (recv_dept_id) REFERENCES department(no),
-    FOREIGN KEY (patient_id) REFERENCES pacs_patient(no),
+    FOREIGN KEY (recv_dept_id) REFERENCES department(NO),
     FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(no),
     FOREIGN KEY (report_id) REFERENCES report(no),
     FOREIGN KEY (origin_request_id) REFERENCES coop_request(coop_request_id)
