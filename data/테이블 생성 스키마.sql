@@ -91,62 +91,6 @@ CREATE TABLE report (
 );
 
 
--- 협진 요청 테이블
-CREATE TABLE coop_request (
-    coop_request_id    INT AUTO_INCREMENT PRIMARY KEY,
-    req_doctor_id      INT NOT NULL,
-    recv_type          ENUM('지정의사','진료과') NOT NULL,
-    recv_doctor_id     INT NULL,
-    recv_dept_id       INT NULL,
-    accept_doctor_id   INT NULL,
-    patient_id         INT NOT NULL,
-    pacs_study_id      INT NOT NULL,
-    report_id          INT NULL,
-    origin_request_id  INT NULL,
-    req_content        TEXT NOT NULL,
-    status             ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
-    req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    resp_time          DATETIME NULL,
-    reject_reason      TEXT NULL,
-    is_read            BOOLEAN NOT NULL DEFAULT FALSE,
-    read_time          DATETIME NULL,
- 
-    CONSTRAINT chk_recv_type_match CHECK (
-        (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
-        OR
-        (recv_type = '진료과' AND recv_dept_id IS NOT NULL AND recv_doctor_id IS NULL)
-    ),
-    CONSTRAINT chk_req_recv_diff CHECK (req_doctor_id <> recv_doctor_id),
-    CONSTRAINT chk_reject_reason CHECK (
-        (status = '거절' AND reject_reason IS NOT NULL) OR (status <> '거절')
-    ),
- 
-    FOREIGN KEY (req_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (recv_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (accept_doctor_id) REFERENCES doctor(doctor_id),
-    FOREIGN KEY (recv_dept_id) REFERENCES department(dept_id),
-    FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
-    FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(study_id),
-    FOREIGN KEY (report_id) REFERENCES report(report_id),
-    FOREIGN KEY (origin_request_id) REFERENCES coop_request(coop_request_id)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-
--- 협진요청 진료과 거절기록 테이블
-CREATE TABLE coop_request_dept_reject (
-    id                INT AUTO_INCREMENT PRIMARY KEY,
-    coop_request_id   INT NOT NULL,
-    doctor_id         INT NOT NULL,
-    reject_reason     TEXT NOT NULL,
-    rejected_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
- 
-    UNIQUE (coop_request_id, doctor_id),
- 
-    FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
-    FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id)
-) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
-
-
 -- 1. 공지사항 (Notices)
 CREATE TABLE IF NOT EXISTS `notices` (
     `notice_id` BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '공지사항 ID',
@@ -200,7 +144,7 @@ CREATE TABLE IF NOT EXISTS `case_tags` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COMMENT='검색 태그';
 
 
-----------------------회원 테이블 생성 후
+-- -------------------- 회원 테이블 생성 후
 -- 공지사항 작성자에 회원 외래키 연결
 ALTER TABLE `notices`
 ADD CONSTRAINT `fk_notices_writer` 
@@ -213,62 +157,212 @@ ADD CONSTRAINT `fk_cases_writer`
 FOREIGN KEY (`writer_id`) REFERENCES `users` (`user_id`) ON DELETE CASCADE;
 
 
--- ============================================================
--- 1. 의료진 스케줄 (Doctor Schedules)
--- ============================================================
+-- 회원/의료진 테이블
+CREATE TABLE pacs_member (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    login_id VARCHAR(100) NOT NULL,
+    password VARCHAR(255) NOT NULL,
+    member_name VARCHAR(200) NOT NULL,
+    email VARCHAR(200),
+    phone VARCHAR(30),
+    department_no BIGINT,
+    position VARCHAR(100),
+    specialty VARCHAR(200),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    stable BOOLEAN,
 
-CREATE TABLE IF NOT EXISTS `doctor_schedules` (
-    `schedule_id` BIGINT AUTO_INCREMENT PRIMARY KEY
-        COMMENT '스케줄 ID',
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_pacs_member_login_id (login_id),
+    UNIQUE KEY uk_pacs_member_email (email),
 
-    `doctor_id` BIGINT NOT NULL
-        COMMENT '의료진 ID (users.user_id 매핑용)',
-
-    `schedule_date` DATE NOT NULL
-        COMMENT '스케줄 날짜',
-
-    `start_time` TIME NOT NULL
-        COMMENT '스케줄 시작 시간',
-
-    `end_time` TIME NOT NULL
-        COMMENT '스케줄 종료 시간',
-
-    `schedule_type` VARCHAR(20) NOT NULL DEFAULT 'AVAILABLE'
-        COMMENT '스케줄 상태 (AVAILABLE: 협진 가능, RESERVED: 협진 예정, UNAVAILABLE: 협진 불가)',
-
-    `memo` VARCHAR(500) NULL
-        COMMENT '스케줄 관련 메모',
-
-    `created_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        COMMENT '생성 일시',
-
-    `updated_at` DATETIME DEFAULT CURRENT_TIMESTAMP
-        ON UPDATE CURRENT_TIMESTAMP
-        COMMENT '수정 일시',
-
-    `is_deleted` TINYINT(1) DEFAULT 0
-        COMMENT '삭제 여부 (1:삭제, 0:정상)',
-
-    INDEX `idx_schedule_doctor` (`doctor_id`),
-
-    INDEX `idx_schedule_date` (`schedule_date`),
-
-    INDEX `idx_schedule_doctor_date`
-        (`doctor_id`, `schedule_date`),
-
-    INDEX `idx_schedule_type`
-        (`schedule_type`)
-
-) ENGINE=InnoDB
-DEFAULT CHARSET=utf8mb4
-COMMENT='의료진 협진 가능 일정 및 스케줄 관리';
+    CONSTRAINT fk_pacs_member_department
+        FOREIGN KEY (department_no)
+        REFERENCES pacs_department(no)
+);
 
 
--- ============================================================
--- 2. 회원 테이블 생성 후 FK 연결
--- ============================================================
+-- 진료과 테이블
+CREATE TABLE pacs_department (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    department_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    status VARCHAR(20) NOT NULL DEFAULT 'ACTIVE',
+    stable BOOLEAN,
 
-ALTER TABLE `doctor_schedules`
-ADD CONSTRAINT `fk_doctor_schedules_doctor`
-FOREIGN KEY (`doctor_id`)
-REFERENCES `users` (`user_id`);
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_pacs_department_name (department_name)
+);
+
+
+-- 회원 역할 테이블
+CREATE TABLE pacs_role (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    role_code VARCHAR(50) NOT NULL,
+    role_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_pacs_role_code (role_code)
+);
+
+
+-- 회원-역할 매핑 테이블
+CREATE TABLE pacs_member_role (
+    member_no BIGINT NOT NULL,
+    role_no BIGINT NOT NULL,
+    assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (member_no, role_no),
+
+    CONSTRAINT fk_pacs_member_role_member
+        FOREIGN KEY (member_no)
+        REFERENCES pacs_member(no),
+
+    CONSTRAINT fk_pacs_member_role_role
+        FOREIGN KEY (role_no)
+        REFERENCES pacs_role(no)
+);
+
+
+-- 권한 테이블
+CREATE TABLE pacs_permission (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    permission_code VARCHAR(100) NOT NULL,
+    permission_name VARCHAR(100) NOT NULL,
+    description VARCHAR(500),
+    stable BOOLEAN,
+
+    PRIMARY KEY (no),
+    UNIQUE KEY uk_pacs_permission_code (permission_code)
+);
+
+
+-- 역할-권한 매핑 테이블
+CREATE TABLE pacs_role_permission (
+    role_no BIGINT NOT NULL,
+    permission_no BIGINT NOT NULL,
+
+    PRIMARY KEY (role_no, permission_no),
+
+    CONSTRAINT fk_pacs_role_permission_role
+        FOREIGN KEY (role_no)
+        REFERENCES pacs_role(no),
+
+    CONSTRAINT fk_pacs_role_permission_permission
+        FOREIGN KEY (permission_no)
+        REFERENCES pacs_permission(no)
+);
+
+
+-- 의료 데이터 접근 이력 테이블
+CREATE TABLE pacs_data_access_log (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    member_no BIGINT NOT NULL,
+    patient_no BIGINT,
+    study_no BIGINT,
+    data_type VARCHAR(50) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    access_result VARCHAR(20) NOT NULL,
+    ip_address VARCHAR(45),
+    accessed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (no),
+
+    CONSTRAINT fk_pacs_data_access_log_member
+        FOREIGN KEY (member_no)
+        REFERENCES pacs_member(no),
+
+    CONSTRAINT fk_pacs_data_access_log_patient
+        FOREIGN KEY (patient_no)
+        REFERENCES pacs_patient(no),
+
+    CONSTRAINT fk_pacs_data_access_log_study
+        FOREIGN KEY (study_no)
+        REFERENCES pacs_study(no)
+);
+
+
+-- 의료 데이터 변경 이력 테이블
+CREATE TABLE pacs_data_change_history (
+    no BIGINT NOT NULL AUTO_INCREMENT,
+    member_no BIGINT NOT NULL,
+    patient_no BIGINT,
+    study_no BIGINT,
+    data_type VARCHAR(50) NOT NULL,
+    action_type VARCHAR(50) NOT NULL,
+    before_data TEXT,
+    after_data TEXT,
+    change_reason VARCHAR(500),
+    changed_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+
+    PRIMARY KEY (no),
+
+    CONSTRAINT fk_pacs_data_change_history_member
+        FOREIGN KEY (member_no)
+        REFERENCES pacs_member(no),
+
+    CONSTRAINT fk_pacs_data_change_history_patient
+        FOREIGN KEY (patient_no)
+        REFERENCES pacs_patient(no),
+
+    CONSTRAINT fk_pacs_data_change_history_study
+        FOREIGN KEY (study_no)
+        REFERENCES pacs_study(no)
+);
+
+
+-- 협진 요청 테이블
+CREATE TABLE coop_request (
+    coop_request_id    INT AUTO_INCREMENT PRIMARY KEY,
+    req_doctor_id      INT NOT NULL,
+    recv_type          ENUM('지정의사','진료과') NOT NULL,
+    recv_doctor_id     INT NULL,
+    recv_dept_id       INT NULL,
+    accept_doctor_id   INT NULL,
+    patient_id         INT NOT NULL,
+    pacs_study_id      INT NOT NULL,
+    report_id          INT NULL,
+    origin_request_id  INT NULL,
+    req_content        TEXT NOT NULL,
+    status             ENUM('요청','수락','거절','취소','만료') NOT NULL DEFAULT '요청',
+    req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    resp_time          DATETIME NULL,
+    reject_reason      TEXT NULL,
+    is_read            BOOLEAN NOT NULL DEFAULT FALSE,
+    read_time          DATETIME NULL,
+ 
+    CONSTRAINT chk_recv_type_match CHECK (
+        (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
+        OR
+        (recv_type = '진료과' AND recv_dept_id IS NOT NULL AND recv_doctor_id IS NULL)
+    ),
+    CONSTRAINT chk_req_recv_diff CHECK (req_doctor_id <> recv_doctor_id),
+    CONSTRAINT chk_reject_reason CHECK (
+        (status = '거절' AND reject_reason IS NOT NULL) OR (status <> '거절')
+    ),
+ 
+    FOREIGN KEY (req_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (recv_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (accept_doctor_id) REFERENCES doctor(doctor_id),
+    FOREIGN KEY (recv_dept_id) REFERENCES department(dept_id),
+    FOREIGN KEY (patient_id) REFERENCES patient(patient_id),
+    FOREIGN KEY (pacs_study_id) REFERENCES pacs_study(study_id),
+    FOREIGN KEY (report_id) REFERENCES report(report_id),
+    FOREIGN KEY (origin_request_id) REFERENCES coop_request(coop_request_id)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+
+-- 협진 요청 진료과 거절 기록 테이블
+CREATE TABLE coop_request_dept_reject (
+    id                INT AUTO_INCREMENT PRIMARY KEY,
+    coop_request_id   INT NOT NULL,
+    doctor_id         INT NOT NULL,
+    reject_reason     TEXT NOT NULL,
+    rejected_at       DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+ 
+    UNIQUE (coop_request_id, doctor_id),
+ 
+    FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
+    FOREIGN KEY (doctor_id) REFERENCES doctor(doctor_id)
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
