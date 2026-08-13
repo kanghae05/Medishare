@@ -58,8 +58,6 @@ function TopNavi() {
             </li>
             {isLoggedIn && (
               <>
-                <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
-                <li className="nav-item"><NavLink to="/special-cases" className="nav-link">특이케이스</NavLink></li>
                 <li className="nav-item"><NavLink to="/report/list" className="nav-link">판독소견</NavLink></li>
                 <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
               </>
