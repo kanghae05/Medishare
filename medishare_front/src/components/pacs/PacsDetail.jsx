@@ -17,6 +17,7 @@ function PacsDetail() {
   const [loading, setLoading] = useState(true);
   const [errorMessage, setErrorMessage] = useState("");
   const [thumbnailFailed, setThumbnailFailed] = useState(false);
+  const [thumbnailSrc, setThumbnailSrc] = useState(null);
 
 
   // =========================================================
@@ -98,6 +99,75 @@ function PacsDetail() {
     };
 
   }, [studyId]);
+
+
+  // =========================================================
+  // 대표 썸네일 조회
+  // 로그인 토큰이 포함된 api 요청으로 Blob 이미지를 가져온다.
+  // =========================================================
+ useEffect(() => {
+  const orthancStudyId =
+    study?.orthancStudyId;
+
+  if (!orthancStudyId) {
+    return undefined;
+  }
+
+  let cancelled = false;
+  let objectUrl = null;
+
+  const loadThumbnail = async () => {
+    try {
+      const response =
+        await api.get(
+          `/pacs/thumbnail/${
+            encodeURIComponent(
+              orthancStudyId
+            )
+          }`,
+          {
+            responseType: "blob"
+          }
+        );
+
+      if (cancelled) {
+        return;
+      }
+
+      objectUrl =
+        URL.createObjectURL(
+          response.data
+        );
+
+      setThumbnailFailed(false);
+      setThumbnailSrc(objectUrl);
+
+    } catch (error) {
+      if (cancelled) {
+        return;
+      }
+
+      console.error(
+        "PACS 대표 썸네일 조회 오류 : ",
+        error
+      );
+
+      setThumbnailFailed(true);
+    }
+  };
+
+  loadThumbnail();
+
+  return () => {
+    cancelled = true;
+
+    if (objectUrl) {
+      URL.revokeObjectURL(
+        objectUrl
+      );
+    }
+  };
+}, [study?.orthancStudyId]);
 
 
   // =========================================================
@@ -309,28 +379,6 @@ function PacsDetail() {
 
     return null;
   }
-
-
-  // =========================================================
-  // 썸네일 URL
-  // =========================================================
-
-  const apiBaseUrl =
-    (
-      api.defaults.baseURL
-      || ""
-    ).replace(
-      /\/$/,
-      ""
-    );
-
-
-  const thumbnailUrl =
-    `${apiBaseUrl}/pacs/thumbnail/${
-      encodeURIComponent(
-        study.orthancStudyId
-      )
-    }`;
 
 
   const firstSeries =
@@ -548,22 +596,8 @@ function PacsDetail() {
           <div className="detail-image-area">
 
             {
-              !thumbnailFailed
+              thumbnailFailed
                 ? (
-
-                  <img
-                    src={thumbnailUrl}
-                    alt="PACS Study Thumbnail"
-                    className="detail-thumbnail"
-                    onError={() =>
-                      setThumbnailFailed(
-                        true
-                      )
-                    }
-                  />
-
-                )
-                : (
 
                   <div className="detail-no-image">
 
@@ -572,7 +606,33 @@ function PacsDetail() {
                     </span>
 
                   </div>
+
                 )
+                : thumbnailSrc
+                  ? (
+
+                    <img
+                      src={thumbnailSrc}
+                      alt="PACS Study Thumbnail"
+                      className="detail-thumbnail"
+                      onError={() =>
+                        setThumbnailFailed(
+                          true
+                        )
+                      }
+                    />
+
+                  )
+                  : (
+
+                    <div className="detail-no-image">
+
+                      <span>
+                        LOADING
+                      </span>
+
+                    </div>
+                  )
             }
 
           </div>

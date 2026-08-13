@@ -13,7 +13,73 @@ import api from "../common/api";
 // PACS Study 썸네일
 // =========================================================
 function StudyThumbnail({ orthancStudyId }) {
-  const [failed, setFailed] = useState(false);
+  const [thumbnailSrc, setThumbnailSrc] =
+    useState(null);
+
+  const [failed, setFailed] =
+    useState(false);
+
+  useEffect(() => {
+    if (!orthancStudyId) {
+      return undefined;
+    }
+
+    let cancelled = false;
+    let objectUrl = null;
+
+    const loadThumbnail = async () => {
+      try {
+        const response =
+          await api.get(
+            `/pacs/thumbnail/${
+              encodeURIComponent(
+                orthancStudyId
+              )
+            }`,
+            {
+              responseType: "blob"
+            }
+          );
+
+        if (cancelled) {
+          return;
+        }
+
+        objectUrl =
+          URL.createObjectURL(
+            response.data
+          );
+
+        setThumbnailSrc(
+          objectUrl
+        );
+
+      } catch (error) {
+        if (cancelled) {
+          return;
+        }
+
+        console.error(
+          "PACS 썸네일 조회 오류:",
+          error
+        );
+
+        setFailed(true);
+      }
+    };
+
+    loadThumbnail();
+
+    return () => {
+      cancelled = true;
+
+      if (objectUrl) {
+        URL.revokeObjectURL(
+          objectUrl
+        );
+      }
+    };
+  }, [orthancStudyId]);
 
   if (!orthancStudyId || failed) {
     return (
@@ -23,18 +89,23 @@ function StudyThumbnail({ orthancStudyId }) {
     );
   }
 
-  const thumbnailUrl =
-    `${api.defaults.baseURL}/pacs/thumbnail/${
-      encodeURIComponent(orthancStudyId)
-    }`;
+  if (!thumbnailSrc) {
+    return (
+      <div className="pacs-thumbnail-empty">
+        <span>LOADING</span>
+      </div>
+    );
+  }
 
   return (
     <div className="pacs-thumbnail-box">
       <img
-        src={thumbnailUrl}
+        src={thumbnailSrc}
         alt="PACS Study Thumbnail"
         className="pacs-thumbnail"
-        onError={() => setFailed(true)}
+        onError={() =>
+          setFailed(true)
+        }
       />
     </div>
   );
