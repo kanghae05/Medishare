@@ -18,23 +18,25 @@ public class PacsPatient {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Column(name = "no")
     private Long no;
 
-    @Column(length = 100, unique = true, nullable = false)
+    @Column(name = "orthanc_patient_id", length = 100, unique = true, nullable = false)
     private String orthancPatientId;
 
-    @Column(length = 100)
+    @Column(name = "patient_id", length = 100)
     private String patientId;
 
-    @Column(length = 200)
+    @Column(name = "patient_name", length = 200)
     private String patientName;
 
-    @Column(length = 10)
+    @Column(name = "patient_sex", length = 10)
     private String patientSex;
 
-    @Column(length = 20)
+    @Column(name = "patient_birth_date", length = 20)
     private String patientBirthDate;
 
+    @Column(name = "stable")
     private Boolean stable;
 
     @OneToMany(

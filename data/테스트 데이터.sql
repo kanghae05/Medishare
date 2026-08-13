@@ -23,26 +23,26 @@ INSERT INTO department (department_name, description, status, stable) VALUES
 
 -- 의사
 INSERT INTO member (login_id, password, member_name, email, phone, department_no, position, specialty, status, stable) VALUES
-('doctor1',  'temp1234', '김영상', 'doctor1@medishare.local',  '010-1000-0001', 1, '전문의', '흉부영상의학', 'ACTIVE', TRUE),
-('doctor2',  'temp1234', '박영상', 'doctor2@medishare.local',  '010-1000-0002', 1, '전문의', '근골격영상의학', 'ACTIVE', TRUE),
-('doctor3',  'temp1234', '이영상', 'doctor3@medishare.local',  '010-1000-0003', 1, '전문의', '복부영상의학', 'ACTIVE', TRUE),
-('doctor4',  'temp1234', '최영상', 'doctor4@medishare.local',  '010-1000-0004', 1, '전공의', '신경두경부영상의학', 'ACTIVE', TRUE),
-('doctor5',  'temp1234', '정영상', 'doctor5@medishare.local',  '010-1000-0005', 1, '전공의', '유방영상의학', 'ACTIVE', TRUE),
-('doctor6',  'temp1234', '홍내과', 'doctor6@medishare.local',  '010-1000-0006', 2, '전문의', '소화기내과', 'ACTIVE', TRUE),
-('doctor7',  'temp1234', '강내과', 'doctor7@medishare.local',  '010-1000-0007', 2, '전문의', '순환기내과', 'ACTIVE', TRUE),
-('doctor8',  'temp1234', '조내과', 'doctor8@medishare.local',  '010-1000-0008', 2, '전공의', '내분비내과', 'ACTIVE', TRUE),
-('doctor9',  'temp1234', '윤외과', 'doctor9@medishare.local',  '010-1000-0009', 3, '전문의', '일반외과', 'ACTIVE', TRUE),
-('doctor10', 'temp1234', '장외과', 'doctor10@medishare.local', '010-1000-0010', 3, '전공의', '혈관외과', 'ACTIVE', TRUE),
-('doctor11', 'temp1234', '임정형', 'doctor11@medishare.local', '010-1000-0011', 4, '전문의', '척추외과', 'ACTIVE', TRUE),
-('doctor12', 'temp1234', '한신경', 'doctor12@medishare.local', '010-1000-0012', 5, '전문의', '뇌혈관질환', 'ACTIVE', TRUE),
-('doctor13', 'temp1234', '오신외', 'doctor13@medishare.local', '010-1000-0013', 6, '전문의', '뇌종양', 'ACTIVE', TRUE),
-('doctor14', 'temp1234', '서흉부', 'doctor14@medishare.local', '010-1000-0014', 7, '전문의', '심장혈관흉부외과', 'ACTIVE', TRUE),
-('doctor15', 'temp1234', '신소아', 'doctor15@medishare.local', '010-1000-0015', 8, '전문의', '소아청소년과', 'ACTIVE', TRUE),
-('doctor16', 'temp1234', '권산부', 'doctor16@medishare.local', '010-1000-0016', 9, '전문의', '산과', 'ACTIVE', TRUE),
-('doctor17', 'temp1234', '황비뇨', 'doctor17@medishare.local', '010-1000-0017', 10, '전문의', '비뇨기종양', 'ACTIVE', TRUE),
-('doctor18', 'temp1234', '안응급', 'doctor18@medishare.local', '010-1000-0018', 15, '전문의', '응급의학', 'ACTIVE', TRUE),
-('doctor19', 'temp1234', '류가정', 'doctor19@medishare.local', '010-1000-0019', 17, '전문의', '가정의학', 'ACTIVE', TRUE),
-('doctor20', 'temp1234', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);
+('doctor1',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '김영상', 'doctor1@medishare.local',  '010-1000-0001', 1, '전문의', '흉부영상의학', 'ACTIVE', TRUE),
+('doctor2',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '박영상', 'doctor2@medishare.local',  '010-1000-0002', 1, '전문의', '근골격영상의학', 'ACTIVE', TRUE),
+('doctor3',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '이영상', 'doctor3@medishare.local',  '010-1000-0003', 1, '전문의', '복부영상의학', 'ACTIVE', TRUE),
+('doctor4',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '최영상', 'doctor4@medishare.local',  '010-1000-0004', 1, '전공의', '신경두경부영상의학', 'ACTIVE', TRUE),
+('doctor5',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '정영상', 'doctor5@medishare.local',  '010-1000-0005', 1, '전공의', '유방영상의학', 'ACTIVE', TRUE),
+('doctor6',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '홍내과', 'doctor6@medishare.local',  '010-1000-0006', 2, '전문의', '소화기내과', 'ACTIVE', TRUE),
+('doctor7',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '강내과', 'doctor7@medishare.local',  '010-1000-0007', 2, '전문의', '순환기내과', 'ACTIVE', TRUE),
+('doctor8',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '조내과', 'doctor8@medishare.local',  '010-1000-0008', 2, '전공의', '내분비내과', 'ACTIVE', TRUE),
+('doctor9',  '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '윤외과', 'doctor9@medishare.local',  '010-1000-0009', 3, '전문의', '일반외과', 'ACTIVE', TRUE),
+('doctor10', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '장외과', 'doctor10@medishare.local', '010-1000-0010', 3, '전공의', '혈관외과', 'ACTIVE', TRUE),
+('doctor11', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '임정형', 'doctor11@medishare.local', '010-1000-0011', 4, '전문의', '척추외과', 'ACTIVE', TRUE),
+('doctor12', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '한신경', 'doctor12@medishare.local', '010-1000-0012', 5, '전문의', '뇌혈관질환', 'ACTIVE', TRUE),
+('doctor13', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '오신외', 'doctor13@medishare.local', '010-1000-0013', 6, '전문의', '뇌종양', 'ACTIVE', TRUE),
+('doctor14', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '서흉부', 'doctor14@medishare.local', '010-1000-0014', 7, '전문의', '심장혈관흉부외과', 'ACTIVE', TRUE),
+('doctor15', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '신소아', 'doctor15@medishare.local', '010-1000-0015', 8, '전문의', '소아청소년과', 'ACTIVE', TRUE),
+('doctor16', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '권산부', 'doctor16@medishare.local', '010-1000-0016', 9, '전문의', '산과', 'ACTIVE', TRUE),
+('doctor17', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '황비뇨', 'doctor17@medishare.local', '010-1000-0017', 10, '전문의', '비뇨기종양', 'ACTIVE', TRUE),
+('doctor18', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '안응급', 'doctor18@medishare.local', '010-1000-0018', 15, '전문의', '응급의학', 'ACTIVE', TRUE),
+('doctor19', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '류가정', 'doctor19@medishare.local', '010-1000-0019', 17, '전문의', '가정의학', 'ACTIVE', TRUE),
+('doctor20', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);
 
 
 -- 환자 정보
