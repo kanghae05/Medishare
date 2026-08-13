@@ -8,18 +8,21 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/*
-    협진요청 (coop_request)
-    status 값 (MariaDB ENUM과 1:1): 요청, 수락, 거절, 취소, 만료
-    recv_type 값: 지정의사, 진료과
-
-    주의:
-    - doctor / patient / pacs_study / report / department 는 타 담당자 소관 테이블이라
-      현재는 FK 컬럼값(Long id)만 갖고 연관관계는 걸지 않는다.
-    - accept/reject/cancel/deptReject 확정 같은 "동시에 여러 명이 건드릴 수 있는" 상태 변경은 반드시
-      CoopRequestRepository의 조건부 UPDATE(@Modifying, WHERE status='요청')로 처리하고,
-      이 엔티티의 setter로 직접 상태를 바꾸지 않는다. (진료과 요청은 여러 의사가 동시에 수락/거절을 시도할 수 있어
-      단순 findById → setter → save() 로는 레이스 컨디션을 못 막음)
+/**
+ * 협진요청 (coop_request)
+ *
+ * status 값 (MariaDB ENUM과 1:1):
+ *   요청, 수락, 거절, 취소, 만료
+ * recv_type 값:
+ *   지정의사, 진료과
+ *
+ * 주의:
+ * - doctor / patient / pacs_study / report / department 는 타 담당자 소관 테이블이라
+ *   현재는 FK 컬럼값(Long id)만 갖고 연관관계는 걸지 않는다.
+ * - accept/reject/cancel/deptReject 확정 같은 "동시에 여러 명이 건드릴 수 있는" 상태 변경은
+ *   반드시 CoopRequestRepository의 조건부 UPDATE(@Modifying, WHERE status='요청')로 처리하고,
+ *   이 엔티티의 setter로 직접 상태를 바꾸지 않는다. (진료과 요청은 여러 의사가 동시에
+ *   수락/거절을 시도할 수 있어 단순 findById → setter → save() 로는 레이스 컨디션을 못 막음)
  */
 @Entity
 @Data
@@ -45,9 +48,6 @@ public class CoopRequest {
     private Long recvDeptId;
 
     private Long acceptDoctorId;
-
-    @Column(nullable = false)
-    private Long patientId;
 
     @Column(nullable = false)
     private Long pacsStudyId;
