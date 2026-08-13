@@ -1,5 +1,6 @@
 package com.medishare.api.coop.controller;
 
+import com.medishare.api.member.entity.Member;
 import com.medishare.api.pacs.entity.PacsStudy;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.service.CoopRequestService;
@@ -31,17 +32,19 @@ public class CoopRequestController {
 
     // ------------------------------------------------------------------
     // 로그인 사용자 정보 추출
-    // TODO(3번 회원관리 연동): 실제 Security 인증 principal이 완성되면 아래 두 메서드를
-    // MemberUserDetails(가칭)에서 doctorId / deptId를 꺼내오는 코드로 교체한다.
-    // 예: return ((MemberUserDetails) authentication.getPrincipal()).getMember().getNo();
     // ------------------------------------------------------------------
 
     private Long currentDoctorId(Authentication authentication) {
-        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
+        Member member = (Member) authentication.getPrincipal();
+        return member.getNo();
     }
 
     private Long currentDeptId(Authentication authentication) {
-        throw new UnsupportedOperationException("로그인 인증 연동 전까지 미구현 (3번 회원관리 완료 후 교체)");
+        Member member = (Member) authentication.getPrincipal();
+        if (member.getDepartment() == null) {
+            throw new RuntimeException("소속 진료과가 등록되지 않은 계정입니다.");
+        }
+        return member.getDepartment().getNo();
     }
 
     // ------------------------------------------------------------------

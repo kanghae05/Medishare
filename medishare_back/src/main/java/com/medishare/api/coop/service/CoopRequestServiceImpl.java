@@ -7,6 +7,7 @@ import com.medishare.api.coop.entity.RecvType;
 import com.medishare.api.coop.repository.CoopRequestDeptRejectRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
+import com.medishare.api.coop.repository.CoopMemberLookupRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
@@ -32,6 +33,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
+    private final CoopMemberLookupRepository memberRepository;
 
     // TODO(3번 회원관리 연동): 의사명/진료과명 조회, 소속 진료과 의사 수 조회는
     // MemberRepository / DepartmentRepository가 준비되면 아래 enrich* / resolveDeptDoctorCount에 연결한다.
@@ -365,10 +367,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     }
 
     private long resolveDeptDoctorCount(Long deptId) {
-        // TODO(3번 회원관리 연동): department 소속 의사 수 조회로 교체
-        // 예: return memberRepository.countByDeptIdAndGrade(deptId, DOCTOR_GRADE);
-        throw new UnsupportedOperationException(
-                "소속 진료과 의사 수 조회가 아직 연동되지 않았습니다. MemberRepository 완성 후 구현 필요.");
+        return memberRepository.countByDepartment_NoAndStatus(deptId, "ACTIVE");
     }
 
     private CoopRequestVO toVO(CoopRequest c) {
