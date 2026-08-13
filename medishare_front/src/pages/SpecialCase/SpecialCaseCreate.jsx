@@ -1,4 +1,30 @@
-import {useEffect,useState} from "react"; import {useNavigate,useParams} from "react-router-dom"; import ReportSelectModal from "../../components/SpecialCase/ReportSelectModal"; import {getSpecialCase,saveSpecialCase} from "./specialCaseApi";
-const empty={title:"",modality:"",bodyPart:"",diseaseCode:"",findings:"",impression:"",thumbnailUrl:"",studyInstanceUid:"",seriesInstanceUid:"",patientName:"",patientId:"",tags:""};
-export default function SpecialCaseCreate(){const {caseId}=useParams();const nav=useNavigate();const [form,setForm]=useState(empty);const [modal,setModal]=useState(false);useEffect(()=>{if(caseId)getSpecialCase(caseId).then(c=>setForm({...c,tags:c.tags.join(", "),patientId:""}))},[caseId]);const change=e=>setForm(f=>({...f,[e.target.name]:e.target.value}));const select=r=>setForm(f=>({...f,...Object.fromEntries(["studyInstanceUid","seriesInstanceUid","findings","impression","modality","bodyPart","patientName","patientId"].map(k=>[k,r[k]??f[k]]))}));
- return <><form onSubmit={async e=>{e.preventDefault();const saved=await saveSpecialCase(caseId,{...form,tags:form.tags.split(",").map(t=>t.trim()).filter(Boolean)});nav(`/special-cases/${saved.caseId}`)}}><div className="d-flex justify-content-between"><h2>특이케이스 {caseId?"수정":"등록"}</h2><button type="button" className="btn btn-outline-primary" onClick={()=>setModal(true)}>판독소견서 불러오기</button></div><input required className="form-control my-3" name="title" placeholder="제목" value={form.title} onChange={change}/><div className="row g-2 mb-3"><div className="col"><input required className="form-control" name="modality" placeholder="모달리티" value={form.modality} onChange={change}/></div><div className="col"><input required className="form-control" name="bodyPart" placeholder="촬영 부위" value={form.bodyPart} onChange={change}/></div><div className="col"><input className="form-control" name="diseaseCode" placeholder="질병 코드" value={form.diseaseCode??""} onChange={change}/></div></div><textarea required className="form-control mb-3" rows="7" name="findings" placeholder="소견" value={form.findings} onChange={change}/><textarea required className="form-control mb-3" rows="5" name="impression" placeholder="결론" value={form.impression} onChange={change}/><input required className="form-control mb-3" name="studyInstanceUid" placeholder="Study Instance UID" value={form.studyInstanceUid??""} onChange={change}/><input className="form-control mb-3" name="tags" placeholder="태그 (쉼표로 구분)" value={form.tags} onChange={change}/><button className="btn btn-primary">저장</button></form><ReportSelectModal open={modal} onClose={()=>setModal(false)} onSelect={select}/></>}
+import { useEffect, useState } from "react";
+import { Link, useNavigate, useParams } from "react-router-dom";
+import ReportSelectModal from "../../components/SpecialCase/ReportSelectModal";
+import { getSpecialCase, saveSpecialCase } from "./specialCaseApi";
+import "./SpecialCase.css";
+
+const EMPTY_FORM = { title: "", modality: "", bodyPart: "", diseaseCode: "", findings: "", impression: "", thumbnailUrl: "", studyInstanceUid: "", seriesInstanceUid: "", patientName: "", patientId: "", tags: "" };
+
+export default function SpecialCaseCreate() {
+  const { caseId } = useParams();
+  const navigate = useNavigate();
+  const [form, setForm] = useState(EMPTY_FORM);
+  const [modal, setModal] = useState(false);
+
+  useEffect(() => { if (caseId) getSpecialCase(caseId).then((item) => setForm({ ...item, tags: item.tags.join(", "), patientId: "" })); }, [caseId]);
+  const change = (event) => setForm((current) => ({ ...current, [event.target.name]: event.target.value }));
+  const selectReport = (report) => setForm((current) => ({ ...current, ...Object.fromEntries(["studyInstanceUid", "seriesInstanceUid", "findings", "impression", "modality", "bodyPart", "patientName", "patientId"].map((key) => [key, report[key] ?? current[key]])) }));
+  const submit = async (event) => { event.preventDefault(); const saved = await saveSpecialCase(caseId, { ...form, tags: form.tags.split(",").map((tag) => tag.trim()).filter(Boolean) }); navigate(`/special-cases/${saved.caseId}`); };
+
+  return <div className="case-shell"><section className="case-page">
+    <header className="case-page-head"><div><h1>특이케이스 {caseId ? "수정" : "등록"}</h1><p>판독 정보를 바탕으로 공유할 임상 사례를 작성하세요.</p></div><button type="button" className="case-secondary" onClick={() => setModal(true)}>판독 소견 불러오기</button></header>
+    <form className="case-form-card" onSubmit={submit}>
+      <label className="case-full"><span>제목</span><input required name="title" placeholder="케이스 제목을 입력하세요" value={form.title} onChange={change} /></label>
+      <label><span>검사 종류</span><input required name="modality" placeholder="예: CT, MRI" value={form.modality} onChange={change} /></label><label><span>촬영 부위</span><input required name="bodyPart" placeholder="예: Brain, Chest" value={form.bodyPart} onChange={change} /></label><label><span>질병 코드</span><input name="diseaseCode" placeholder="질병 코드" value={form.diseaseCode ?? ""} onChange={change} /></label>
+      <label className="case-full"><span>Findings</span><textarea required rows="7" name="findings" placeholder="영상 소견을 입력하세요" value={form.findings} onChange={change} /></label><label className="case-full"><span>Impression</span><textarea required rows="5" name="impression" placeholder="판독 결론을 입력하세요" value={form.impression} onChange={change} /></label>
+      <label className="case-full"><span>Study Instance UID</span><input required name="studyInstanceUid" value={form.studyInstanceUid ?? ""} onChange={change} /></label><label className="case-full"><span>태그</span><input name="tags" placeholder="쉼표로 구분해 입력하세요" value={form.tags} onChange={change} /></label>
+      <div className="case-actions case-full"><Link className="case-secondary" to={caseId ? `/special-cases/${caseId}` : "/special-cases"}>취소</Link><button className="case-primary">저장</button></div>
+    </form><ReportSelectModal open={modal} onClose={() => setModal(false)} onSelect={selectReport} />
+  </section></div>;
+}
