@@ -1,8 +1,6 @@
 package com.medishare.api.coop.entity;
 
-import jakarta.persistence.Entity;
-import jakarta.persistence.Id;
-import jakarta.persistence.Table;
+import jakarta.persistence.*;
 import lombok.Getter;
 
 /**
@@ -19,14 +17,19 @@ import lombok.Getter;
 public class PacsStudyRef {
 
     @Id
+    @Column(name = "no")
     private Long no;
 
+    @Column(name = "orthanc_study_id")
     private String orthancStudyId;
 
+    @Column(name = "study_description")
     private String studyDescription;
 
+    @Column(name = "study_date")
     private String studyDate;
 
+    @Column(name = "patient_no")
     private Long patientNo;
 
     protected PacsStudyRef() {
