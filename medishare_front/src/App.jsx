@@ -14,6 +14,7 @@ import SpecialCaseList from "./pages/SpecialCase/SpecialCaseList"
 import SpecialCaseDetail from "./pages/SpecialCase/SpecialCaseDetail"
 import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
 import DPartComp from "./components/dpart/DPartComp"
+import MedicalStaffManagement from "./pages/Admin/MedicalStaffManagement"
 
 function App() {
 
@@ -51,6 +52,7 @@ function App() {
           <Route path="/special-cases/:caseId" element={<SpecialCaseDetail currentUser={currentUser} />} />
           <Route path="/special-cases/:caseId/edit" element={<SpecialCaseCreate />} />
           <Route path="/d/*" element={<DPartComp />} />
+          <Route path="/admin/medical-staff" element={<MedicalStaffManagement isAdmin={isAdmin} />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

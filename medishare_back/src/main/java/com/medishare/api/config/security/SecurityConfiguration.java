@@ -60,6 +60,7 @@ public class SecurityConfiguration {
                             .requestMatchers("/report/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/pacs/departments/**", "/pacs/members/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/roles/**", "/pacs/permissions/**").hasRole("ADMIN")
+                            .requestMatchers("/api/admin/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
                             .requestMatchers("/coop/**").permitAll()
                             // 공지사항 목록/상세는 회원가입 및 로그인 없이 조회할 수 있다.

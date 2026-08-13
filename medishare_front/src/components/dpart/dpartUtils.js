@@ -6,6 +6,19 @@ export const currentUser = {
   role: "DOCTOR",
 };
 
+export const getStoredLogin = () => {
+  try {
+    return JSON.parse(localStorage.getItem("login")) ?? null;
+  } catch {
+    return null;
+  }
+};
+
+export const canAccessDPart = () => {
+  const login = getStoredLogin();
+  return Array.isArray(login?.roles) && login.roles.some((role) => role === "ROLE_USER" || role === "ROLE_ADMIN" || role === "ADMIN");
+};
+
 export const scheduleTypeLabels = {
   AVAILABLE: "진료 가능",
   RESERVED: "진료 예정",

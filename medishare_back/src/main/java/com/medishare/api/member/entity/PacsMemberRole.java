@@ -5,7 +5,7 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "member_role")
+@Table(name = "member_roles")
 @Getter @Setter @NoArgsConstructor @AllArgsConstructor @Builder
 public class PacsMemberRole {
     @EmbeddedId private PacsMemberRoleId id;

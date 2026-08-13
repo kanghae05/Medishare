@@ -1,5 +1,6 @@
 package com.medishare.api.member.service;
 
+import com.medishare.api.member.entity.Member;
 import com.medishare.api.member.entity.MemberDetails;
 import com.medishare.api.member.repository.QMemberRepository;
 import lombok.RequiredArgsConstructor;
@@ -14,13 +15,16 @@ public class MemberDetailsServiceImpl implements MemberDetailsService {
 
     // @RequiredArgsConstructor 때문에 생성자에 의해서 자동 DI 적용
     private final QMemberRepository qMemberRepository;
+    private final MemberRoleAuthorityService memberRoleAuthorityService;
 
     @Override
     public MemberDetails loadMemberById(String id) throws UsernameNotFoundException {
         log.info("[loadUserByUsername] loadUserByUsername 수행, id : {}", id);
         // getReferenceById 인 경우 ploxy를 사용해서 실제적으로 DB를 가져오지 않아서 문제가 생긴다.
-        return qMemberRepository.findMemberById(id)
+        Member member = qMemberRepository.findMemberById(id)
                 .orElseThrow(() ->
                         new UsernameNotFoundException(id));
+        member.setRoles(memberRoleAuthorityService.getAuthorities(member.getNo()));
+        return member;
     }
 }

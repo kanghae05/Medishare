@@ -43,3 +43,28 @@ INSERT INTO member (login_id, password, member_name, email, phone, department_no
 ('doctor18', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '안응급', 'doctor18@medishare.local', '010-1000-0018', 15, '전문의', '응급의학', 'ACTIVE', TRUE),
 ('doctor19', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '류가정', 'doctor19@medishare.local', '010-1000-0019', 17, '전문의', '가정의학', 'ACTIVE', TRUE),
 ('doctor20', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);
+-- Administrator account and the existing role mapping used by JWT/Spring Security.
+-- Password: admin1234 (encoded with the configured BCrypt PasswordEncoder)
+INSERT INTO role (role_code, role_name, description, stable) VALUES
+('ROLE_ADMIN', 'Administrator', 'Medical staff management administrator', TRUE),
+('ROLE_USER', 'User', 'Default medical staff role', TRUE)
+ON DUPLICATE KEY UPDATE
+role_name = VALUES(role_name), description = VALUES(description), stable = VALUES(stable);
+
+INSERT INTO member (login_id, password, member_name, email, phone, status, stable) VALUES
+('admin', '{bcrypt}$2a$10$aXzZZ8tWKt9nNdJ9.SDGv.xx38ni5t5zc4Trg.Ws74p9PFoVqml9S', 'Test Administrator', 'admin@medishare.local', '010-0000-0000', 'ACTIVE', TRUE)
+ON DUPLICATE KEY UPDATE
+password = VALUES(password), member_name = VALUES(member_name), email = VALUES(email),
+phone = VALUES(phone), status = VALUES(status), stable = VALUES(stable);
+
+INSERT IGNORE INTO member_roles (member_no, role_no)
+SELECT m.no, r.no
+FROM member m
+JOIN role r ON r.role_code = 'ROLE_ADMIN'
+WHERE m.login_id = 'admin';
+
+INSERT IGNORE INTO member_roles (member_no, role_no)
+SELECT m.no, r.no
+FROM member m
+JOIN role r ON r.role_code = 'ROLE_USER'
+WHERE m.login_id LIKE 'doctor%';

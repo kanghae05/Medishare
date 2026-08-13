@@ -6,6 +6,7 @@ function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
   const showDPartMenu = Boolean(token && canAccessDPart());
+  const isAdmin = login?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN");
 
   const logout = (event) => {
     event.preventDefault();
@@ -35,6 +36,11 @@ function TopNavi() {
                 <NavLink to="/d/dashboard" className="nav-link">
                   Dashboard
                 </NavLink>
+              </li>
+            )}
+            {isAdmin && (
+              <li className="nav-item">
+                <NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink>
               </li>
             )}
             <li className="nav-item">
