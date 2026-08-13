@@ -61,7 +61,7 @@ public class SecurityConfiguration {
                             .requestMatchers("/pacs/departments/**", "/pacs/members/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/roles/**", "/pacs/permissions/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
-                            .requestMatchers("/coop/**").permitAll()
+                            .requestMatchers("/coop/**").hasAnyRole("USER", "ADMIN")
                             // 공지사항 목록/상세는 회원가입 및 로그인 없이 조회할 수 있다.
                             // 작성/수정/삭제(POST/PUT/DELETE)는 아래 인증 규칙을 그대로 적용한다.
                             .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").permitAll()
