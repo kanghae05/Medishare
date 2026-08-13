@@ -70,13 +70,13 @@ export default function MedicalStaffManagement({ isAdmin }) {
     <form className="row g-2 mb-3" onSubmit={(event) => { event.preventDefault(); loadStaff().catch(() => setMessage("검색하지 못했습니다.")); }}>
       <div className="col-md-4"><input className="form-control" placeholder="이름, 로그인 ID, 이메일 검색" value={filters.keyword} onChange={(e) => setFilters({ ...filters, keyword: e.target.value })} /></div>
       <div className="col-md-3"><select className="form-select" value={filters.departmentNo} onChange={(e) => setFilters({ ...filters, departmentNo: e.target.value })}><option value="">전체 진료과</option>{departments.map((department) => <option key={department.no} value={department.no}>{department.departmentName}</option>)}</select></div>
-      <div className="col-md-3"><select className="form-select" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">전체 상태</option><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option><option value="SUSPENDED">SUSPENDED</option></select></div>
+      <div className="col-md-3"><select className="form-select" value={filters.status} onChange={(e) => setFilters({ ...filters, status: e.target.value })}><option value="">전체 상태</option><option value="ACTIVE">활성화</option><option value="INACTIVE">비활성화</option></select></div>
       <div className="col-md-2"><button className="btn btn-primary w-100">검색</button></div>
     </form>
     {message && <div className="alert alert-info">{message}</div>}
     <div className="table-responsive"><table className="table table-hover">
       <thead><tr><th>번호</th><th>로그인 ID</th><th>이름</th><th>이메일</th><th>전화</th><th>진료과</th><th>직위</th><th>전문분야</th><th>상태</th><th>관리</th></tr></thead>
-      <tbody>{staffPage.content.map((staff) => <tr key={staff.memberNo}><td>{staff.memberNo}</td><td>{staff.loginId}</td><td>{staff.name}</td><td>{staff.email}</td><td>{staff.tel}</td><td>{staff.departmentName || "-"}</td><td>{staff.position || "-"}</td><td>{staff.specialty || "-"}</td><td>{staff.status}</td><td><button type="button" className="btn btn-sm btn-outline-primary" onClick={() => selectStaff(staff.memberNo)}>상세</button></td></tr>)}</tbody>
+      <tbody>{staffPage.content.map((staff) => <tr key={staff.memberNo}><td>{staff.memberNo}</td><td>{staff.loginId}</td><td>{staff.name}</td><td>{staff.email}</td><td>{staff.tel}</td><td>{staff.departmentName || "-"}</td><td>{staff.position || "-"}</td><td>{staff.specialty || "-"}</td><td>{staff.status === "ACTIVE" ? "활성화" : "비활성화"}</td><td><button type="button" className="btn btn-sm btn-outline-primary" onClick={() => selectStaff(staff.memberNo)}>상세</button></td></tr>)}</tbody>
     </table></div>
     <div className="mb-4">{Array.from({ length: staffPage.totalPages || 0 }, (_, page) => <button key={page} className={`btn btn-sm me-1 ${page === staffPage.number ? "btn-primary" : "btn-outline-primary"}`} onClick={() => loadStaff(page)}>{page + 1}</button>)}</div>
     {selected && <form className="card card-body" onSubmit={save}>

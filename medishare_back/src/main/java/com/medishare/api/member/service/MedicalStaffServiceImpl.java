@@ -19,7 +19,7 @@ import java.util.Set;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class MedicalStaffServiceImpl implements MedicalStaffService {
-    private static final Set<String> AVAILABLE_STATUSES = Set.of("ACTIVE", "INACTIVE", "SUSPENDED");
+    private static final Set<String> AVAILABLE_STATUSES = Set.of("ACTIVE", "INACTIVE");
 
     private final QMemberRepository memberRepository;
     private final PacsDepartmentRepository departmentRepository;

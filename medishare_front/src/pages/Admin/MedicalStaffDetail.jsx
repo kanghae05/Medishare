@@ -43,7 +43,7 @@ export default function MedicalStaffDetail({ isAdmin }) {
         <div className="col-md-4"><label className="form-label">진료과</label><select required className="form-select" value={staff.departmentNo || ""} onChange={(e) => updateField("departmentNo", e.target.value)}>{departments.map((department) => <option key={department.no} value={department.no}>{department.departmentName}</option>)}</select></div>
         <div className="col-md-4"><label className="form-label">직위</label><input className="form-control" value={staff.position || ""} onChange={(e) => updateField("position", e.target.value)} /></div>
         <div className="col-md-4"><label className="form-label">전문분야</label><input className="form-control" value={staff.specialty || ""} onChange={(e) => updateField("specialty", e.target.value)} /></div>
-        <div className="col-md-4"><label className="form-label">상태</label><select className="form-select" value={staff.status || "ACTIVE"} onChange={(e) => updateField("status", e.target.value)}><option value="ACTIVE">ACTIVE</option><option value="INACTIVE">INACTIVE</option><option value="SUSPENDED">SUSPENDED</option></select></div>
+        <div className="col-md-4"><label className="form-label">계정 상태</label><select className="form-select" value={staff.status || "ACTIVE"} onChange={(e) => updateField("status", e.target.value)}><option value="ACTIVE">활성화</option><option value="INACTIVE">비활성화</option></select></div>
       </div>
       <div className="mt-3"><button className="btn btn-primary">저장</button></div>
     </form>
