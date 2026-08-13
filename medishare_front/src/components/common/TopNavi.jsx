@@ -12,8 +12,6 @@ const getStoredLogin = () => {
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
-  const roles = Array.isArray(login?.roles) ? login.roles : [login?.role].filter(Boolean);
-  const showDPartMenu = Boolean(token && roles.some((role) => ["DOCTOR", "ROLE_DOCTOR", "ADMIN", "ROLE_ADMIN"].includes(role)));
 
   const logout = (event) => {
     event.preventDefault();
@@ -21,7 +19,7 @@ function TopNavi() {
     localStorage.removeItem("login");
     setToken(null);
     setLogin(null);
-    alert("로그아웃되었습니다.");
+    alert("로그아웃 되었습니다.");
     location.href = "/";
   };
 
@@ -36,11 +34,9 @@ function TopNavi() {
             <li className="nav-item">
               <NavLink to="/" className="nav-link">Home</NavLink>
             </li>
-            {showDPartMenu && (
-              <li className="nav-item">
-                <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
-              </li>
-            )}
+            <li className="nav-item">
+              <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
+            </li>
             {token && (
               <>
                 <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
