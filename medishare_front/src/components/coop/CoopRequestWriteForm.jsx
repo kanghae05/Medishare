@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
+import DoctorAutocomplete from "./DoctorAutocomplete";
 import "./Coop.css";
 
-// TODO: 의사/진료과/검사 선택은 지금 숫자 ID 직접 입력이다.
-// 회원관리(의사·진료과 목록 API), PACS(검사 목록 API)가 준비되면
-// <input type="number">를 <select>로 교체한다.
+// TODO: 검사 선택은 아직 숫자 ID 직접 입력이다. PACS 검사 목록/검색 API가 준비되면
+// <input type="number">를 검색 또는 <select>로 교체한다.
 // 참고: 환자는 검사(pacsStudyId)를 통해 자동으로 연결되므로 별도 입력칸이 없다.
 
 function CoopRequestWriteForm() {
@@ -15,8 +15,9 @@ function CoopRequestWriteForm() {
 
   const [origin, setOrigin] = useState(null); // 재요청일 때 원본 요청 정보 (인용 표시용)
   const [recvType, setRecvType] = useState("지정의사");
-  const [recvDoctorId, setRecvDoctorId] = useState("");
+  const [selectedDoctor, setSelectedDoctor] = useState(null); // { no, name, ... } - DoctorAutocomplete에서 선택됨
   const [recvDeptId, setRecvDeptId] = useState("");
+  const [departments, setDepartments] = useState([]);
   const [pacsStudyId, setPacsStudyId] = useState("");
   const [reportId, setReportId] = useState("");
   const [reqContent, setReqContent] = useState("");
@@ -24,7 +25,21 @@ function CoopRequestWriteForm() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState(null);
 
-  // 재요청이면 원본 요청을 불러와 환자/검사/소견서를 자동 복사하고 인용문을 보여준다.
+  // 진료과 목록은 개수가 적어 자동완성 없이 전체를 한 번에 불러온다.
+  useEffect(() => {
+    let ignore = false;
+    api
+      .get("/coop/lookup/departments.do")
+      .then((res) => {
+        if (!ignore) setDepartments(res.data || []);
+      })
+      .catch(() => {});
+    return () => {
+      ignore = true;
+    };
+  }, []);
+
+  // 재요청이면 원본 요청을 불러와 검사/소견서를 자동 복사하고 인용문을 보여준다.
   useEffect(() => {
     if (!originRequestId) return;
     let ignore = false;
@@ -46,8 +61,8 @@ function CoopRequestWriteForm() {
   }, [originRequestId]);
 
   const validate = () => {
-    if (recvType === "지정의사" && !recvDoctorId) return "수신 의사를 입력해주세요.";
-    if (recvType === "진료과" && !recvDeptId) return "수신 진료과를 입력해주세요.";
+    if (recvType === "지정의사" && !selectedDoctor) return "수신 의사를 검색해서 선택해주세요.";
+    if (recvType === "진료과" && !recvDeptId) return "수신 진료과를 선택해주세요.";
     if (!pacsStudyId) return "검사를 입력해주세요.";
     if (!reqContent.trim()) return "요청 내용을 입력해주세요.";
     return null;
@@ -66,7 +81,7 @@ function CoopRequestWriteForm() {
 
     const payload = {
       recvType,
-      recvDoctorId: recvType === "지정의사" ? Number(recvDoctorId) : null,
+      recvDoctorId: recvType === "지정의사" ? selectedDoctor.no : null,
       recvDeptId: recvType === "진료과" ? Number(recvDeptId) : null,
       pacsStudyId: Number(pacsStudyId),
       reportId: reportId ? Number(reportId) : null,
@@ -126,25 +141,28 @@ function CoopRequestWriteForm() {
 
         {recvType === "지정의사" ? (
           <div className="coop-form-row">
-            <label className="coop-form-label">수신 의사 ID</label>
-            <input
-              type="number"
-              className="coop-form-input"
-              value={recvDoctorId}
-              onChange={(e) => setRecvDoctorId(e.target.value)}
-              placeholder="예: 1"
+            <label className="coop-form-label">받는 의사</label>
+            <DoctorAutocomplete
+              value={selectedDoctor}
+              onSelect={setSelectedDoctor}
+              placeholder="이름, 진료과, 세부전공으로 검색"
             />
           </div>
         ) : (
           <div className="coop-form-row">
-            <label className="coop-form-label">수신 진료과 ID</label>
-            <input
-              type="number"
+            <label className="coop-form-label">받는 진료과</label>
+            <select
               className="coop-form-input"
               value={recvDeptId}
               onChange={(e) => setRecvDeptId(e.target.value)}
-              placeholder="예: 1"
-            />
+            >
+              <option value="">진료과 선택</option>
+              {departments.map((d) => (
+                <option key={d.no} value={d.no}>
+                  {d.departmentName}
+                </option>
+              ))}
+            </select>
           </div>
         )}
 

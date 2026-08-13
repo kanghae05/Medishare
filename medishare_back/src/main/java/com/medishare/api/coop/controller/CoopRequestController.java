@@ -2,10 +2,14 @@ package com.medishare.api.coop.controller;
 
 import com.medishare.api.member.entity.Member;
 import com.medishare.api.pacs.entity.PacsStudy;
+import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
+import com.medishare.api.coop.repository.CoopMemberLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.CoopRequestVO;
+import com.medishare.api.coop.vo.DepartmentLookupVO;
+import com.medishare.api.coop.vo.DoctorLookupVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -29,6 +33,8 @@ public class CoopRequestController {
     private final CoopRequestService coopRequestService;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final OrthancImageService orthancImageService;
+    private final CoopMemberLookupRepository memberRepository;
+    private final CoopDepartmentLookupRepository departmentRepository;
 
     // ------------------------------------------------------------------
     // 로그인 사용자 정보 추출
@@ -176,6 +182,34 @@ public class CoopRequestController {
         Long doctorId = currentDoctorId(authentication);
         int result = coopRequestService.cancel(no, doctorId);
         return Map.of("result", result == 1 ? "ok" : "fail");
+    }
+
+    // ------------------------------------------------------------------
+    // 협진 요청 등록 폼용 조회 (받는 의사 자동완성 / 받는 진료과 목록)
+    // TODO: 3번 담당자가 정식 회원 검색 API를 만들면 이 두 메서드는 삭제하고
+    // 그쪽 API를 호출하도록 바꾼다. (관리자 제외 필터도 그때 함께 반영)
+    // ------------------------------------------------------------------
+
+    // 받는 의사 자동완성 - 이름/세부전공/진료과명 중 하나라도 검색어 포함
+    @GetMapping("/lookup/doctors.do")
+    public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q) {
+        return memberRepository.searchDoctors(q).stream()
+                .map(m -> new DoctorLookupVO(
+                        m.getNo(),
+                        m.getName(),
+                        m.getDepartment() != null ? m.getDepartment().getDepartmentName() : null,
+                        m.getSpecialty(),
+                        m.getPosition()
+                ))
+                .toList();
+    }
+
+    // 받는 진료과 전체 목록 (드롭다운용)
+    @GetMapping("/lookup/departments.do")
+    public List<DepartmentLookupVO> lookupDepartments() {
+        return departmentRepository.findAll().stream()
+                .map(d -> new DepartmentLookupVO(d.getNo(), d.getDepartmentName()))
+                .toList();
     }
 
     // ------------------------------------------------------------------
