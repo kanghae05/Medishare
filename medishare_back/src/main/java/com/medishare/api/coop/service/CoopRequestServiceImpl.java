@@ -3,13 +3,10 @@ package com.medishare.api.coop.service;
 import com.medishare.api.coop.entity.CoopRequest;
 import com.medishare.api.coop.entity.CoopRequestDeptReject;
 import com.medishare.api.coop.entity.CoopStatus;
-import com.medishare.api.coop.entity.PacsPatientRef;
-import com.medishare.api.coop.entity.PacsStudyRef;
 import com.medishare.api.coop.entity.RecvType;
 import com.medishare.api.coop.repository.CoopRequestDeptRejectRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
-import com.medishare.api.coop.repository.PacsPatientRefRepository;
-import com.medishare.api.coop.repository.PacsStudyRefRepository;
+import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
@@ -34,12 +31,12 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
-    private final PacsPatientRefRepository pacsPatientRefRepository;
-    private final PacsStudyRefRepository pacsStudyRefRepository;
+    private final CoopPacsStudyLookupRepository pacsStudyRepository;
 
     // TODO(3번 회원관리 연동): 의사명/진료과명 조회, 소속 진료과 의사 수 조회는
     // MemberRepository / DepartmentRepository가 준비되면 아래 enrich* / resolveDeptDoctorCount에 연결한다.
-    // 환자명/검사설명은 PacsPatientRef/PacsStudyRef(임시 조회용)로 우선 채운다.
+    // 환자명/검사설명은 PACS 담당자의 실제 엔티티(PacsStudy -> PacsStudy.getPatient())를 조회 전용으로 가져다 쓴다.
+    // patient_id 컬럼을 없앤 뒤로는 PacsPatient를 직접 조회할 일이 없어 CoopPacsPatientLookupRepository는 제거했다.
 
     // ------------------------------------------------------------------
     // 조회
@@ -169,14 +166,13 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     public CoopRequestVO write(CoopRequestVO vo) {
         RecvType recvType = RecvType.valueOf(vo.getRecvType());
 
-        Long patientId = vo.getPatientId();
         Long pacsStudyId = vo.getPacsStudyId();
         Long reportId = vo.getReportId();
 
-        // 재요청 (4-1-1) - 이전 요청의 환자/검사/소견서를 그대로 복사
+        // 재요청 (4-1-1) - 이전 요청의 검사/소견서를 그대로 복사
+        // (환자는 patient_id 컬럼 삭제 후 pacs_study -> patient로 자동 연결되므로 별도 복사 불필요)
         if (vo.getOriginRequestId() != null) {
             CoopRequest origin = findEntity(vo.getOriginRequestId());
-            patientId = origin.getPatientId();
             pacsStudyId = origin.getPacsStudyId();
             reportId = origin.getReportId();
         }
@@ -188,7 +184,6 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 .recvType(recvType)
                 .recvDoctorId(recvType == RecvType.지정의사 ? vo.getRecvDoctorId() : null)
                 .recvDeptId(recvType == RecvType.진료과 ? vo.getRecvDeptId() : null)
-                .patientId(patientId)
                 .pacsStudyId(pacsStudyId)
                 .reportId(reportId)
                 .originRequestId(vo.getOriginRequestId())
@@ -384,7 +379,6 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         vo.setRecvDoctorId(c.getRecvDoctorId());
         vo.setRecvDeptId(c.getRecvDeptId());
         vo.setAcceptDoctorId(c.getAcceptDoctorId());
-        vo.setPatientId(c.getPatientId());
         vo.setPacsStudyId(c.getPacsStudyId());
         vo.setReportId(c.getReportId());
         vo.setOriginRequestId(c.getOriginRequestId());
@@ -396,18 +390,20 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         vo.setIsRead(c.isRead());
         vo.setReadTime(c.getReadTime() == null ? null : c.getReadTime().format(DATETIME_FMT));
 
-        // 환자명 (PacsPatientRef 임시 조회 - PACS 정식 API 나오면 교체)
-        pacsPatientRefRepository.findById(c.getPatientId())
-                .ifPresent(p -> vo.setPatientName(p.getPatientName()));
-
-        // 검사 설명 + 촬영일 (PacsStudyRef 임시 조회 - PACS 정식 API 나오면 교체)
-        pacsStudyRefRepository.findById(c.getPacsStudyId())
+        // 검사 설명 + 촬영일 + 환자 정보 (PacsStudy 조회 한 번으로 전부 해결)
+        // patient_id 컬럼을 없애면서, 환자는 이제 pacs_study -> patient(FK) 통해서만 얻는다.
+        pacsStudyRepository.findById(c.getPacsStudyId())
                 .ifPresent(s -> {
                     String label = s.getStudyDescription();
                     if (s.getStudyDate() != null && !s.getStudyDate().isBlank()) {
                         label = (label == null ? "" : label + " ") + formatStudyDate(s.getStudyDate());
                     }
                     vo.setPacsStudyLabel(label);
+
+                    if (s.getPatient() != null) {
+                        vo.setPatientId(s.getPatient().getNo());
+                        vo.setPatientName(s.getPatient().getPatientName());
+                    }
                 });
 
         // TODO(3번 회원관리 연동): reqDoctorName, recvDoctorName, recvDeptName, acceptDoctorName 채우기

@@ -43,17 +43,3 @@ INSERT INTO member (login_id, password, member_name, email, phone, department_no
 ('doctor18', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '안응급', 'doctor18@medishare.local', '010-1000-0018', 15, '전문의', '응급의학', 'ACTIVE', TRUE),
 ('doctor19', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '류가정', 'doctor19@medishare.local', '010-1000-0019', 17, '전문의', '가정의학', 'ACTIVE', TRUE),
 ('doctor20', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);
-
-
--- 환자 정보
-INSERT INTO pacs_patient (orthanc_patient_id, patient_id, patient_name, patient_sex, patient_birth_date, stable) VALUES
-('orthanc-p001', 'P00001', '홍길동', 'M', '19800315', TRUE),
-('orthanc-p002', 'P00002', '이순신', 'M', '19750622', TRUE),
-('orthanc-p003', 'P00003', '신사임당', 'F', '19900110', TRUE);
-
-
--- 검사 정보
-INSERT INTO pacs_study (orthanc_study_id, study_instance_uid, accession_number, study_date, study_time, study_description, patient_no, stable, series_count, instance_count) VALUES
-('orthanc-s001', '1.2.840.10008.study.001', 'ACC0001', '20260810', '093000', '흉부 CT', 1, TRUE, 1, 120),
-('orthanc-s002', '1.2.840.10008.study.002', 'ACC0002', '20260809', '141500', '무릎 MRI', 2, TRUE, 1, 80),
-('orthanc-s003', '1.2.840.10008.study.003', 'ACC0003', '20260808', '110000', '복부 CT', 3, TRUE, 1, 150);

@@ -3,9 +3,10 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import "./Coop.css";
 
-// TODO: 의사/진료과/환자/검사 선택은 지금 숫자 ID 직접 입력이다.
-// 회원관리(의사·진료과 목록 API), PACS(환자·검사 목록 API)가 준비되면
+// TODO: 의사/진료과/검사 선택은 지금 숫자 ID 직접 입력이다.
+// 회원관리(의사·진료과 목록 API), PACS(검사 목록 API)가 준비되면
 // <input type="number">를 <select>로 교체한다.
+// 참고: 환자는 검사(pacsStudyId)를 통해 자동으로 연결되므로 별도 입력칸이 없다.
 
 function CoopRequestWriteForm() {
   const [searchParams] = useSearchParams();
@@ -16,7 +17,6 @@ function CoopRequestWriteForm() {
   const [recvType, setRecvType] = useState("지정의사");
   const [recvDoctorId, setRecvDoctorId] = useState("");
   const [recvDeptId, setRecvDeptId] = useState("");
-  const [patientId, setPatientId] = useState("");
   const [pacsStudyId, setPacsStudyId] = useState("");
   const [reportId, setReportId] = useState("");
   const [reqContent, setReqContent] = useState("");
@@ -34,7 +34,6 @@ function CoopRequestWriteForm() {
         if (ignore) return;
         const o = res.data;
         setOrigin(o);
-        setPatientId(o.patientId ?? "");
         setPacsStudyId(o.pacsStudyId ?? "");
         setReportId(o.reportId ?? "");
       })
@@ -49,7 +48,6 @@ function CoopRequestWriteForm() {
   const validate = () => {
     if (recvType === "지정의사" && !recvDoctorId) return "수신 의사를 입력해주세요.";
     if (recvType === "진료과" && !recvDeptId) return "수신 진료과를 입력해주세요.";
-    if (!patientId) return "환자를 입력해주세요.";
     if (!pacsStudyId) return "검사를 입력해주세요.";
     if (!reqContent.trim()) return "요청 내용을 입력해주세요.";
     return null;
@@ -70,7 +68,6 @@ function CoopRequestWriteForm() {
       recvType,
       recvDoctorId: recvType === "지정의사" ? Number(recvDoctorId) : null,
       recvDeptId: recvType === "진료과" ? Number(recvDeptId) : null,
-      patientId: Number(patientId),
       pacsStudyId: Number(pacsStudyId),
       reportId: reportId ? Number(reportId) : null,
       reqContent,
@@ -150,18 +147,6 @@ function CoopRequestWriteForm() {
             />
           </div>
         )}
-
-        <div className="coop-form-row">
-          <label className="coop-form-label">환자 ID</label>
-          <input
-            type="number"
-            className="coop-form-input"
-            value={patientId}
-            onChange={(e) => setPatientId(e.target.value)}
-            disabled={!!originRequestId}
-            placeholder="예: 1"
-          />
-        </div>
 
         <div className="coop-form-row">
           <label className="coop-form-label">검사 ID</label>
