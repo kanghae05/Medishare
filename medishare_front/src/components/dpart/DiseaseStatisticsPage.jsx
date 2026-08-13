@@ -60,15 +60,15 @@ function DiseaseStatisticsPage() {
   const totalInterpretations = displayRows.reduce((sum, row) => sum + (row.interpretationCount || 0), 0);
 
   return (
-    <section className="dpart-page">
+    <section className="dpart-page dpart-statistics-page">
       <div className="dpart-page-head">
         <div>
-          <h1>질환별 판독 통계</h1>
-          <p>판독과 협진 데이터가 연결되면 실제 질환별 집계가 표시됩니다.</p>
+          <h1>질환별 통계</h1>
+          <p>질환별 판독 및 협진 데이터를 기간 기준으로 확인합니다.</p>
         </div>
       </div>
 
-      <div className="dpart-filter-band">
+      <div className="dpart-filter-band compact">
         <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
         <span>~</span>
         <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
@@ -82,23 +82,31 @@ function DiseaseStatisticsPage() {
       {loading ? (
         <LoadingState />
       ) : displayRows.length === 0 ? (
-        <EmptyState message="질환/판독 연동 데이터가 아직 없습니다." />
+        <EmptyState message="질환 또는 판독 연동 데이터가 아직 없습니다." />
       ) : (
         <>
-          <div className="dpart-panel">
-            <h2>질환별 판독 건수</h2>
-            <div className="dpart-bars">
+          <div className="dpart-panel dpart-work-panel">
+            <div className="dpart-section-head">
+              <div>
+                <h2>질환별 판독 건수</h2>
+                <p>전체 판독 건수 대비 질환별 비중입니다.</p>
+              </div>
+            </div>
+            <div className="dpart-status-list">
               {displayRows.map((row) => {
                 const width = totalInterpretations
                   ? Math.round(((row.interpretationCount || 0) / totalInterpretations) * 100)
                   : 0;
                 return (
-                  <div className="dpart-bar-row" key={row.diseaseCode || row.diseaseId}>
-                    <span>{row.diseaseCode}</span>
+                  <div className="dpart-status-row" key={row.diseaseCode || row.diseaseId}>
+                    <div>
+                      <strong>{row.diseaseCode}</strong>
+                      <span>{row.diseaseName}</span>
+                    </div>
                     <div className="dpart-bar-track">
                       <div className="dpart-bar-fill tone-blue" style={{ width: `${width}%` }} />
                     </div>
-                    <strong>{row.interpretationCount}</strong>
+                    <b>{row.interpretationCount}</b>
                   </div>
                 );
               })}
@@ -106,7 +114,12 @@ function DiseaseStatisticsPage() {
           </div>
 
           <div className="dpart-panel">
-            <h2>TOP 5</h2>
+            <div className="dpart-section-head">
+              <div>
+                <h2>TOP 5</h2>
+                <p>판독 건수가 많은 질환 순위입니다.</p>
+              </div>
+            </div>
             <div className="dpart-table-wrap flat">
               <table className="dpart-table">
                 <thead>

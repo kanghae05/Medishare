@@ -1,15 +1,18 @@
 .dpart-shell {
-  background: #f4f7fa;
+  background: #f6f8fa;
   color: #172331;
   margin: -8px -12px 32px;
   min-height: calc(100vh - 96px);
+  padding: 0 24px;
 }
 
 .dpart-layout {
   display: grid;
-  gap: 24px;
-  grid-template-columns: 228px minmax(0, 1fr);
-  padding: 24px 0;
+  gap: 28px;
+  grid-template-columns: 232px minmax(0, 1fr);
+  margin: 0 auto;
+  max-width: 1480px;
+  padding: 30px 0;
 }
 
 .dpart-sidebar,
@@ -19,6 +22,7 @@
   background: #ffffff;
   border: 1px solid #dce4ea;
   border-radius: 8px;
+  box-shadow: 0 1px 2px rgba(15, 35, 45, 0.04);
 }
 
 .dpart-sidebar {
@@ -68,13 +72,14 @@
   border-radius: 7px;
   color: #40505f;
   font-weight: 700;
-  padding: 10px 12px;
+  line-height: 1.25;
+  padding: 11px 12px;
   text-decoration: none;
 }
 
 .dpart-menu a.active,
 .dpart-menu a:hover {
-  background: #e6f3f1;
+  background: #e7f2f1;
   color: #0f766e;
 }
 
@@ -87,19 +92,20 @@
   display: flex;
   gap: 16px;
   justify-content: space-between;
-  margin-bottom: 18px;
+  margin-bottom: 20px;
 }
 
 .dpart-page-head h1 {
-  font-size: 26px;
+  font-size: 30px;
   font-weight: 800;
   letter-spacing: 0;
+  line-height: 1.2;
   margin: 0;
 }
 
 .dpart-page-head p {
   color: #647482;
-  margin: 6px 0 0;
+  margin: 7px 0 0;
 }
 
 .dpart-inline-note {
@@ -119,7 +125,7 @@
   background: #0f766e;
   border: 1px solid #0f766e;
   color: #ffffff;
-  padding: 9px 16px;
+  padding: 10px 16px;
 }
 
 .dpart-primary:disabled {
@@ -141,8 +147,12 @@
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
-  margin-bottom: 14px;
+  margin-bottom: 16px;
   padding: 12px;
+}
+
+.dpart-filter-band.compact {
+  gap: 8px;
 }
 
 .dpart-filter-band input,
@@ -191,6 +201,7 @@
 
 .dpart-alert.error {
   background: #fdeceb;
+  border: 1px solid #f2b8b4;
   color: #a43d37;
 }
 
@@ -204,12 +215,182 @@
   text-align: center;
 }
 
+.dpart-summary-strip {
+  background: #ffffff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 18px;
+  overflow: hidden;
+}
+
+.dpart-summary-strip .dpart-stat-card {
+  border: 0;
+  border-radius: 0;
+  box-shadow: none;
+  padding: 15px 18px;
+}
+
+.dpart-summary-strip .dpart-stat-card + .dpart-stat-card {
+  border-left: 1px solid #e6ecf1;
+}
+
+.dpart-stat-grid {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  margin-bottom: 16px;
+}
+
+.dpart-stat-grid.wide {
+  grid-template-columns: repeat(6, minmax(0, 1fr));
+}
+
+.dpart-stat-card {
+  padding: 16px;
+}
+
+.dpart-stat-card span {
+  color: #647482;
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.dpart-stat-card strong {
+  display: block;
+  font-size: 28px;
+  letter-spacing: 0;
+  line-height: 1.1;
+  margin-top: 7px;
+}
+
+.dpart-stat-card.tone-green strong { color: #0f766e; }
+.dpart-stat-card.tone-blue strong { color: #2563a8; }
+.dpart-stat-card.tone-warning strong { color: #b26b00; }
+.dpart-stat-card.tone-red strong { color: #a43d37; }
+.dpart-stat-card.tone-gray strong { color: #65717c; }
+
+.dpart-panel {
+  margin-bottom: 16px;
+  padding: 18px;
+}
+
+.dpart-work-panel {
+  padding: 0;
+}
+
+.dpart-section-head {
+  align-items: flex-start;
+  border-bottom: 1px solid #e7edf2;
+  display: flex;
+  justify-content: space-between;
+  padding: 17px 18px 14px;
+}
+
+.dpart-section-head h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 0 0 4px;
+}
+
+.dpart-section-head p {
+  color: #647482;
+  font-size: 13px;
+  margin: 0;
+}
+
+.dpart-work-list {
+  display: grid;
+}
+
+.dpart-work-row {
+  align-items: center;
+  display: grid;
+  gap: 18px;
+  grid-template-columns: 150px minmax(0, 1fr) auto;
+  min-height: 62px;
+  padding: 13px 18px;
+}
+
+.dpart-work-row + .dpart-work-row {
+  border-top: 1px solid #e7edf2;
+}
+
+.dpart-work-row:hover {
+  background: #f8fbfc;
+}
+
+.dpart-row-time {
+  color: #40505f;
+  font-weight: 800;
+}
+
+.dpart-row-main {
+  display: grid;
+  gap: 4px;
+  min-width: 0;
+}
+
+.dpart-row-main strong {
+  color: #172331;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.dpart-row-main span {
+  color: #647482;
+  font-size: 13px;
+}
+
+.dpart-row-status {
+  justify-self: end;
+}
+
+.dpart-status-list {
+  display: grid;
+}
+
+.dpart-status-row {
+  align-items: center;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: 150px minmax(0, 1fr) 52px;
+  padding: 14px 18px;
+}
+
+.dpart-status-row + .dpart-status-row {
+  border-top: 1px solid #e7edf2;
+}
+
+.dpart-status-row strong,
+.dpart-status-row span {
+  display: block;
+}
+
+.dpart-status-row strong {
+  color: #172331;
+}
+
+.dpart-status-row span,
+.dpart-status-row b {
+  color: #647482;
+  font-size: 13px;
+}
+
+.dpart-status-row b {
+  text-align: right;
+}
+
 .dpart-table-wrap {
   overflow: auto;
 }
 
 .dpart-table-wrap.flat {
   border: 0;
+  box-shadow: none;
 }
 
 .dpart-table {
@@ -229,6 +410,10 @@
   color: #526371;
   font-size: 13px;
   white-space: nowrap;
+}
+
+.dpart-table tbody tr:hover {
+  background: #f8fbfc;
 }
 
 .dpart-row-actions {
@@ -275,6 +460,24 @@
   border-color: #d8d8d0;
   color: #686862;
 }
+
+.dpart-bar-track {
+  background: #eef3f6;
+  border-radius: 999px;
+  height: 12px;
+  overflow: hidden;
+}
+
+.dpart-bar-fill {
+  border-radius: inherit;
+  height: 100%;
+}
+
+.dpart-bar-fill.tone-green { background: #0f766e; }
+.dpart-bar-fill.tone-blue { background: #2563a8; }
+.dpart-bar-fill.tone-warning { background: #d99526; }
+.dpart-bar-fill.tone-red { background: #bf514b; }
+.dpart-bar-fill.tone-gray { background: #7b8791; }
 
 .dpart-modal-backdrop {
   align-items: center;
@@ -346,108 +549,6 @@
   padding-top: 4px;
 }
 
-.dpart-stat-grid {
-  display: grid;
-  gap: 12px;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
-  margin-bottom: 14px;
-}
-
-.dpart-stat-card {
-  padding: 16px;
-}
-
-.dpart-stat-card span {
-  color: #647482;
-  display: block;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.dpart-stat-card strong {
-  display: block;
-  font-size: 30px;
-  letter-spacing: 0;
-  line-height: 1.1;
-  margin-top: 8px;
-}
-
-.dpart-stat-card.tone-green strong { color: #0f766e; }
-.dpart-stat-card.tone-blue strong { color: #2563a8; }
-.dpart-stat-card.tone-warning strong { color: #b26b00; }
-.dpart-stat-card.tone-red strong { color: #a43d37; }
-.dpart-stat-card.tone-gray strong { color: #65717c; }
-
-.dpart-panel {
-  margin-bottom: 14px;
-  padding: 18px;
-}
-
-.dpart-panel h2 {
-  font-size: 18px;
-  font-weight: 800;
-  margin: 0 0 14px;
-}
-
-.dpart-bars {
-  display: grid;
-  gap: 12px;
-}
-
-.dpart-bar-row {
-  align-items: center;
-  display: grid;
-  gap: 12px;
-  grid-template-columns: 90px minmax(0, 1fr) 48px;
-}
-
-.dpart-bar-row span,
-.dpart-bar-row strong {
-  color: #40505f;
-  font-size: 13px;
-  font-weight: 800;
-}
-
-.dpart-bar-track {
-  background: #eef3f6;
-  border-radius: 999px;
-  height: 12px;
-  overflow: hidden;
-}
-
-.dpart-bar-fill {
-  border-radius: inherit;
-  height: 100%;
-}
-
-.dpart-bar-fill.tone-green { background: #0f766e; }
-.dpart-bar-fill.tone-blue { background: #2563a8; }
-.dpart-bar-fill.tone-warning { background: #d99526; }
-.dpart-bar-fill.tone-red { background: #bf514b; }
-.dpart-bar-fill.tone-gray { background: #7b8791; }
-
-.dpart-timeline {
-  display: grid;
-  gap: 12px;
-}
-
-.dpart-timeline-item {
-  border-left: 3px solid #0f766e;
-  display: grid;
-  gap: 14px;
-  grid-template-columns: 130px minmax(0, 1fr);
-  padding-left: 14px;
-}
-
-.dpart-timeline-item time {
-  color: #526371;
-  font-weight: 800;
-}
-
-.dpart-timeline-item p {
-  margin: 8px 0 0;
-}
-
 .dpart-toggle {
   align-items: center;
   color: #40505f;
@@ -469,8 +570,14 @@
     grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
-  .dpart-stat-grid {
+  .dpart-summary-strip,
+  .dpart-stat-grid,
+  .dpart-stat-grid.wide {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .dpart-summary-strip .dpart-stat-card {
+    border-bottom: 1px solid #e6ecf1;
   }
 }
 
@@ -482,8 +589,24 @@
   }
 
   .dpart-form-grid,
+  .dpart-summary-strip,
   .dpart-stat-grid,
-  .dpart-timeline-item {
+  .dpart-stat-grid.wide,
+  .dpart-work-row,
+  .dpart-status-row {
     grid-template-columns: 1fr;
+  }
+
+  .dpart-row-status {
+    justify-self: start;
+  }
+
+  .dpart-shell {
+    padding: 0 10px;
+  }
+
+  .dpart-table th,
+  .dpart-table td {
+    padding: 11px 10px;
   }
 }

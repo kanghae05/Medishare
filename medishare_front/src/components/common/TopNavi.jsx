@@ -1,19 +1,13 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-
-const getStoredLogin = () => {
-  try {
-    return JSON.parse(localStorage.getItem("login")) ?? null;
-  } catch {
-    return null;
-  }
-};
+import { getStoredLogin, isAdminLogin, isDoctorLogin } from "../dpart/dpartUtils";
 
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
   const isLoggedIn = Boolean(token);
-  const isAdmin = login?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN");
+  const isAdmin = isAdminLogin(login);
+  const isDoctor = isDoctorLogin(login);
 
   const logout = (event) => {
     event.preventDefault();
@@ -34,6 +28,7 @@ function TopNavi() {
         <div className="collapse navbar-collapse" id="mynavbar">
           <ul className="navbar-nav me-auto">
             <li className="nav-item"><NavLink to="/" className="nav-link">Home</NavLink></li>
+<<<<<<< Updated upstream
             {isLoggedIn && <li className="nav-item"><NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink></li>}
             {isAdmin && <>
               <li className="nav-item"><NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink></li>
@@ -46,6 +41,23 @@ function TopNavi() {
               <li className="nav-item"><NavLink to="/report/list" className="nav-link">판독소견</NavLink></li>
               <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
             </>}
+=======
+            {isLoggedIn && isDoctor && (
+              <li className="nav-item"><NavLink to="/d/dashboard" className="nav-link">협진 관리</NavLink></li>
+            )}
+            {isLoggedIn && (
+              <li className="nav-item"><NavLink to="/d/statistics" className="nav-link">질환별 통계</NavLink></li>
+            )}
+            {isAdmin && <li className="nav-item"><NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink></li>}
+            {isLoggedIn && (
+              <>
+                <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
+                <li className="nav-item"><NavLink to="/special-cases" className="nav-link">특이케이스</NavLink></li>
+                <li className="nav-item"><NavLink to="/report/list" className="nav-link">판독소견</NavLink></li>
+                <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
+              </>
+            )}
+>>>>>>> Stashed changes
           </ul>
           <ul className="navbar-nav ms-auto">
             {!isLoggedIn ? <>

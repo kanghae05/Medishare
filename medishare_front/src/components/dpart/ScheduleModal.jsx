@@ -16,9 +16,11 @@ const emptyForm = {
 
 function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
   const [form, setForm] = useState(emptyForm);
+  const [validationError, setValidationError] = useState("");
 
   useEffect(() => {
     if (!open) return;
+    setValidationError("");
 
     if (initialData) {
       setForm({
@@ -43,6 +45,12 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
 
   const submit = (event) => {
     event.preventDefault();
+    if (form.startTime >= form.endTime) {
+      setValidationError("종료 시간은 시작 시간보다 늦어야 합니다.");
+      return;
+    }
+
+    setValidationError("");
     onSubmit({
       ...form,
       startTime: toTimeWithSeconds(form.startTime),
@@ -121,12 +129,14 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
             <textarea name="memo" rows="4" value={form.memo} onChange={change} />
           </label>
 
+          {validationError && <div className="dpart-alert error">{validationError}</div>}
+
           <div className="dpart-modal-actions">
             <button type="button" className="dpart-secondary" onClick={onClose}>
               취소
             </button>
             <button type="submit" className="dpart-primary" disabled={saving}>
-              {saving ? "저장 중..." : "저장"}
+              {saving ? "저장 중..." : mode === "edit" ? "저장" : "등록"}
             </button>
           </div>
         </form>
