@@ -28,27 +28,17 @@ function TopNavi() {
         <div className="collapse navbar-collapse" id="mynavbar">
           <ul className="navbar-nav me-auto">
             <li className="nav-item"><NavLink to="/" className="nav-link">Home</NavLink></li>
-<<<<<<< Updated upstream
-            {isLoggedIn && <li className="nav-item"><NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink></li>}
-            {isAdmin && <>
-              <li className="nav-item"><NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink></li>
-              <li className="nav-item"><NavLink to="/admin/access-logs" className="nav-link">접근 이력</NavLink></li>
-              <li className="nav-item"><NavLink to="/admin/change-logs" className="nav-link">변경 이력</NavLink></li>
-            </>}
-            {isLoggedIn && <>
-              <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
-              <li className="nav-item"><NavLink to="/special-cases" className="nav-link">특이케이스</NavLink></li>
-              <li className="nav-item"><NavLink to="/report/list" className="nav-link">판독소견</NavLink></li>
-              <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
-            </>}
-=======
             {isLoggedIn && isDoctor && (
               <li className="nav-item"><NavLink to="/d/dashboard" className="nav-link">협진 관리</NavLink></li>
             )}
             {isLoggedIn && (
               <li className="nav-item"><NavLink to="/d/statistics" className="nav-link">질환별 통계</NavLink></li>
             )}
-            {isAdmin && <li className="nav-item"><NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink></li>}
+            {isAdmin && <>
+              <li className="nav-item"><NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink></li>
+              <li className="nav-item"><NavLink to="/admin/access-logs" className="nav-link">접근 이력</NavLink></li>
+              <li className="nav-item"><NavLink to="/admin/change-logs" className="nav-link">변경 이력</NavLink></li>
+            </>}
             {isLoggedIn && (
               <>
                 <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
@@ -57,7 +47,6 @@ function TopNavi() {
                 <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
               </>
             )}
->>>>>>> Stashed changes
           </ul>
           <ul className="navbar-nav ms-auto">
             {!isLoggedIn ? <>
