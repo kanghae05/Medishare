@@ -1,7 +1,7 @@
 package com.medishare.api.coop.controller;
 
-import com.medishare.api.coop.entity.PacsStudyRef;
-import com.medishare.api.coop.repository.PacsStudyRefRepository;
+import com.medishare.api.pacs.entity.PacsStudy;
+import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.CoopRequestVO;
@@ -26,7 +26,7 @@ import java.util.Map;
 public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
-    private final PacsStudyRefRepository pacsStudyRefRepository;
+    private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final OrthancImageService orthancImageService;
 
     // ------------------------------------------------------------------
@@ -178,7 +178,7 @@ public class CoopRequestController {
     // ------------------------------------------------------------------
     // 검사 이미지 (Orthanc 프록시)
     // TODO: PACS 담당자가 정식 검사/이미지 조회 API를 만들면 이 두 메서드는 삭제하고
-    // 그쪽 API를 호출하도록 바꾼다. (PacsStudyRef, OrthancImageService도 같이 삭제)
+    // 그쪽 API를 호출하도록 바꾼다. (CoopPacsStudyLookupRepository, OrthancImageService도 같이 삭제)
     // ------------------------------------------------------------------
 
     // 이 검사에 이미지가 몇 장 있는지 (프론트 이전/다음, 슬라이더 범위 계산용)
@@ -204,7 +204,7 @@ public class CoopRequestController {
     }
 
     private String resolveOrthancStudyId(Long studyNo) {
-        PacsStudyRef study = pacsStudyRefRepository.findById(studyNo)
+        PacsStudy study = pacsStudyRepository.findById(studyNo)
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 검사입니다."));
         return study.getOrthancStudyId();
     }
