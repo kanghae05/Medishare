@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { canAccessDPart, getStoredLogin } from "../dpart/dpartUtils";
+
+const getStoredLogin = () => {
+  try {
+    return JSON.parse(localStorage.getItem("login")) ?? null;
+  } catch {
+    return null;
+  }
+};
 
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
-  const showDPartMenu = Boolean(token && canAccessDPart());
+  const roles = Array.isArray(login?.roles) ? login.roles : [login?.role].filter(Boolean);
+  const showDPartMenu = Boolean(token && roles.some((role) => ["DOCTOR", "ROLE_DOCTOR", "ADMIN", "ROLE_ADMIN"].includes(role)));
 
   const logout = (event) => {
     event.preventDefault();
@@ -13,7 +21,7 @@ function TopNavi() {
     localStorage.removeItem("login");
     setToken(null);
     setLogin(null);
-    alert("로그아웃 되었습니다.");
+    alert("로그아웃되었습니다.");
     location.href = "/";
   };
 
@@ -21,75 +29,37 @@ function TopNavi() {
     <nav className="navbar navbar-expand-sm bg-dark navbar-dark fixed-top">
       <div className="container-fluid">
         <button className="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mynavbar">
-          <span className="navbar-toggler-icon"></span>
+          <span className="navbar-toggler-icon" />
         </button>
         <div className="collapse navbar-collapse" id="mynavbar">
           <ul className="navbar-nav me-auto">
             <li className="nav-item">
-              <NavLink to="/" className="nav-link">
-                Home
-              </NavLink>
+              <NavLink to="/" className="nav-link">Home</NavLink>
             </li>
             {showDPartMenu && (
               <li className="nav-item">
-                <NavLink to="/d/dashboard" className="nav-link">
-                  Dashboard
-                </NavLink>
+                <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
               </li>
             )}
-            <li className="nav-item">
-              <NavLink to="/notices" className="nav-link">
-                공지사항
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/special-cases" className="nav-link">
-                특이케이스
-              </NavLink>
-            </li>
             {token && (
               <>
-                <li className="nav-item">
-                  <NavLink to="/report/list" className="nav-link">
-                    판독소견
-                  </NavLink>
-                </li>
-                <li className="nav-item">
-                  <NavLink to="/coop/received" className="nav-link">
-                    협진
-                  </NavLink>
-                </li>
+                <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
+                <li className="nav-item"><NavLink to="/special-cases" className="nav-link">특이케이스</NavLink></li>
+                <li className="nav-item"><NavLink to="/report/list" className="nav-link">판독소견</NavLink></li>
+                <li className="nav-item"><NavLink to="/coop/received" className="nav-link">협진</NavLink></li>
               </>
             )}
           </ul>
           <ul className="navbar-nav ms-auto">
-            {!token && (
+            {!token ? (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/member/login">
-                    Login
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/member/write">
-                    Join
-                  </Link>
-                </li>
+                <li className="nav-item"><Link className="nav-link" to="/member/login">Login</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/member/write">Join</Link></li>
               </>
-            )}
-
-            {token && (
+            ) : (
               <>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/member/logout" onClick={logout}>
-                    Logout
-                  </Link>
-                </li>
-                <li className="nav-item">
-                  <Link className="nav-link" to="/member/view">
-                    {login?.name || "사용자"}
-                  </Link>
-                </li>
+                <li className="nav-item"><Link className="nav-link" to="/member/logout" onClick={logout}>Logout</Link></li>
+                <li className="nav-item"><Link className="nav-link" to="/member/view">{login?.name || "사용자"}</Link></li>
               </>
             )}
           </ul>
