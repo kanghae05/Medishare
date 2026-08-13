@@ -3,6 +3,7 @@ package com.medishare.api.report.service;
 import com.medishare.api.member.entity.Member;
 import com.medishare.api.member.repository.QMemberRepository;
 import com.medishare.api.member.service.PacsChangeHistoryService;
+import com.medishare.api.member.service.MemberRoleAuthorityService;
 import com.medishare.api.report.entity.Report;
 import com.medishare.api.report.repository.QReportRepository;
 import com.medishare.api.report.vo.ReportVO;
@@ -19,6 +20,7 @@ import java.util.List;
 public class ReportServiceImpl implements ReportService {
     private final QReportRepository qReportRepository;
     private final QMemberRepository qMemberRepository;
+    private final MemberRoleAuthorityService memberRoleAuthorityService;
     private final PacsChangeHistoryService pacsChangeHistoryService;
 
     @Override
@@ -74,7 +76,8 @@ public class ReportServiceImpl implements ReportService {
     private void validateOwnerOrAdmin(Report report, String loginMemberId) {
         Member loginMember = qMemberRepository.findMemberById(loginMemberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found."));
-        if (!loginMember.getRoles().contains("ROLE_ADMIN") && !report.getMember().getId().equals(loginMemberId)) {
+        boolean isAdmin = memberRoleAuthorityService.getAuthorities(loginMember.getNo()).contains("ROLE_ADMIN");
+        if (!isAdmin && !report.getMember().getId().equals(loginMemberId)) {
             throw new AccessDeniedException("Only the author can modify this report.");
         }
     }
