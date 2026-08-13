@@ -16,6 +16,8 @@ import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
 import DPartComp from "./components/dpart/DPartComp"
 import MedicalStaffManagement from "./pages/Admin/MedicalStaffManagement"
 import MedicalStaffDetail from "./pages/Admin/MedicalStaffDetail"
+import AccessLogManagement from "./pages/Admin/AccessLogManagement"
+import AccessLogDetail from "./pages/Admin/AccessLogDetail"
 
 function App() {
 
@@ -57,6 +59,8 @@ function App() {
           <Route path="/d/*" element={<DPartComp />} />
           <Route path="/admin/medical-staff" element={<MedicalStaffManagement isAdmin={isAdmin} />} />
           <Route path="/admin/medical-staff/:memberNo" element={<MedicalStaffDetail isAdmin={isAdmin} />} />
+          <Route path="/admin/access-logs" element={<AccessLogManagement isAdmin={isAdmin} />} />
+          <Route path="/admin/access-logs/:logNo" element={<AccessLogDetail isAdmin={isAdmin} />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

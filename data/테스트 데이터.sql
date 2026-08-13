@@ -51,6 +51,20 @@ INSERT INTO role (role_code, role_name, description, stable) VALUES
 ON DUPLICATE KEY UPDATE
 role_name = VALUES(role_name), description = VALUES(description), stable = VALUES(stable);
 
+-- Only permissions already enforced by application code are seeded here.
+INSERT INTO permission (permission_code, permission_name, description, stable) VALUES
+('IMAGE_VIEW', 'PACS image view', 'View PACS study lists, details, and thumbnails', TRUE)
+ON DUPLICATE KEY UPDATE
+permission_name = VALUES(permission_name), description = VALUES(description), stable = VALUES(stable);
+
+-- ROLE_ADMIN bypasses permission checks in PacsAuthorizationService.
+-- ROLE_USER receives the currently enforced PACS viewing permission.
+INSERT IGNORE INTO role_permission (role_no, permission_no)
+SELECT r.no, p.no
+FROM role r
+JOIN permission p ON p.permission_code = 'IMAGE_VIEW'
+WHERE r.role_code = 'ROLE_USER';
+
 INSERT INTO member (login_id, password, member_name, email, phone, status, stable) VALUES
 ('admin', '{bcrypt}$2a$10$aXzZZ8tWKt9nNdJ9.SDGv.xx38ni5t5zc4Trg.Ws74p9PFoVqml9S', 'Test Administrator', 'admin@medishare.local', '010-0000-0000', 'ACTIVE', TRUE)
 ON DUPLICATE KEY UPDATE

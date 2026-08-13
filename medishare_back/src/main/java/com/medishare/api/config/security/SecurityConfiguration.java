@@ -54,6 +54,7 @@ public class SecurityConfiguration {
                                     "/api-docs/**", "/v3/api-docs/**" ).permitAll()
                             .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                             .requestMatchers("/member/login.do", "/member/write.do", "/member/departments.do").permitAll()
+                            .requestMatchers("/member/view", "/member/password").hasAnyRole("USER", "ADMIN")
                             .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                             .requestMatchers("/board/**", "/image/list.do", "/image/view.do").permitAll()
                             .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")
@@ -65,9 +66,12 @@ public class SecurityConfiguration {
                             .requestMatchers("/coop/**").hasAnyRole("USER", "ADMIN")
                             // 공지사항 목록/상세는 회원가입 및 로그인 없이 조회할 수 있다.
                             // 작성/수정/삭제(POST/PUT/DELETE)는 아래 인증 규칙을 그대로 적용한다.
-                            .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").hasAnyRole("USER", "ADMIN")
                             // 특이케이스 목록/상세 조회 공개 설정
-                            .requestMatchers(HttpMethod.GET, "/api/special-cases", "/api/special-cases/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/special-cases", "/api/special-cases/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.POST, "/api/special-cases").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.PUT, "/api/special-cases/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.DELETE, "/api/special-cases/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/upload/**").permitAll()
                             .requestMatchers("/txt/**").permitAll()
                             .requestMatchers("**exception**").permitAll()

@@ -34,7 +34,12 @@ public class CustomAccessDeniedHandler implements AccessDeniedHandler {
                 log.error("Unable to save denied PACS access log.", e);
             }
         }
-        response.sendError(HttpServletResponse.SC_FORBIDDEN, "Access denied.");
+        // sendError() triggers an /error dispatch. That dispatch is protected by the
+        // catch-all rule and can turn an authenticated user's 403 into a 401.
+        response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+        response.setContentType("application/json");
+        response.setCharacterEncoding("utf-8");
+        response.getWriter().write("{\"message\":\"Access denied.\"}");
     }
 
     private boolean isAuditedPacsReadRequest(String uri) {
