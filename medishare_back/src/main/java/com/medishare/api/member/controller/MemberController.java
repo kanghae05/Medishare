@@ -5,10 +5,16 @@ import com.medishare.api.data.dto.SignUpResultDto;
 import com.medishare.api.member.vo.LoginVO;
 import com.medishare.api.member.vo.MemberVO;
 import com.medishare.api.member.vo.PacsDepartmentVO;
+import com.medishare.api.member.vo.MemberMyPageVO;
+import com.medishare.api.member.vo.MemberUpdateVO;
+import com.medishare.api.member.vo.PasswordChangeVO;
+import com.medishare.api.member.service.MemberMyPageService;
+import com.medishare.api.member.entity.MemberDetails;
 import com.medishare.api.member.service.PacsDepartmentService;
 import com.medishare.api.service.SignService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 @RestController
 @RequestMapping("/member")
@@ -17,7 +23,8 @@ import org.springframework.web.bind.annotation.*;
 public class MemberController {
     private final SignService signService;
     private final PacsDepartmentService pacsDepartmentService;
-    public MemberController(SignService signService, PacsDepartmentService pacsDepartmentService) { this.signService = signService; this.pacsDepartmentService = pacsDepartmentService; }
+    private final MemberMyPageService memberMyPageService;
+    public MemberController(SignService signService, PacsDepartmentService pacsDepartmentService, MemberMyPageService memberMyPageService) { this.signService = signService; this.pacsDepartmentService = pacsDepartmentService; this.memberMyPageService = memberMyPageService; }
 
     @GetMapping("/departments.do")
     public java.util.List<PacsDepartmentVO> departments() { return pacsDepartmentService.activeList(); }
@@ -33,5 +40,27 @@ public class MemberController {
     @PostMapping("/write.do")
     public SignUpResultDto write(@RequestBody MemberVO vo) {
         return signService.signUp(vo);
+    }
+
+    @GetMapping("/view")
+    public MemberMyPageVO view(Authentication authentication) {
+        return memberMyPageService.view(currentLoginId(authentication));
+    }
+
+    @PutMapping("/view")
+    public MemberMyPageVO update(@RequestBody MemberUpdateVO request, Authentication authentication) {
+        return memberMyPageService.update(currentLoginId(authentication), request);
+    }
+
+    @PutMapping("/password")
+    public void changePassword(@RequestBody PasswordChangeVO request, Authentication authentication) {
+        memberMyPageService.changePassword(currentLoginId(authentication), request);
+    }
+
+    private String currentLoginId(Authentication authentication) {
+        if (authentication == null || !authentication.isAuthenticated()) throw new IllegalStateException("Authentication is required.");
+        Object principal = authentication.getPrincipal();
+        if (principal instanceof MemberDetails member) return member.getId();
+        return authentication.getName();
     }
 }
