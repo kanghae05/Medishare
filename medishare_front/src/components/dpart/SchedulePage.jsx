@@ -28,6 +28,12 @@ function SchedulePage() {
   const user = getCurrentUser();
 
   const loadSchedules = useCallback(async () => {
+    if (!user.doctorId) {
+      setSchedules([]);
+      setError("로그인한 의료진 ID를 확인할 수 없습니다.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -63,6 +69,11 @@ function SchedulePage() {
   };
 
   const submitSchedule = async (payload) => {
+    if (!user.doctorId) {
+      setError("로그인한 의료진 ID를 확인할 수 없습니다.");
+      return;
+    }
+
     setSaving(true);
     setError("");
     try {
@@ -102,22 +113,22 @@ function SchedulePage() {
   };
 
   return (
-    <section className="dpart-page">
+    <section className="dpart-page dpart-work-page">
       <div className="dpart-page-head">
         <div>
-          <h1>{user.isAdmin ? "의료진 일정" : "의사 일정"}</h1>
-          <p>협진 가능한 시간과 일정을 등록하고 관리합니다.</p>
+          <h1>의사 일정</h1>
+          <p>진료 가능 시간, 예약 시간, 불가 시간을 등록하고 관리합니다.</p>
         </div>
         <button type="button" className="dpart-primary" onClick={openCreate}>
           + 일정 등록
         </button>
       </div>
 
-      <div className="dpart-filter-band">
+      <div className="dpart-filter-band compact">
         <div className="dpart-segment">
-          <button className={filterMode === "all" ? "active" : ""} onClick={() => setFilterMode("all")}>전체</button>
-          <button className={filterMode === "date" ? "active" : ""} onClick={() => setFilterMode("date")}>날짜</button>
-          <button className={filterMode === "period" ? "active" : ""} onClick={() => setFilterMode("period")}>기간</button>
+          <button type="button" className={filterMode === "all" ? "active" : ""} onClick={() => setFilterMode("all")}>전체</button>
+          <button type="button" className={filterMode === "date" ? "active" : ""} onClick={() => setFilterMode("date")}>날짜</button>
+          <button type="button" className={filterMode === "period" ? "active" : ""} onClick={() => setFilterMode("period")}>기간</button>
         </div>
         {filterMode === "date" && (
           <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
@@ -155,7 +166,7 @@ function SchedulePage() {
               {schedules.map((schedule) => (
                 <tr key={schedule.scheduleId}>
                   <td>{schedule.scheduleDate}</td>
-                  <td>{schedule.startTime?.slice(0, 5)} - {schedule.endTime?.slice(0, 5)}</td>
+                  <td>{schedule.startTime?.slice(0, 5)} ~ {schedule.endTime?.slice(0, 5)}</td>
                   <td><StatusBadge type={schedule.scheduleType} /></td>
                   <td>{schedule.memo || "-"}</td>
                   <td>

@@ -8,6 +8,29 @@ export const getStoredLogin = () => {
 
 export const getAuthToken = () => localStorage.getItem("token");
 
+export const getRoles = (login = getStoredLogin()) => {
+  if (Array.isArray(login?.roles)) return login.roles;
+  if (login?.role) return [login.role];
+  return [];
+};
+
+export const hasAnyRole = (login, targets) => {
+  const normalizedTargets = targets.map((role) => role.replace(/^ROLE_/, ""));
+  return getRoles(login).some((role) => normalizedTargets.includes(String(role).replace(/^ROLE_/, "")));
+};
+
+export const isAdminLogin = (login = getStoredLogin()) => hasAnyRole(login, ["ADMIN"]);
+
+export const isDoctorLogin = (login = getStoredLogin()) => {
+  if (!login || isAdminLogin(login)) return false;
+  if (hasAnyRole(login, ["DOCTOR"])) return true;
+
+  const subject = login?.sub || login?.id || "";
+  if (/^doctor\d+$/i.test(String(subject))) return true;
+
+  return hasAnyRole(login, ["USER"]);
+};
+
 const deriveDoctorId = (login) => {
   const explicitId = login?.doctorId || login?.doctor_id || login?.memberNo || login?.memberId || login?.no;
   if (explicitId && !Number.isNaN(Number(explicitId))) {
@@ -16,40 +39,52 @@ const deriveDoctorId = (login) => {
 
   const subject = login?.sub || login?.id || "";
   const match = String(subject).match(/^doctor(\d+)$/i);
-  return match ? Number(match[1]) : 1;
+  return match ? Number(match[1]) : null;
 };
 
 export const getCurrentUser = () => {
   const login = getStoredLogin();
-  const roles = Array.isArray(login?.roles) ? login.roles : [];
-  const isAdmin = roles.some((role) => role === "ADMIN" || role === "ROLE_ADMIN");
+  const roles = getRoles(login);
   const subject = login?.sub || login?.id || "";
-  const isDoctorAccount = /^doctor\d+$/i.test(String(subject));
+  const isAdmin = isAdminLogin(login);
+  const isDoctor = isDoctorLogin(login);
+  const doctorId = deriveDoctorId(login);
 
   return {
     isAuthenticated: Boolean(getAuthToken() && login),
-    memberId: login?.memberId || login?.memberNo || login?.no || subject || null,
-    doctorId: deriveDoctorId(login),
+    memberId: login?.memberId || login?.memberNo || login?.no || doctorId || subject || null,
+    doctorId,
     name: login?.name || subject || "사용자",
     department: login?.department || "진료과 미연동",
-    role: isAdmin ? "ADMIN" : "DOCTOR",
+    role: isAdmin ? "ADMIN" : isDoctor ? "DOCTOR" : roles[0] || "USER",
     roles,
     isAdmin,
-    isDoctor: isDoctorAccount || !isAdmin,
+    isDoctor,
     isMock: !login?.doctorId && !login?.memberNo && !login?.no,
   };
 };
 
 export const canAccessDPart = () => {
   const user = getCurrentUser();
-  return user.isAuthenticated && (user.isAdmin || user.isDoctor);
+  return user.isAuthenticated;
+};
+
+export const canAccessConsultationManagement = () => {
+  const user = getCurrentUser();
+  return user.isAuthenticated && user.isDoctor;
+};
+
+export const canAccessDiseaseStatistics = () => {
+  const user = getCurrentUser();
+  return user.isAuthenticated;
 };
 
 export const currentUser = getCurrentUser();
+
 export const scheduleTypeLabels = {
-  AVAILABLE: "진료 가능",
-  RESERVED: "진료 예정",
-  UNAVAILABLE: "진료 불가",
+  AVAILABLE: "협진 가능",
+  RESERVED: "협진 예정",
+  UNAVAILABLE: "협진 불가",
 };
 
 export const extractErrorMessage = (error, fallback = "요청을 처리하지 못했습니다.") => {

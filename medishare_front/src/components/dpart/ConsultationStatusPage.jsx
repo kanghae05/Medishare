@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useState } from "react";
-import { getConsultationStatistics, getDoctorConsultationStatistics } from "../../api/statisticsApi";
+import { getDoctorConsultationStatistics } from "../../api/statisticsApi";
 import LoadingState from "./LoadingState";
 import StatCard from "./StatCard";
 import { extractErrorMessage, getCurrentUser, todayString } from "./dpartUtils";
@@ -24,7 +24,6 @@ const statusCards = [
 
 function ConsultationStatusPage() {
   const [stats, setStats] = useState(emptyStats);
-  const [scope, setScope] = useState("doctor");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
@@ -32,6 +31,12 @@ function ConsultationStatusPage() {
   const user = getCurrentUser();
 
   const loadStats = useCallback(async () => {
+    if (!user.doctorId) {
+      setStats(emptyStats);
+      setError("로그인한 의료진 ID를 확인할 수 없습니다.");
+      return;
+    }
+
     setLoading(true);
     setError("");
     try {
@@ -39,52 +44,48 @@ function ConsultationStatusPage() {
         startDate: startDate || undefined,
         endDate: endDate || undefined,
       };
-      const response =
-        scope === "doctor"
-          ? await getDoctorConsultationStatistics(user.doctorId, params)
-          : await getConsultationStatistics(params);
+      const response = await getDoctorConsultationStatistics(user.doctorId, params);
       setStats(response.data || emptyStats);
     } catch (err) {
       setStats(emptyStats);
-      setError(extractErrorMessage(err, "협진 통계를 불러오지 못했습니다."));
+      setError(extractErrorMessage(err, "협진 정보를 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
-  }, [endDate, scope, startDate, user.doctorId]);
+  }, [endDate, startDate, user.doctorId]);
 
   useEffect(() => {
     loadStats();
   }, [loadStats]);
 
+  const resetDates = () => {
+    setStartDate("");
+    setEndDate("");
+  };
+
+  const setToday = () => {
+    const today = todayString();
+    setStartDate(today);
+    setEndDate(today);
+  };
+
   const total = stats.totalCount || 0;
 
   return (
-    <section className="dpart-page">
+    <section className="dpart-page dpart-work-page">
       <div className="dpart-page-head">
         <div>
           <h1>협진 현황</h1>
-          <p>요청, 수락, 완료, 취소 상태를 실시간 집계로 확인합니다.</p>
+          <p>요청부터 완료까지 협진 상태를 기간별로 확인합니다.</p>
         </div>
       </div>
 
-      <div className="dpart-filter-band">
-        <div className="dpart-segment">
-          <button className={scope === "doctor" ? "active" : ""} onClick={() => setScope("doctor")}>
-            내 현황
-          </button>
-          <button className={scope === "all" ? "active" : ""} onClick={() => setScope("all")}>
-            전체
-          </button>
-        </div>
+      <div className="dpart-filter-band compact">
         <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
         <span>~</span>
         <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
-        <button type="button" className="dpart-secondary" onClick={() => { setStartDate(""); setEndDate(""); }}>
-          초기화
-        </button>
-        <button type="button" className="dpart-secondary" onClick={() => { setStartDate(todayString()); setEndDate(todayString()); }}>
-          오늘
-        </button>
+        <button type="button" className="dpart-secondary" onClick={resetDates}>초기화</button>
+        <button type="button" className="dpart-secondary" onClick={setToday}>오늘</button>
       </div>
 
       {error && <div className="dpart-alert error">{error}</div>}
@@ -92,25 +93,33 @@ function ConsultationStatusPage() {
         <LoadingState />
       ) : (
         <>
-          <div className="dpart-stat-grid">
+          <div className="dpart-stat-grid wide">
             {statusCards.map(([key, label, tone]) => (
               <StatCard key={key} label={label} value={stats[key]} tone={tone} />
             ))}
           </div>
 
-          <div className="dpart-panel">
-            <h2>상태 분포</h2>
-            <div className="dpart-bars">
+          <div className="dpart-panel dpart-work-panel">
+            <div className="dpart-section-head">
+              <div>
+                <h2>상태 분포</h2>
+                <p>전체 협진 대비 상태별 비율입니다.</p>
+              </div>
+            </div>
+            <div className="dpart-status-list">
               {statusCards.slice(1).map(([key, label, tone]) => {
                 const value = stats[key] || 0;
                 const width = total > 0 ? Math.round((value / total) * 100) : 0;
                 return (
-                  <div className="dpart-bar-row" key={key}>
-                    <span>{label}</span>
+                  <div className="dpart-status-row" key={key}>
+                    <div>
+                      <strong>{label}</strong>
+                      <span>{value.toLocaleString()}건</span>
+                    </div>
                     <div className="dpart-bar-track">
                       <div className={`dpart-bar-fill tone-${tone}`} style={{ width: `${width}%` }} />
                     </div>
-                    <strong>{width}%</strong>
+                    <b>{width}%</b>
                   </div>
                 );
               })}
