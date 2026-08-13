@@ -234,7 +234,14 @@ public class CoopRequestController {
     @GetMapping("/lookup/patients/{patientNo}/studies.do")
     public List<StudyLookupVO> lookupStudiesByPatient(@PathVariable Long patientNo) {
         return pacsStudyRepository.findByPatient_NoOrderByStudyDateDesc(patientNo).stream()
-                .map(s -> new StudyLookupVO(s.getNo(), s.getStudyDescription(), s.getStudyDate()))
+                .map(s -> new StudyLookupVO(
+                        s.getNo(),
+                        s.getStudyDescription(),
+                        s.getStudyDate(),
+                        s.getStudyTime(),
+                        s.getInstanceCount(),
+                        s.getRequestedProcedureDescription()
+                ))
                 .toList();
     }
 

@@ -258,10 +258,22 @@
 .coop-row-unread-dot.hidden { visibility: hidden; }
 
 .coop-row-main { flex: 1; min-width: 0; }
-.coop-row-top { display: flex; align-items: baseline; margin-bottom: 3px; }
-.coop-row-patient { font-size: 14.5px; color: var(--coop-ink); margin-right: 8px; }
-.coop-row-patient.unread { font-weight: 700; }
-.coop-row-counterpart { font-size: 12.5px; color: var(--coop-muted); }
+.coop-row-top { display: flex; align-items: baseline; margin-bottom: 2px; }
+.coop-row-counterpart-primary { font-size: 14.5px; font-weight: 600; color: var(--coop-ink); margin-right: 6px; }
+.coop-row-counterpart-primary.unread { font-weight: 700; }
+.coop-row-direction-text { font-size: 12px; color: var(--coop-muted); margin-right: 6px; }
+.coop-row-sub { display: flex; align-items: baseline; margin-bottom: 3px; }
+.coop-row-patient-label {
+  font-size: 11px;
+  color: var(--coop-muted);
+  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-border);
+  border-radius: 3px;
+  padding: 0 5px;
+  line-height: 16px;
+  margin-right: 5px;
+}
+.coop-row-patient { font-size: 13px; color: var(--coop-ink); }
 .coop-row-content {
   font-size: 13px;
   color: var(--coop-muted);
@@ -488,4 +500,17 @@
   background: var(--coop-page-bg);
   border: 1px solid var(--coop-border);
   border-radius: 4px;
+}
+
+.coop-study-reason {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--coop-muted);
+  padding: 6px 0;
+}
+
+.coop-doctor-meta {
+  font-size: 12px;
+  color: var(--coop-muted);
+  font-weight: 400;
 }

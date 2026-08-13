@@ -24,11 +24,17 @@ function DoctorAutocomplete({ value, onSelect, placeholder }) {
 
   // 디바운스 검색 - 입력 멈추고 300ms 후에 요청
   useEffect(() => {
-    if (!query || query === value?.name) {
-      setResults([]);
-      return;
-    }
     let ignore = false;
+
+    if (!query || query === value?.name) {
+      queueMicrotask(() => {
+        if (!ignore) setResults([]);
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
     const timer = setTimeout(() => {
       setLoading(true);
       api

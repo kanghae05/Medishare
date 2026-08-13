@@ -22,11 +22,17 @@ function PatientAutocomplete({ value, onSelect, placeholder }) {
   }, []);
 
   useEffect(() => {
-    if (!query || query === value?.patientName) {
-      setResults([]);
-      return;
-    }
     let ignore = false;
+
+    if (!query || query === value?.patientName) {
+      queueMicrotask(() => {
+        if (!ignore) setResults([]);
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
     const timer = setTimeout(() => {
       setLoading(true);
       api

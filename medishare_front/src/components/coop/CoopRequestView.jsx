@@ -4,6 +4,17 @@ import api from "../common/api";
 import CoopReasonModal from "./CoopReasonModal";
 import "./Coop.css";
 
+// 의사명 + 메타(진료과·세부전공·직급)를 같이 표시. 이름이 없으면 번호로 폴백.
+function renderDoctor(name, meta, id) {
+  if (!name) return `의사 #${id}`;
+  return (
+    <>
+      {name}
+      {meta && <span className="coop-doctor-meta"> ({meta})</span>}
+    </>
+  );
+}
+
 function CoopRequestView() {
   const [searchParams] = useSearchParams();
   const no = searchParams.get("no");
@@ -104,14 +115,18 @@ function CoopRequestView() {
         </div>
         <div className="coop-view-row">
           <span className="coop-view-label">요청 의사</span>
-          <span className="coop-view-value">{vo.reqDoctorName || `의사 #${vo.reqDoctorId}`}</span>
+          <span className="coop-view-value">
+            {renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}
+          </span>
         </div>
         <div className="coop-view-row">
           <span className="coop-view-label">수신 대상</span>
           <span className="coop-view-value">
             {vo.recvType === "지정의사"
-              ? vo.recvDoctorName || `의사 #${vo.recvDoctorId}`
-              : (vo.acceptDoctorName || (vo.acceptDoctorId ? `의사 #${vo.acceptDoctorId}` : vo.recvDeptName || `진료과 #${vo.recvDeptId}`))}
+              ? renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
+              : vo.acceptDoctorId
+              ? renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)
+              : vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
             {vo.recvType === "진료과" && !vo.acceptDoctorId && " (아직 미수락)"}
           </span>
         </div>

@@ -10,6 +10,18 @@ function formatStudyDate(raw) {
   return `${raw.slice(0, 4)}-${raw.slice(4, 6)}-${raw.slice(6, 8)}`;
 }
 
+function formatStudyTime(raw) {
+  if (!raw || raw.length < 4) return "";
+  return `${raw.slice(0, 2)}:${raw.slice(2, 4)}`;
+}
+
+function formatStudyDateTime(date, time) {
+  const d = formatStudyDate(date);
+  const t = formatStudyTime(time);
+  if (!d) return "";
+  return t ? `${d} ${t}` : d;
+}
+
 function CoopRequestWriteForm() {
   const [searchParams] = useSearchParams();
   const originRequestId = searchParams.get("originRequestId");
@@ -25,6 +37,7 @@ function CoopRequestWriteForm() {
   const [selectedPatient, setSelectedPatient] = useState(null); // { no, patientName, ... }
   const [studies, setStudies] = useState([]);
   const [selectedStudyId, setSelectedStudyId] = useState("");
+  const selectedStudy = studies.find((s) => String(s.no) === String(selectedStudyId)) || null;
   const [studiesLoading, setStudiesLoading] = useState(false);
 
   const [availableReport, setAvailableReport] = useState(null); // { no, title, status } | null
@@ -67,13 +80,23 @@ function CoopRequestWriteForm() {
 
   // 환자를 선택하면 그 환자의 검사 목록을 불러온다.
   useEffect(() => {
-    if (!selectedPatient) {
-      setStudies([]);
-      setSelectedStudyId("");
-      return;
-    }
     let ignore = false;
-    setStudiesLoading(true);
+
+    if (!selectedPatient) {
+      queueMicrotask(() => {
+        if (!ignore) {
+          setStudies([]);
+          setSelectedStudyId("");
+        }
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
+    queueMicrotask(() => {
+      if (!ignore) setStudiesLoading(true);
+    });
     api
       .get(`/coop/lookup/patients/${selectedPatient.no}/studies.do`)
       .then((res) => {
@@ -92,12 +115,20 @@ function CoopRequestWriteForm() {
 
   // 검사를 선택하면 그 검사의 소견서 존재 여부를 확인한다.
   useEffect(() => {
-    if (!selectedStudyId) {
-      setAvailableReport(null);
-      setAttachReport(false);
-      return;
-    }
     let ignore = false;
+
+    if (!selectedStudyId) {
+      queueMicrotask(() => {
+        if (!ignore) {
+          setAvailableReport(null);
+          setAttachReport(false);
+        }
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
     api
       .get(`/coop/lookup/studies/${selectedStudyId}/report.do`)
       .then((res) => {
@@ -263,10 +294,20 @@ function CoopRequestWriteForm() {
                   </option>
                   {studies.map((s) => (
                     <option key={s.no} value={s.no}>
-                      {s.studyDescription || "검사"} ({formatStudyDate(s.studyDate)})
+                      {s.studyDescription || `검사 #${s.no}`}
+                      {s.instanceCount ? ` · ${s.instanceCount}장` : ""} ({formatStudyDateTime(s.studyDate, s.studyTime)})
                     </option>
                   ))}
                 </select>
+              </div>
+            )}
+
+            {selectedStudy?.requestedProcedureDescription && (
+              <div className="coop-form-row">
+                <label className="coop-form-label"></label>
+                <div className="coop-study-reason">
+                  요청 사유: {selectedStudy.requestedProcedureDescription}
+                </div>
               </div>
             )}
 
@@ -279,7 +320,8 @@ function CoopRequestWriteForm() {
                     checked={attachReport}
                     onChange={(e) => setAttachReport(e.target.checked)}
                   />
-                  이 검사의 소견서 "{availableReport.title}" 첨부 ({availableReport.status})
+                  이 검사의 소견서 "{availableReport.title}" 첨부 (
+                  {availableReport.status === "FINAL" ? "최종 확정" : availableReport.status === "DRAFT" ? "작성 중" : availableReport.status})
                 </label>
               </div>
             )}
