@@ -180,7 +180,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             reportId = origin.getReportId();
         }
 
-        validateCreate(recvType, vo.getReqDoctorId(), vo.getRecvDoctorId(), vo.getRecvDeptId());
+        validateCreate(recvType, vo.getReqDoctorId(), vo.getRecvDoctorId(), vo.getRecvDeptId(), pacsStudyId, vo.getReqContent());
 
         CoopRequest entity = CoopRequest.builder()
                 .reqDoctorId(vo.getReqDoctorId())
@@ -198,7 +198,8 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return toVO(coopRequestRepository.save(entity), vo.getReqDoctorId());
     }
 
-    private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId) {
+    private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId,
+                                Long pacsStudyId, String reqContent) {
         if (recvType == RecvType.지정의사) {
             if (recvDoctorId == null) {
                 throw new RuntimeException("지정의사 요청은 수신 의사를 선택해야 합니다.");
@@ -210,6 +211,12 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             if (recvDeptId == null) {
                 throw new RuntimeException("진료과 요청은 수신 진료과를 선택해야 합니다.");
             }
+        }
+        if (pacsStudyId == null) {
+            throw new RuntimeException("검사를 선택해야 합니다.");
+        }
+        if (reqContent == null || reqContent.isBlank()) {
+            throw new RuntimeException("요청 내용을 입력해야 합니다.");
         }
     }
 

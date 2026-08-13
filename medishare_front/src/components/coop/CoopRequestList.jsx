@@ -14,18 +14,6 @@ function renderDoctor(name, meta, id, fallbackLabel = "의사") {
   );
 }
 
-// 목록에서는 공간이 좁으니 메타 전체 대신 진료과만 짧게 보여준다.
-function renderDoctorShort(name, meta, id, fallbackLabel = "의사") {
-  if (!name) return `${fallbackLabel} #${id}`;
-  const dept = meta ? meta.split(" · ")[0] : null;
-  return (
-    <>
-      {name}
-      {dept && <span className="coop-doctor-meta"> ({dept})</span>}
-    </>
-  );
-}
-
 const ALL_STATUSES = ["요청", "수락", "거절", "취소", "만료"];
 const DEFAULT_RECEIVED_STATUSES = ["요청", "수락", "거절", "만료"]; // 받은 협진함만 취소 기본 제외
 
@@ -225,15 +213,15 @@ function CoopRequestList({ mode }) {
 
             let counterpartDisplay;
             if (isIncoming) {
-              counterpartDisplay = renderDoctorShort(r.reqDoctorName, r.reqDoctorMeta, r.reqDoctorId, "요청의사");
+              counterpartDisplay = renderDoctor(r.reqDoctorName, r.reqDoctorMeta, r.reqDoctorId, "요청의사");
             } else if (r.acceptDoctorId) {
               // 진료과 요청이든 지정의사 요청이든, 이미 수락한 의사가 있으면 그 사람이 상대방
-              counterpartDisplay = renderDoctorShort(r.acceptDoctorName, r.acceptDoctorMeta, r.acceptDoctorId, "의사");
+              counterpartDisplay = renderDoctor(r.acceptDoctorName, r.acceptDoctorMeta, r.acceptDoctorId, "의사");
             } else if (r.recvType === "지정의사") {
-              counterpartDisplay = renderDoctorShort(r.recvDoctorName, r.recvDoctorMeta, r.recvDoctorId, "의사");
+              counterpartDisplay = renderDoctor(r.recvDoctorName, r.recvDoctorMeta, r.recvDoctorId, "의사");
             } else {
-              // 진료과 요청 + 아직 수락 전 = 진짜로 "누가 받을지 미정"인 상태
-              counterpartDisplay = (r.recvDeptName || `진료과 #${r.recvDeptId}`) + " (미정)";
+              // 진료과 요청 + 아직 수락 전 = 진료과 이름만 표시 (미수락 여부는 오른쪽 상태 배지로 이미 보임)
+              counterpartDisplay = r.recvDeptName || `진료과 #${r.recvDeptId}`;
             }
 
             return (
