@@ -2,7 +2,6 @@ import { Navigate, Routes, Route } from "react-router-dom"
 import TopNavi from "./components/common/TopNavi"
 import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
-import BoardComp from "./components/board/BoardComp"
 import MemberComp from "./components/member/MemberComp"
 import ReportComp from "./components/report/ReportComp"
 import PacsComp from "./components/pacs/PacsComp"
@@ -43,7 +42,6 @@ function App() {
         {/* 라이팅 - 메뉴별 */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/board/*" element={<BoardComp />} />
           <Route path="/member/*" element={<MemberComp />} />
           <Route path="/report/*" element={<ReportComp />} />
           <Route path="/pacs/*" element={<PacsComp />} />

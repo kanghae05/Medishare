@@ -32,3 +32,5 @@ spring.servlet.multipart.location=c:/Temp
 
 # orthanc 이미지를 가져오기 위한 url
 orthanc.base-url=http://10.15.21.177:8042
+orthanc.username=[받은 계정]
+orthanc.password=[받은 비밀번호]
