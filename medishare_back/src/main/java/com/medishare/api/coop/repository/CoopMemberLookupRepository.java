@@ -20,6 +20,7 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
     /**
      * 이름/세부전공/진료과명 중 하나라도 검색어를 포함하는 활성 의사 검색.
      * 협진 요청 등록 폼의 "받는 의사" 자동완성용.
+     * excludeNo: 검색하는 본인 계정은 결과에서 제외 (자기 자신에게 협진 요청 불가)
      *
      * TODO(3번 회원관리 연동): role(의사/관리자 구분)이 정식으로 필드화되면
      * 관리자는 결과에서 제외하도록 조건을 추가한다. 지금은 그 필드가 없어서
@@ -27,9 +28,10 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
      */
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department " +
             "WHERE m.status = 'ACTIVE' " +
+            "AND m.no <> :excludeNo " +
             "AND (m.name LIKE CONCAT('%', :q, '%') " +
             "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
             "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
             "ORDER BY m.name")
-    List<Member> searchDoctors(@Param("q") String q);
+    List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
 }

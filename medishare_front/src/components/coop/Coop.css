@@ -336,7 +336,7 @@
 .coop-form-row.align-top .coop-form-label { padding-top: 8px; }
 .coop-form-input,
 .coop-form-textarea {
-  width: 230px;
+  width: 220px;
   flex: 1;
   border: 1px solid var(--coop-border);
   border-radius: 4px;
@@ -478,4 +478,14 @@
   font-size: 13px;
   color: var(--coop-muted);
   text-align: center;
+}
+
+.coop-form-readonly {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: var(--coop-muted);
+  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-border);
+  border-radius: 4px;
 }
