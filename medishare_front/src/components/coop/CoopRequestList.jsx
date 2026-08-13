@@ -232,7 +232,6 @@ function CoopRequestList({ mode }) {
                     <span className={"coop-row-counterpart-primary" + (isIncoming && !r.isRead ? " unread" : "")}>
                       {counterpartDisplay}
                     </span>
-                    <span className="coop-row-direction-text">{isIncoming ? "보냄" : "에게 보냄"}</span>
                     {mode === "all" && (
                       <span className={"coop-direction-badge" + (isIncoming ? " in" : " out")}>
                         {isIncoming ? "받음" : "보냄"}

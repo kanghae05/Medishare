@@ -50,6 +50,7 @@ function CoopStudyDetailPanel({ pacsStudyId }) {
         <div className="coop-detail-grid">
           <div><span className="coop-detail-label">환자번호</span>{detail.patientIdText || `#${detail.patientNo}`}</div>
           <div><span className="coop-detail-label">성별</span>{formatSex(detail.patientSex)}</div>
+          <div><span className="coop-detail-label">이름</span>{detail.patientName || "-"}</div>
           <div><span className="coop-detail-label">나이</span>{detail.age != null ? `만 ${detail.age}세` : "-"}</div>
         </div>
       </div>

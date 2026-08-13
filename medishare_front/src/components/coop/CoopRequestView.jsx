@@ -108,14 +108,6 @@ function CoopRequestView() {
 
       <div className="coop-view-card">
         <div className="coop-view-row">
-          <span className="coop-view-label">환자</span>
-          <span className="coop-view-value">{vo.patientName || `환자 #${vo.patientId}`}</span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">검사</span>
-          <span className="coop-view-value">{vo.pacsStudyLabel || `검사 #${vo.pacsStudyId}`}</span>
-        </div>
-        <div className="coop-view-row">
           <span className="coop-view-label">요청 의사</span>
           <span className="coop-view-value">
             {renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}
