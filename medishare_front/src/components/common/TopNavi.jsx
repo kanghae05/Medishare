@@ -12,6 +12,7 @@ const getStoredLogin = () => {
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
+  const isLoggedIn = Boolean(token);
 
   const logout = (event) => {
     event.preventDefault();
@@ -34,10 +35,12 @@ function TopNavi() {
             <li className="nav-item">
               <NavLink to="/" className="nav-link">Home</NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
-            </li>
-            {token && (
+            {isLoggedIn && (
+              <li className="nav-item">
+                <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
+              </li>
+            )}
+            {isLoggedIn && (
               <>
                 <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
                 <li className="nav-item"><NavLink to="/special-cases" className="nav-link">특이케이스</NavLink></li>
@@ -47,7 +50,7 @@ function TopNavi() {
             )}
           </ul>
           <ul className="navbar-nav ms-auto">
-            {!token ? (
+            {!isLoggedIn ? (
               <>
                 <li className="nav-item"><Link className="nav-link" to="/member/login">Login</Link></li>
                 <li className="nav-item"><Link className="nav-link" to="/member/write">Join</Link></li>

@@ -79,24 +79,10 @@ function ConsultationStatusPage() {
         <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
         <span>~</span>
         <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
-        <button
-          type="button"
-          className="dpart-secondary"
-          onClick={() => {
-            setStartDate("");
-            setEndDate("");
-          }}
-        >
+        <button type="button" className="dpart-secondary" onClick={() => { setStartDate(""); setEndDate(""); }}>
           초기화
         </button>
-        <button
-          type="button"
-          className="dpart-secondary"
-          onClick={() => {
-            setStartDate(todayString());
-            setEndDate(todayString());
-          }}
-        >
+        <button type="button" className="dpart-secondary" onClick={() => { setStartDate(todayString()); setEndDate(todayString()); }}>
           오늘
         </button>
       </div>

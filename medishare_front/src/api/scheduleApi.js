@@ -1,18 +1,18 @@
-import api from "../components/common/api";
+import dpartApi from "./dpartApi";
 
-export const createSchedule = (payload) => api.post("/api/schedules", payload);
+export const createSchedule = (payload) => dpartApi.post("/api/schedules", payload);
 
-export const getSchedule = (scheduleId) => api.get(`/api/schedules/${scheduleId}`);
+export const getSchedule = (scheduleId) => dpartApi.get(`/api/schedules/${scheduleId}`);
 
-export const getDoctorSchedules = (doctorId) => api.get(`/api/schedules/doctor/${doctorId}`);
+export const getDoctorSchedules = (doctorId) => dpartApi.get(`/api/schedules/doctor/${doctorId}`);
 
 export const getDoctorSchedulesByDate = (doctorId, date) =>
-  api.get(`/api/schedules/doctor/${doctorId}`, { params: { date } });
+  dpartApi.get(`/api/schedules/doctor/${doctorId}`, { params: { date } });
 
 export const getDoctorSchedulesByPeriod = (doctorId, startDate, endDate) =>
-  api.get(`/api/schedules/doctor/${doctorId}`, { params: { startDate, endDate } });
+  dpartApi.get(`/api/schedules/doctor/${doctorId}`, { params: { startDate, endDate } });
 
 export const updateSchedule = (scheduleId, payload) =>
-  api.put(`/api/schedules/${scheduleId}`, payload);
+  dpartApi.put(`/api/schedules/${scheduleId}`, payload);
 
-export const deleteSchedule = (scheduleId) => api.delete(`/api/schedules/${scheduleId}`);
+export const deleteSchedule = (scheduleId) => dpartApi.delete(`/api/schedules/${scheduleId}`);

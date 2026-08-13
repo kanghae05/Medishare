@@ -1,5 +1,10 @@
 import { useEffect, useState } from "react";
-import { scheduleTypeLabels, toTimeWithSeconds, toTimeWithoutSeconds, todayString } from "./dpartUtils";
+import {
+  scheduleTypeLabels,
+  toTimeWithSeconds,
+  toTimeWithoutSeconds,
+  todayString,
+} from "./dpartUtils";
 
 const emptyForm = {
   scheduleDate: todayString(),
@@ -14,6 +19,7 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
 
   useEffect(() => {
     if (!open) return;
+
     if (initialData) {
       setForm({
         scheduleDate: initialData.scheduleDate || todayString(),
@@ -22,9 +28,10 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
         scheduleType: initialData.scheduleType || "AVAILABLE",
         memo: initialData.memo || "",
       });
-    } else {
-      setForm(emptyForm);
+      return;
     }
+
+    setForm(emptyForm);
   }, [open, initialData]);
 
   if (!open) return null;
@@ -48,7 +55,12 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
       <div className="dpart-modal" role="dialog" aria-modal="true">
         <div className="dpart-modal-head">
           <h3>{mode === "edit" ? "일정 수정" : "일정 등록"}</h3>
-          <button type="button" className="dpart-icon-button" onClick={onClose} aria-label="닫기">
+          <button
+            type="button"
+            className="dpart-icon-button"
+            onClick={onClose}
+            aria-label="닫기"
+          >
             x
           </button>
         </div>
@@ -56,21 +68,46 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
         <form className="dpart-form" onSubmit={submit}>
           <label>
             <span>날짜</span>
-            <input type="date" name="scheduleDate" value={form.scheduleDate} onChange={change} required />
+            <input
+              type="date"
+              name="scheduleDate"
+              value={form.scheduleDate}
+              onChange={change}
+              required
+            />
           </label>
+
           <div className="dpart-form-grid">
             <label>
               <span>시작 시간</span>
-              <input type="time" name="startTime" value={form.startTime} onChange={change} required />
+              <input
+                type="time"
+                name="startTime"
+                value={form.startTime}
+                onChange={change}
+                required
+              />
             </label>
             <label>
               <span>종료 시간</span>
-              <input type="time" name="endTime" value={form.endTime} onChange={change} required />
+              <input
+                type="time"
+                name="endTime"
+                value={form.endTime}
+                onChange={change}
+                required
+              />
             </label>
           </div>
+
           <label>
             <span>일정 상태</span>
-            <select name="scheduleType" value={form.scheduleType} onChange={change} required>
+            <select
+              name="scheduleType"
+              value={form.scheduleType}
+              onChange={change}
+              required
+            >
               {Object.entries(scheduleTypeLabels).map(([value, label]) => (
                 <option key={value} value={value}>
                   {label}
@@ -78,6 +115,7 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
               ))}
             </select>
           </label>
+
           <label>
             <span>메모</span>
             <textarea name="memo" rows="4" value={form.memo} onChange={change} />
@@ -88,7 +126,7 @@ function ScheduleModal({ open, mode, initialData, onClose, onSubmit, saving }) {
               취소
             </button>
             <button type="submit" className="dpart-primary" disabled={saving}>
-              {saving ? "저장 중" : "저장"}
+              {saving ? "저장 중..." : "저장"}
             </button>
           </div>
         </form>

@@ -115,15 +115,9 @@ function SchedulePage() {
 
       <div className="dpart-filter-band">
         <div className="dpart-segment">
-          <button className={filterMode === "all" ? "active" : ""} onClick={() => setFilterMode("all")}>
-            전체
-          </button>
-          <button className={filterMode === "date" ? "active" : ""} onClick={() => setFilterMode("date")}>
-            날짜
-          </button>
-          <button className={filterMode === "period" ? "active" : ""} onClick={() => setFilterMode("period")}>
-            기간
-          </button>
+          <button className={filterMode === "all" ? "active" : ""} onClick={() => setFilterMode("all")}>전체</button>
+          <button className={filterMode === "date" ? "active" : ""} onClick={() => setFilterMode("date")}>날짜</button>
+          <button className={filterMode === "period" ? "active" : ""} onClick={() => setFilterMode("period")}>기간</button>
         </div>
         {filterMode === "date" && (
           <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
@@ -135,9 +129,7 @@ function SchedulePage() {
             <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
           </>
         )}
-        <button type="button" className="dpart-secondary" onClick={resetFilter}>
-          초기화
-        </button>
+        <button type="button" className="dpart-secondary" onClick={resetFilter}>초기화</button>
       </div>
 
       {message && <div className="dpart-alert success">{message}</div>}
@@ -163,21 +155,13 @@ function SchedulePage() {
               {schedules.map((schedule) => (
                 <tr key={schedule.scheduleId}>
                   <td>{schedule.scheduleDate}</td>
-                  <td>
-                    {schedule.startTime?.slice(0, 5)} - {schedule.endTime?.slice(0, 5)}
-                  </td>
-                  <td>
-                    <StatusBadge type={schedule.scheduleType} />
-                  </td>
+                  <td>{schedule.startTime?.slice(0, 5)} - {schedule.endTime?.slice(0, 5)}</td>
+                  <td><StatusBadge type={schedule.scheduleType} /></td>
                   <td>{schedule.memo || "-"}</td>
                   <td>
                     <div className="dpart-row-actions">
-                      <button type="button" onClick={() => openEdit(schedule)}>
-                        수정
-                      </button>
-                      <button type="button" className="danger" onClick={() => removeSchedule(schedule.scheduleId)}>
-                        삭제
-                      </button>
+                      <button type="button" onClick={() => openEdit(schedule)}>수정</button>
+                      <button type="button" className="danger" onClick={() => removeSchedule(schedule.scheduleId)}>삭제</button>
                     </div>
                   </td>
                 </tr>
