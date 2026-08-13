@@ -22,6 +22,13 @@ public class PacsDepartmentServiceImpl implements PacsDepartmentService {
     }
 
     @Override
+    public List<PacsDepartmentVO> activeList() {
+        return pacsDepartmentRepository.findAll().stream()
+                .filter(department -> "ACTIVE".equals(department.getStatus()))
+                .map(this::toVO).toList();
+    }
+
+    @Override
     public PacsDepartmentVO view(Long no) {
         return toVO(getDepartment(no));
     }

@@ -53,7 +53,7 @@ public class SecurityConfiguration {
                                     "/swagger-ui.html", "/swagger-ui/**", "/api-docs",
                                     "/api-docs/**", "/v3/api-docs/**" ).permitAll()
                             .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
-                            .requestMatchers("/member/login.do", "/member/write.do").permitAll()
+                            .requestMatchers("/member/login.do", "/member/write.do", "/member/departments.do").permitAll()
                             .requestMatchers(HttpMethod.GET, "/product/**").permitAll()
                             .requestMatchers("/board/**", "/image/list.do", "/image/view.do").permitAll()
                             .requestMatchers("/image/write.do", "/image/update.do", "/image/delete.do").hasRole("USER")

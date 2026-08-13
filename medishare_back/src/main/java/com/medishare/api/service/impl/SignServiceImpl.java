@@ -5,6 +5,8 @@ import com.medishare.api.config.security.JwtTokenProvider;
 import com.medishare.api.data.dto.SignInResultDto;
 import com.medishare.api.data.dto.SignUpResultDto;
 import com.medishare.api.member.entity.Member;
+import com.medishare.api.member.entity.PacsDepartment;
+import com.medishare.api.member.repository.PacsDepartmentRepository;
 import com.medishare.api.member.repository.QMemberRepository;
 import com.medishare.api.member.vo.MemberVO;
 import com.medishare.api.service.SignService;
@@ -23,29 +25,34 @@ public class SignServiceImpl implements SignService {
     private final QMemberRepository qMemberRepository;
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
+    private final PacsDepartmentRepository pacsDepartmentRepository;
 
-    public SignServiceImpl(QMemberRepository qMemberRepository, JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder) {
+    public SignServiceImpl(QMemberRepository qMemberRepository, JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder,
+                           PacsDepartmentRepository pacsDepartmentRepository) {
         this.qMemberRepository = qMemberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
+        this.pacsDepartmentRepository = pacsDepartmentRepository;
     }
 
     @Override
     @Transactional
     public SignUpResultDto signUp(MemberVO vo) {
+        validateSignUp(vo);
+        qMemberRepository.findMemberById(vo.getId()).ifPresent(member -> { throw new IllegalArgumentException("Login ID already exists."); });
+        qMemberRepository.findMemberByEmail(vo.getEmail()).ifPresent(member -> { throw new IllegalArgumentException("Email already exists."); });
+        PacsDepartment department = pacsDepartmentRepository.findById(vo.getDepartmentNo())
+                .orElseThrow(() -> new IllegalArgumentException("Department not found."));
+        if (!"ACTIVE".equals(department.getStatus())) throw new IllegalArgumentException("Department is inactive.");
         Member member = new Member();
         member.setId(vo.getId());
         member.setPw(passwordEncoder.encode(vo.getPw()));
         member.setName(vo.getName());
-        member.setGender(vo.getGender());
-        member.setBirth(vo.getBirth());
         member.setTel(vo.getTel());
         member.setEmail(vo.getEmail());
-        member.setPostNo(vo.getPostNo());
-        member.setAddress(vo.getAddress());
-        List<String> roles = new ArrayList<>();
-        for (String role : vo.getRoles()) roles.add(role.equalsIgnoreCase("admin") ? "ROLE_ADMIN" : "ROLE_USER");
-        member.setRoles(roles.isEmpty() ? List.of("ROLE_USER") : roles);
+        member.setDepartment(department);
+        member.setPosition(vo.getPosition());
+        member.setRoles(List.of("ROLE_USER"));
 
         Member savedMember = qMemberRepository.save(member);
         SignUpResultDto result = new SignUpResultDto();
@@ -75,4 +82,14 @@ public class SignServiceImpl implements SignService {
 
     private void setSuccessResult(SignUpResultDto result) { result.setSuccess(true); result.setCode(CommonResponse.SUCCESS.getCode()); result.setMsg(CommonResponse.SUCCESS.getMsg()); }
     private void setFailResult(SignUpResultDto result) { result.setSuccess(false); result.setCode(CommonResponse.FAIL.getCode()); result.setMsg(CommonResponse.FAIL.getMsg()); }
+    private void validateSignUp(MemberVO vo) {
+        if (vo.getId() == null || vo.getId().isBlank()) throw new IllegalArgumentException("Login ID is required.");
+        if (vo.getPw() == null || vo.getPw().isBlank()) throw new IllegalArgumentException("Password is required.");
+        if (vo.getName() == null || vo.getName().isBlank()) throw new IllegalArgumentException("Name is required.");
+        if (vo.getEmail() == null || vo.getEmail().isBlank()) throw new IllegalArgumentException("Email is required.");
+        if (vo.getDepartmentNo() == null) throw new IllegalArgumentException("Department is required.");
+        if (!"전문의".equals(vo.getPosition()) && !"전공의".equals(vo.getPosition())) {
+            throw new IllegalArgumentException("Position must be 전문의 or 전공의.");
+        }
+    }
 }
