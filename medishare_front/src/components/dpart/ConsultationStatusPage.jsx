@@ -2,7 +2,16 @@ import { useCallback, useEffect, useState } from "react";
 import { getConsultationStatistics, getDoctorConsultationStatistics } from "../../api/statisticsApi";
 import LoadingState from "./LoadingState";
 import StatCard from "./StatCard";
-import { currentUser, extractErrorMessage, todayString } from "./dpartUtils";
+import { extractErrorMessage, getCurrentUser, todayString } from "./dpartUtils";
+
+const emptyStats = {
+  totalCount: 0,
+  requestedCount: 0,
+  acceptedCount: 0,
+  inProgressCount: 0,
+  completedCount: 0,
+  canceledCount: 0,
+};
 
 const statusCards = [
   ["totalCount", "전체 협진", "default"],
@@ -14,12 +23,13 @@ const statusCards = [
 ];
 
 function ConsultationStatusPage() {
-  const [stats, setStats] = useState(null);
+  const [stats, setStats] = useState(emptyStats);
   const [scope, setScope] = useState("doctor");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const user = getCurrentUser();
 
   const loadStats = useCallback(async () => {
     setLoading(true);
@@ -31,21 +41,22 @@ function ConsultationStatusPage() {
       };
       const response =
         scope === "doctor"
-          ? await getDoctorConsultationStatistics(currentUser.doctorId, params)
+          ? await getDoctorConsultationStatistics(user.doctorId, params)
           : await getConsultationStatistics(params);
-      setStats(response.data);
+      setStats(response.data || emptyStats);
     } catch (err) {
+      setStats(emptyStats);
       setError(extractErrorMessage(err, "협진 통계를 불러오지 못했습니다."));
     } finally {
       setLoading(false);
     }
-  }, [endDate, scope, startDate]);
+  }, [endDate, scope, startDate, user.doctorId]);
 
   useEffect(() => {
     loadStats();
   }, [loadStats]);
 
-  const total = stats?.totalCount || 0;
+  const total = stats.totalCount || 0;
 
   return (
     <section className="dpart-page">
@@ -65,9 +76,9 @@ function ConsultationStatusPage() {
             전체
           </button>
         </div>
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
         <span>~</span>
-        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
         <button
           type="button"
           className="dpart-secondary"
@@ -97,7 +108,7 @@ function ConsultationStatusPage() {
         <>
           <div className="dpart-stat-grid">
             {statusCards.map(([key, label, tone]) => (
-              <StatCard key={key} label={label} value={stats?.[key]} tone={tone} />
+              <StatCard key={key} label={label} value={stats[key]} tone={tone} />
             ))}
           </div>
 
@@ -105,7 +116,7 @@ function ConsultationStatusPage() {
             <h2>상태 분포</h2>
             <div className="dpart-bars">
               {statusCards.slice(1).map(([key, label, tone]) => {
-                const value = stats?.[key] || 0;
+                const value = stats[key] || 0;
                 const width = total > 0 ? Math.round((value / total) * 100) : 0;
                 return (
                   <div className="dpart-bar-row" key={key}>

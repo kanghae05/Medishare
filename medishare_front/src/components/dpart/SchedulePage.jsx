@@ -11,7 +11,7 @@ import EmptyState from "./EmptyState";
 import LoadingState from "./LoadingState";
 import ScheduleModal from "./ScheduleModal";
 import StatusBadge from "./StatusBadge";
-import { currentUser, extractErrorMessage, todayString } from "./dpartUtils";
+import { extractErrorMessage, getCurrentUser, todayString } from "./dpartUtils";
 
 function SchedulePage() {
   const [schedules, setSchedules] = useState([]);
@@ -25,6 +25,7 @@ function SchedulePage() {
   const [error, setError] = useState("");
   const [modalOpen, setModalOpen] = useState(false);
   const [editingSchedule, setEditingSchedule] = useState(null);
+  const user = getCurrentUser();
 
   const loadSchedules = useCallback(async () => {
     setLoading(true);
@@ -32,19 +33,20 @@ function SchedulePage() {
     try {
       let response;
       if (filterMode === "date") {
-        response = await getDoctorSchedulesByDate(currentUser.doctorId, date);
+        response = await getDoctorSchedulesByDate(user.doctorId, date);
       } else if (filterMode === "period") {
-        response = await getDoctorSchedulesByPeriod(currentUser.doctorId, startDate, endDate);
+        response = await getDoctorSchedulesByPeriod(user.doctorId, startDate, endDate);
       } else {
-        response = await getDoctorSchedules(currentUser.doctorId);
+        response = await getDoctorSchedules(user.doctorId);
       }
       setSchedules(response.data || []);
     } catch (err) {
       setError(extractErrorMessage(err, "일정 목록을 불러오지 못했습니다."));
+      setSchedules([]);
     } finally {
       setLoading(false);
     }
-  }, [date, endDate, filterMode, startDate]);
+  }, [date, endDate, filterMode, startDate, user.doctorId]);
 
   useEffect(() => {
     loadSchedules();
@@ -68,7 +70,7 @@ function SchedulePage() {
         await updateSchedule(editingSchedule.scheduleId, payload);
         setMessage("일정이 수정되었습니다.");
       } else {
-        await createSchedule({ ...payload, doctorId: currentUser.doctorId });
+        await createSchedule({ ...payload, doctorId: user.doctorId });
         setMessage("일정이 등록되었습니다.");
       }
       setModalOpen(false);
@@ -103,7 +105,7 @@ function SchedulePage() {
     <section className="dpart-page">
       <div className="dpart-page-head">
         <div>
-          <h1>의사 일정</h1>
+          <h1>{user.isAdmin ? "의료진 일정" : "의사 일정"}</h1>
           <p>협진 가능한 시간과 일정을 등록하고 관리합니다.</p>
         </div>
         <button type="button" className="dpart-primary" onClick={openCreate}>
@@ -124,13 +126,13 @@ function SchedulePage() {
           </button>
         </div>
         {filterMode === "date" && (
-          <input type="date" value={date} onChange={(e) => setDate(e.target.value)} />
+          <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
         )}
         {filterMode === "period" && (
           <>
-            <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+            <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
             <span>~</span>
-            <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+            <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
           </>
         )}
         <button type="button" className="dpart-secondary" onClick={resetFilter}>

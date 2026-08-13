@@ -102,6 +102,11 @@
   margin: 6px 0 0;
 }
 
+.dpart-inline-note {
+  color: #b26b00;
+  font-weight: 700;
+}
+
 .dpart-primary,
 .dpart-secondary,
 .dpart-row-actions button,
