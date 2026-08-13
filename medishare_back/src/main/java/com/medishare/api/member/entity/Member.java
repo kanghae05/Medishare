@@ -9,6 +9,8 @@ import java.time.LocalDateTime;
 import java.util.*;
 
 @Entity @Data @Builder @NoArgsConstructor @AllArgsConstructor
+@ToString(exclude = "department")
+@EqualsAndHashCode(exclude = "department")
 @Table(name = "member")
 public class Member implements MemberDetails {
     @Id @GeneratedValue(strategy = GenerationType.IDENTITY) private Long no;

@@ -14,6 +14,10 @@ import SpecialCaseList from "./pages/SpecialCase/SpecialCaseList"
 import SpecialCaseDetail from "./pages/SpecialCase/SpecialCaseDetail"
 import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
 import DPartComp from "./components/dpart/DPartComp"
+import MedicalStaffManagement from "./pages/Admin/MedicalStaffManagement"
+import MedicalStaffDetail from "./pages/Admin/MedicalStaffDetail"
+import AccessLogManagement from "./pages/Admin/AccessLogManagement"
+import AccessLogDetail from "./pages/Admin/AccessLogDetail"
 
 function App() {
 
@@ -53,6 +57,10 @@ function App() {
           <Route path="/special-cases/:caseId" element={token ? <SpecialCaseDetail currentUser={currentUser} /> : <Navigate to="/" replace />} />
           <Route path="/special-cases/:caseId/edit" element={token ? <SpecialCaseCreate /> : <Navigate to="/" replace />} />
           <Route path="/d/*" element={<DPartComp />} />
+          <Route path="/admin/medical-staff" element={<MedicalStaffManagement isAdmin={isAdmin} />} />
+          <Route path="/admin/medical-staff/:memberNo" element={<MedicalStaffDetail isAdmin={isAdmin} />} />
+          <Route path="/admin/access-logs" element={<AccessLogManagement isAdmin={isAdmin} />} />
+          <Route path="/admin/access-logs/:logNo" element={<AccessLogDetail isAdmin={isAdmin} />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

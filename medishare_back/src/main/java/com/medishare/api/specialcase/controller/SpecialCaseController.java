@@ -89,7 +89,8 @@ public class SpecialCaseController {
         Object principal = authentication.getPrincipal();
 
         try {
-            Object id = principal.getClass().getMethod("getId").invoke(principal);
+            // 로그인 문자열 ID가 아니라 작성자 FK로 사용할 숫자 회원 PK를 가져온다.
+            Object id = principal.getClass().getMethod("getNo").invoke(principal);
 
             if (id instanceof Number number) {
                 return number.longValue();

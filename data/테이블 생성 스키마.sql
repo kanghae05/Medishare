@@ -61,7 +61,7 @@ CREATE TABLE role (
     UNIQUE KEY uk_role_code (role_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-CREATE TABLE member_role (
+CREATE TABLE member_roles (
     member_no BIGINT NOT NULL,
     role_no BIGINT NOT NULL,
     assigned_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,

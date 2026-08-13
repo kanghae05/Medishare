@@ -8,6 +8,7 @@ import com.medishare.api.member.entity.Member;
 import com.medishare.api.member.entity.PacsDepartment;
 import com.medishare.api.member.repository.PacsDepartmentRepository;
 import com.medishare.api.member.repository.QMemberRepository;
+import com.medishare.api.member.service.MemberRoleAuthorityService;
 import com.medishare.api.member.vo.MemberVO;
 import com.medishare.api.service.SignService;
 import lombok.extern.log4j.Log4j2;
@@ -26,13 +27,16 @@ public class SignServiceImpl implements SignService {
     private final JwtTokenProvider jwtTokenProvider;
     private final PasswordEncoder passwordEncoder;
     private final PacsDepartmentRepository pacsDepartmentRepository;
+    private final MemberRoleAuthorityService memberRoleAuthorityService;
 
     public SignServiceImpl(QMemberRepository qMemberRepository, JwtTokenProvider jwtTokenProvider, PasswordEncoder passwordEncoder,
-                           PacsDepartmentRepository pacsDepartmentRepository) {
+                           PacsDepartmentRepository pacsDepartmentRepository,
+                           MemberRoleAuthorityService memberRoleAuthorityService) {
         this.qMemberRepository = qMemberRepository;
         this.jwtTokenProvider = jwtTokenProvider;
         this.passwordEncoder = passwordEncoder;
         this.pacsDepartmentRepository = pacsDepartmentRepository;
+        this.memberRoleAuthorityService = memberRoleAuthorityService;
     }
 
     @Override
@@ -72,6 +76,10 @@ public class SignServiceImpl implements SignService {
         if (!passwordEncoder.matches(pw, member.getPw())) {
             throw new RuntimeException("Invalid password.");
         }
+        if (!"ACTIVE".equals(member.getStatus())) {
+            throw new IllegalStateException("This account is inactive or suspended.");
+        }
+        member.setRoles(memberRoleAuthorityService.getAuthorities(member.getNo()));
 
         SignInResultDto result = SignInResultDto.builder()
                 .token(jwtTokenProvider.createToken(member.getId(), member.getName(), member.getRoles()))

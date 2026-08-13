@@ -46,7 +46,6 @@ export const canAccessDPart = () => {
 };
 
 export const currentUser = getCurrentUser();
-
 export const scheduleTypeLabels = {
   AVAILABLE: "진료 가능",
   RESERVED: "진료 예정",

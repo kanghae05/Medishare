@@ -17,35 +17,39 @@ public class CoopRequestVO {
 
     private Long reqDoctorId;
     private String reqDoctorName;
+    // 진료과·세부전공·직급 (" · "로 이어붙임), 본인("나")이면 비워둠
+    private String reqDoctorMeta;
 
-    /** "지정의사" 또는 "진료과" */
+    // "지정의사" 또는 "진료과"
     private String recvType;
 
     private Long recvDoctorId;
     private String recvDoctorName;
+    private String recvDoctorMeta;
 
     private Long recvDeptId;
     private String recvDeptName;
 
-    /** 실제 수락한 의사 (진료과 요청은 수락 전까지 null) */
+    // 실제 수락한 의사 (진료과 요청은 수락 전까지 null)
     private Long acceptDoctorId;
     private String acceptDoctorName;
+    private String acceptDoctorMeta;
 
     private Long patientId;
     private String patientName;
 
     private Long pacsStudyId;
-    /** 검사 목록 표시용 (예: "CT 2026-08-10") - PACS 담당자 API 연동 후 채움 */
+    // 검사 목록 표시용 (예: "CT 2026-08-10") - PACS 담당자 API 연동 후 채움
     private String pacsStudyLabel;
 
     private Long reportId;
 
-    /** 재요청(이메일 답장 패턴) - 이전 요청 ID */
+    // 재요청(이메일 답장 패턴) - 이전 요청 ID
     private Long originRequestId;
 
     private String reqContent;
 
-    /** 실제 DB 상태값: 요청/수락/거절/취소/만료 */
+    // 실제 DB 상태값: 요청/수락/거절/취소/만료
     private String status;
 
     /**
@@ -56,21 +60,21 @@ public class CoopRequestVO {
      */
     private String displayStatus;
 
-    /** 조회자가 수락/거절 버튼을 볼 수 있는지 (프론트 버튼 노출 판단용) */
+    // 조회자가 수락/거절 버튼을 볼 수 있는지 (프론트 버튼 노출 판단용)
     private Boolean canRespond;
 
     private String reqTime;
     private String respTime;
 
-    /** 지정의사 요청 거절 사유 */
+    // 지정의사 요청 거절 사유
     private String rejectReason;
 
     private Boolean isRead;
     private String readTime;
 
-    /** 전체 협진 내역 조회 시: "received" 또는 "sent" */
+    // 전체 협진 내역 조회 시: "received" 또는 "sent"
     private String direction;
 
-    /** 진료과 요청 상세 조회 시 개인별 거절 목록 (의사명+사유) */
+    // 진료과 요청 상세 조회 시 개인별 거절 목록 (의사명+사유)
     private List<CoopRequestDeptRejectVO> deptRejections;
 }

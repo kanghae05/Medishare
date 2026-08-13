@@ -8,6 +8,7 @@ import com.medishare.api.coop.repository.CoopRequestDeptRejectRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.repository.CoopMemberLookupRepository;
+import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
@@ -34,11 +35,11 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     private final CoopRequestDeptRejectRepository deptRejectRepository;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopMemberLookupRepository memberRepository;
+    private final CoopDepartmentLookupRepository departmentRepository;
 
-    // TODO(3번 회원관리 연동): 의사명/진료과명 조회, 소속 진료과 의사 수 조회는
-    // MemberRepository / DepartmentRepository가 준비되면 아래 enrich* / resolveDeptDoctorCount에 연결한다.
+    // 의사명/진료과명은 CoopMemberLookupRepository/CoopDepartmentLookupRepository로 채운다 (toVO 참고).
+    // 조회하는 본인(viewerId)과 같은 사람이면 이름 대신 "나"로 표시한다.
     // 환자명/검사설명은 PACS 담당자의 실제 엔티티(PacsStudy -> PacsStudy.getPatient())를 조회 전용으로 가져다 쓴다.
-    // patient_id 컬럼을 없앤 뒤로는 PacsPatient를 직접 조회할 일이 없어 CoopPacsPatientLookupRepository는 제거했다.
 
     // ------------------------------------------------------------------
     // 조회
@@ -59,7 +60,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
         List<CoopRequestVO> result = new ArrayList<>();
         for (CoopRequest c : list) {
-            CoopRequestVO vo = toVO(c);
+            CoopRequestVO vo = toVO(c, doctorId);
             vo.setDirection("received");
             applyDisplayStatus(vo, c, doctorId);
             result.add(vo);
@@ -80,7 +81,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
         List<CoopRequestVO> result = new ArrayList<>();
         for (CoopRequest c : list) {
-            CoopRequestVO vo = toVO(c);
+            CoopRequestVO vo = toVO(c, doctorId);
             vo.setDirection("sent");
             // 보낸 협진함은 요청자 본인 시점이라 별도 계산 없이 실제 status를 그대로 노출
             vo.setDisplayStatus(c.getStatus().name());
@@ -103,7 +104,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
         List<CoopRequestVO> result = new ArrayList<>();
         for (CoopRequest c : list) {
-            CoopRequestVO vo = toVO(c);
+            CoopRequestVO vo = toVO(c, doctorId);
             boolean isSent = c.getReqDoctorId().equals(doctorId);
             vo.setDirection(isSent ? "sent" : "received");
             if (isSent) {
@@ -132,7 +133,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             coopRequestRepository.save(c);
         }
 
-        CoopRequestVO vo = toVO(c);
+        CoopRequestVO vo = toVO(c, viewerDoctorId);
         boolean isSent = c.getReqDoctorId().equals(viewerDoctorId);
         vo.setDirection(isSent ? "sent" : "received");
         if (isSent) {
@@ -179,7 +180,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             reportId = origin.getReportId();
         }
 
-        validateCreate(recvType, vo.getReqDoctorId(), vo.getRecvDoctorId(), vo.getRecvDeptId());
+        validateCreate(recvType, vo.getReqDoctorId(), vo.getRecvDoctorId(), vo.getRecvDeptId(), pacsStudyId, vo.getReqContent());
 
         CoopRequest entity = CoopRequest.builder()
                 .reqDoctorId(vo.getReqDoctorId())
@@ -194,10 +195,11 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 .isRead(false)
                 .build();
 
-        return toVO(coopRequestRepository.save(entity));
+        return toVO(coopRequestRepository.save(entity), vo.getReqDoctorId());
     }
 
-    private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId) {
+    private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId,
+                                Long pacsStudyId, String reqContent) {
         if (recvType == RecvType.지정의사) {
             if (recvDoctorId == null) {
                 throw new RuntimeException("지정의사 요청은 수신 의사를 선택해야 합니다.");
@@ -209,6 +211,12 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             if (recvDeptId == null) {
                 throw new RuntimeException("진료과 요청은 수신 진료과를 선택해야 합니다.");
             }
+        }
+        if (pacsStudyId == null) {
+            throw new RuntimeException("검사를 선택해야 합니다.");
+        }
+        if (reqContent == null || reqContent.isBlank()) {
+            throw new RuntimeException("요청 내용을 입력해야 합니다.");
         }
     }
 
@@ -370,7 +378,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return memberRepository.countByDepartment_NoAndStatus(deptId, "ACTIVE");
     }
 
-    private CoopRequestVO toVO(CoopRequest c) {
+    private CoopRequestVO toVO(CoopRequest c, Long viewerId) {
         CoopRequestVO vo = new CoopRequestVO();
         vo.setCoopRequestId(c.getCoopRequestId());
         vo.setReqDoctorId(c.getReqDoctorId());
@@ -405,8 +413,47 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                     }
                 });
 
-        // TODO(3번 회원관리 연동): reqDoctorName, recvDoctorName, recvDeptName, acceptDoctorName 채우기
+        // 요청/수신/수락 의사 이름 - 조회하는 본인이면 "나"로, 아니면 이름+메타(진료과·세부전공·직급)로 채운다.
+        applyDoctorName(c.getReqDoctorId(), viewerId, vo::setReqDoctorName, vo::setReqDoctorMeta);
+        if (c.getRecvDoctorId() != null) {
+            applyDoctorName(c.getRecvDoctorId(), viewerId, vo::setRecvDoctorName, vo::setRecvDoctorMeta);
+        }
+        if (c.getAcceptDoctorId() != null) {
+            applyDoctorName(c.getAcceptDoctorId(), viewerId, vo::setAcceptDoctorName, vo::setAcceptDoctorMeta);
+        }
+        if (c.getRecvDeptId() != null) {
+            departmentRepository.findById(c.getRecvDeptId())
+                    .ifPresent(d -> vo.setRecvDeptName(d.getDepartmentName()));
+        }
+
         return vo;
+    }
+
+    /**
+     * 의사 이름을 채운다. 조회하는 본인(viewerId)과 같은 사람이면 "나"로 표시하고
+     * 메타(진료과·세부전공·직급)는 비워둔다. 남이면 실제 이름+메타를 채운다.
+     */
+    private void applyDoctorName(Long doctorId, Long viewerId,
+                                 java.util.function.Consumer<String> nameSetter,
+                                 java.util.function.Consumer<String> metaSetter) {
+        if (doctorId.equals(viewerId)) {
+            nameSetter.accept("나");
+            return;
+        }
+        memberRepository.findById(doctorId).ifPresent(m -> {
+            nameSetter.accept(m.getName());
+            List<String> metaParts = new ArrayList<>();
+            if (m.getDepartment() != null && m.getDepartment().getDepartmentName() != null) {
+                metaParts.add(m.getDepartment().getDepartmentName());
+            }
+            if (m.getSpecialty() != null && !m.getSpecialty().isBlank()) {
+                metaParts.add(m.getSpecialty());
+            }
+            if (m.getPosition() != null && !m.getPosition().isBlank()) {
+                metaParts.add(m.getPosition());
+            }
+            metaSetter.accept(String.join(" · ", metaParts));
+        });
     }
 
     /** pacs_study.study_date는 "20260810" 형태(DICOM 날짜)라 화면용으로 "2026-08-10"로 바꿔준다. */

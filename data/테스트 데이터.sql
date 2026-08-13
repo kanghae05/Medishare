@@ -42,4 +42,74 @@ INSERT INTO member (login_id, password, member_name, email, phone, department_no
 ('doctor17', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '황비뇨', 'doctor17@medishare.local', '010-1000-0017', 10, '전문의', '비뇨기종양', 'ACTIVE', TRUE),
 ('doctor18', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '안응급', 'doctor18@medishare.local', '010-1000-0018', 15, '전문의', '응급의학', 'ACTIVE', TRUE),
 ('doctor19', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '류가정', 'doctor19@medishare.local', '010-1000-0019', 17, '전문의', '가정의학', 'ACTIVE', TRUE),
-('doctor20', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);
+('doctor20', '{bcrypt}$2a$10$r2xMEvG2Nhw0roDDd3OXOeeZQrQcqcMgw1wlIPpxmr8eHWF43oN0i', '문진단', 'doctor20@medishare.local', '010-1000-0020', 20, '전문의', '진단검사의학', 'ACTIVE', TRUE);report
+-- Administrator account and the existing role mapping used by JWT/Spring Security.
+-- Password: admin1234 (encoded with the configured BCrypt PasswordEncoder)
+INSERT INTO role (role_code, role_name, description, stable) VALUES
+('ROLE_ADMIN', 'Administrator', 'Medical staff management administrator', TRUE),
+('ROLE_USER', 'User', 'Default medical staff role', TRUE)
+ON DUPLICATE KEY UPDATE
+role_name = VALUES(role_name), description = VALUES(description), stable = VALUES(stable);
+
+-- Only permissions already enforced by application code are seeded here.
+INSERT INTO permission (permission_code, permission_name, description, stable) VALUES
+('IMAGE_VIEW', 'PACS image view', 'View PACS study lists, details, and thumbnails', TRUE)
+ON DUPLICATE KEY UPDATE
+permission_name = VALUES(permission_name), description = VALUES(description), stable = VALUES(stable);
+
+-- ROLE_ADMIN bypasses permission checks in PacsAuthorizationService.
+-- ROLE_USER receives the currently enforced PACS viewing permission.
+INSERT IGNORE INTO role_permission (role_no, permission_no)
+SELECT r.no, p.no
+FROM role r
+JOIN permission p ON p.permission_code = 'IMAGE_VIEW'
+WHERE r.role_code = 'ROLE_USER';
+
+INSERT INTO member (login_id, password, member_name, email, phone, status, stable) VALUES
+('admin', '{bcrypt}$2a$10$aXzZZ8tWKt9nNdJ9.SDGv.xx38ni5t5zc4Trg.Ws74p9PFoVqml9S', 'Test Administrator', 'admin@medishare.local', '010-0000-0000', 'ACTIVE', TRUE)
+ON DUPLICATE KEY UPDATE
+password = VALUES(password), member_name = VALUES(member_name), email = VALUES(email),
+phone = VALUES(phone), status = VALUES(status), stable = VALUES(stable);
+
+INSERT IGNORE INTO member_roles (member_no, role_no)
+SELECT m.no, r.no
+FROM member m
+JOIN role r ON r.role_code = 'ROLE_ADMIN'
+WHERE m.login_id = 'admin';
+
+INSERT IGNORE INTO member_roles (member_no, role_no)
+SELECT m.no, r.no
+FROM member m
+JOIN role r ON r.role_code = 'ROLE_USER'
+WHERE m.login_id LIKE 'doctor%';
+
+
+-- 소견서 임시 데이터
+INSERT INTO report (study_no, member_id, title, findings, impression, status, write_date, update_date) VALUES
+(4, 1, '두부 CT 판독 소견', '두개 내 급성 출혈 소견 없음. 뇌실질 내 이상 신호 없음.', '특이 소견 없음.', 'FINAL', NOW(), NOW()),
+(6, 4, '복부 및 골반 CT 판독 소견', '간, 비장, 신장 크기 정상. 우하복부에 경도의 지방 침윤 소견.', '경도의 장간막 지방 침윤, 임상 상관 요망.', 'DRAFT', NOW(), NOW());
+
+
+-- 환자: 이름, 성별, 생년월일
+UPDATE pacs_patient SET patient_name = '오지훈', patient_sex = 'M', patient_birth_date = '19850312' WHERE no = 8;
+UPDATE pacs_patient SET patient_name = '백서연', patient_sex = 'F', patient_birth_date = '19921107' WHERE no = 9;
+UPDATE pacs_patient SET patient_name = '남궁민', patient_sex = 'M', patient_birth_date = '19770825' WHERE no = 10;
+UPDATE pacs_patient SET patient_name = '조은채', patient_sex = 'F', patient_birth_date = '20010419' WHERE no = 11;
+UPDATE pacs_patient SET patient_name = '유하람', patient_sex = 'M', patient_birth_date = '19990630' WHERE no = 12;
+UPDATE pacs_patient SET patient_name = '임도현', patient_sex = 'F', patient_birth_date = '19681203' WHERE no = 13;
+
+-- 검사: 촬영시간, 검사설명
+UPDATE pacs_study SET study_time = '075000', study_description = '흉부 CT (수술 전 평가)' WHERE no = 8;
+UPDATE pacs_study SET study_time = '091500', study_description = '흉부 CT (기흉 평가)' WHERE no = 9;
+UPDATE pacs_study SET study_time = '110000', study_description = '흉부 CT (늑막삼출 평가)' WHERE no = 10;
+UPDATE pacs_study SET study_time = '134000', study_description = '흉부 CT (종격동 병변 평가)' WHERE no = 11;
+UPDATE pacs_study SET study_time = '152000', study_description = '흉부 CT (간질성 폐질환 평가)' WHERE no = 12;
+UPDATE pacs_study SET study_time = '170500', study_description = '흉부 CT (기관지확장증 평가)' WHERE no = 13;
+
+-- 시리즈: 설명
+UPDATE pacs_series SET series_description = 'Chest CT Preop Evaluation' WHERE no = 5;
+UPDATE pacs_series SET series_description = 'Chest CT Pneumothorax Eval' WHERE no = 6;
+UPDATE pacs_series SET series_description = 'Chest CT Pleural Series' WHERE no = 7;
+UPDATE pacs_series SET series_description = 'Chest CT Mediastinal Series' WHERE no = 8;
+UPDATE pacs_series SET series_description = 'Chest CT Interstitial Pattern' WHERE no = 9;
+UPDATE pacs_series SET series_description = 'Chest CT Airway Series' WHERE no = 10;

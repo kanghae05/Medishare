@@ -258,10 +258,22 @@
 .coop-row-unread-dot.hidden { visibility: hidden; }
 
 .coop-row-main { flex: 1; min-width: 0; }
-.coop-row-top { display: flex; align-items: baseline; margin-bottom: 3px; }
-.coop-row-patient { font-size: 14.5px; color: var(--coop-ink); margin-right: 8px; }
-.coop-row-patient.unread { font-weight: 700; }
-.coop-row-counterpart { font-size: 12.5px; color: var(--coop-muted); }
+.coop-row-top { display: flex; align-items: baseline; margin-bottom: 2px; }
+.coop-row-counterpart-primary { font-size: 14.5px; font-weight: 600; color: var(--coop-ink); margin-right: 6px; }
+.coop-row-counterpart-primary.unread { font-weight: 700; }
+.coop-row-direction-text { font-size: 12px; color: var(--coop-muted); margin-right: 6px; }
+.coop-row-sub { display: flex; align-items: baseline; margin-bottom: 3px; }
+.coop-row-patient-label {
+  font-size: 11px;
+  color: var(--coop-muted);
+  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-border);
+  border-radius: 3px;
+  padding: 0 5px;
+  line-height: 16px;
+  margin-right: 5px;
+}
+.coop-row-patient { font-size: 13px; color: var(--coop-ink); }
 .coop-row-content {
   font-size: 13px;
   color: var(--coop-muted);
@@ -336,6 +348,7 @@
 .coop-form-row.align-top .coop-form-label { padding-top: 8px; }
 .coop-form-input,
 .coop-form-textarea {
+  width: 220px;
   flex: 1;
   border: 1px solid var(--coop-border);
   border-radius: 4px;
@@ -442,4 +455,62 @@
   color: #842029;
   font-size: 12.5px;
   margin-top: 6px;
+}
+
+/* ---------- 의사 검색 자동완성 ---------- */
+.coop-autocomplete {
+  position: relative;
+  flex: 1;
+}
+.coop-autocomplete-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: var(--coop-card);
+  border: 1px solid var(--coop-border);
+  border-radius: 6px;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
+  max-height: 260px;
+  overflow-y: auto;
+  z-index: 20;
+}
+.coop-autocomplete-item {
+  padding: 9px 14px;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+.coop-autocomplete-item:hover { background: var(--coop-page-bg); }
+.coop-autocomplete-name { font-size: 13.5px; font-weight: 600; color: var(--coop-ink); }
+.coop-autocomplete-meta { font-size: 12px; color: var(--coop-muted); }
+.coop-autocomplete-empty {
+  padding: 12px 14px;
+  font-size: 13px;
+  color: var(--coop-muted);
+  text-align: center;
+}
+
+.coop-form-readonly {
+  flex: 1;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: var(--coop-muted);
+  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-border);
+  border-radius: 4px;
+}
+
+.coop-study-reason {
+  flex: 1;
+  font-size: 12.5px;
+  color: var(--coop-muted);
+  padding: 6px 0;
+}
+
+.coop-doctor-meta {
+  font-size: 12px;
+  color: var(--coop-muted);
+  font-weight: 400;
 }
