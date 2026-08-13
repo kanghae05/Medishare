@@ -17,14 +17,13 @@ public class Member implements MemberDetails {
     @Column(name = "member_name", nullable = false, length = 200) private String name;
     @Column(length = 200) private String email;
     @Column(name = "phone", length = 30) private String tel;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "department_no")
+    private PacsDepartment department;
+    @Column(length = 100) private String position;
+    @Column(length = 200) private String specialty;
     @Column(nullable = false, length = 20) @Builder.Default private String status = "ACTIVE";
     private Boolean stable;
-    @Transient private String gender;
-    @Transient private LocalDateTime birth;
-    @Transient private String postNo;
-    @Transient private String address;
-    @Transient private LocalDateTime writeDate;
-    @Transient private LocalDateTime conDate;
     @Transient @Builder.Default private List<String> roles = new ArrayList<>(List.of("ROLE_USER"));
     @Override public Collection<? extends GrantedAuthority> getAuthorities() { return roles.stream().map(SimpleGrantedAuthority::new).toList(); }
     @JsonProperty(access = JsonProperty.Access.WRITE_ONLY) @Override public String getPw() { return pw; }

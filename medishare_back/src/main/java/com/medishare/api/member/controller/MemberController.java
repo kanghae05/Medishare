@@ -4,6 +4,8 @@ import com.medishare.api.data.dto.SignInResultDto;
 import com.medishare.api.data.dto.SignUpResultDto;
 import com.medishare.api.member.vo.LoginVO;
 import com.medishare.api.member.vo.MemberVO;
+import com.medishare.api.member.vo.PacsDepartmentVO;
+import com.medishare.api.member.service.PacsDepartmentService;
 import com.medishare.api.service.SignService;
 import lombok.extern.log4j.Log4j2;
 import org.springframework.web.bind.annotation.*;
@@ -14,7 +16,11 @@ import org.springframework.web.bind.annotation.*;
 @Log4j2
 public class MemberController {
     private final SignService signService;
-    public MemberController(SignService signService) { this.signService = signService; }
+    private final PacsDepartmentService pacsDepartmentService;
+    public MemberController(SignService signService, PacsDepartmentService pacsDepartmentService) { this.signService = signService; this.pacsDepartmentService = pacsDepartmentService; }
+
+    @GetMapping("/departments.do")
+    public java.util.List<PacsDepartmentVO> departments() { return pacsDepartmentService.activeList(); }
 
     @PostMapping("/login.do")
     public SignInResultDto login(@RequestBody LoginVO vo) {

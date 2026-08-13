@@ -9,4 +9,5 @@ public interface QMemberRepository
         extends JpaRepository<Member, Long>, QuerydslPredicateExecutor<Member> {
 
     Optional<Member> findMemberById(String id);
+    Optional<Member> findMemberByEmail(String email);
 }
