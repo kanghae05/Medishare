@@ -3,6 +3,8 @@ package com.medishare.api.coop.repository;
 import com.medishare.api.pacs.entity.PacsStudy;
 import org.springframework.data.jpa.repository.JpaRepository;
 
+import java.util.List;
+
 /**
  * PACS 담당자의 실제 PacsStudy 엔티티(com.medishare.api.pacs.entity)를 그대로 사용한다.
  * 별도 임시 엔티티를 새로 만들지 않으므로, 같은 테이블에 두 Entity가 매핑되면서
@@ -12,4 +14,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * save()/delete() 등으로 pacs_study를 절대 수정하지 않는다 (그 테이블은 PACS 담당자 소유).
  */
 public interface CoopPacsStudyLookupRepository extends JpaRepository<PacsStudy, Long> {
+
+    /** 특정 환자(patient_no)의 검사 목록, 최신순 */
+    List<PacsStudy> findByPatient_NoOrderByStudyDateDesc(Long patientNo);
 }

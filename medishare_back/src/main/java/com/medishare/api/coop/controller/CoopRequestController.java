@@ -4,12 +4,17 @@ import com.medishare.api.member.entity.Member;
 import com.medishare.api.pacs.entity.PacsStudy;
 import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
 import com.medishare.api.coop.repository.CoopMemberLookupRepository;
+import com.medishare.api.coop.repository.CoopPacsPatientLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
+import com.medishare.api.coop.repository.CoopReportLookupRepository;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.DepartmentLookupVO;
 import com.medishare.api.coop.vo.DoctorLookupVO;
+import com.medishare.api.coop.vo.PatientLookupVO;
+import com.medishare.api.coop.vo.ReportLookupVO;
+import com.medishare.api.coop.vo.StudyLookupVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
 import jakarta.servlet.http.HttpServletRequest;
@@ -35,6 +40,8 @@ public class CoopRequestController {
     private final OrthancImageService orthancImageService;
     private final CoopMemberLookupRepository memberRepository;
     private final CoopDepartmentLookupRepository departmentRepository;
+    private final CoopPacsPatientLookupRepository patientRepository;
+    private final CoopReportLookupRepository reportRepository;
 
     // ------------------------------------------------------------------
     // 로그인 사용자 정보 추출
@@ -190,10 +197,12 @@ public class CoopRequestController {
     // 그쪽 API를 호출하도록 바꾼다. (관리자 제외 필터도 그때 함께 반영)
     // ------------------------------------------------------------------
 
-    // 받는 의사 자동완성 - 이름/세부전공/진료과명 중 하나라도 검색어 포함
+    // 받는 의사 자동완성 - 이름/세부전공/진료과명 중 하나라도 검색어 포함, 본인은 제외
     @GetMapping("/lookup/doctors.do")
-    public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q) {
-        return memberRepository.searchDoctors(q).stream()
+    public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q,
+                                              Authentication authentication) {
+        Long myDoctorId = currentDoctorId(authentication);
+        return memberRepository.searchDoctors(q, myDoctorId).stream()
                 .map(m -> new DoctorLookupVO(
                         m.getNo(),
                         m.getName(),
@@ -210,6 +219,32 @@ public class CoopRequestController {
         return departmentRepository.findAll().stream()
                 .map(d -> new DepartmentLookupVO(d.getNo(), d.getDepartmentName()))
                 .toList();
+    }
+
+    // 환자 이름 자동완성
+    @GetMapping("/lookup/patients.do")
+    public List<PatientLookupVO> lookupPatients(@RequestParam(defaultValue = "") String q) {
+        if (q.isBlank()) return List.of();
+        return patientRepository.searchByName(q).stream()
+                .map(p -> new PatientLookupVO(p.getNo(), p.getPatientName(), p.getPatientSex(), p.getPatientBirthDate()))
+                .toList();
+    }
+
+    // 선택한 환자의 검사 목록 (최신순)
+    @GetMapping("/lookup/patients/{patientNo}/studies.do")
+    public List<StudyLookupVO> lookupStudiesByPatient(@PathVariable Long patientNo) {
+        return pacsStudyRepository.findByPatient_NoOrderByStudyDateDesc(patientNo).stream()
+                .map(s -> new StudyLookupVO(s.getNo(), s.getStudyDescription(), s.getStudyDate()))
+                .toList();
+    }
+
+    // 선택한 검사에 소견서가 있는지 확인 (없으면 빈 목록)
+    @GetMapping("/lookup/studies/{studyNo}/report.do")
+    public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo) {
+        return reportRepository.findFirstByStudyNoOrderByWriteDateDesc(studyNo)
+                .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
+                .map(List::of)
+                .orElse(List.of());
     }
 
     // ------------------------------------------------------------------
