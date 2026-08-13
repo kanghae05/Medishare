@@ -4,3 +4,4 @@
 *.log
 logs/
 medishare_back/logs/
+/resources/application.properties
