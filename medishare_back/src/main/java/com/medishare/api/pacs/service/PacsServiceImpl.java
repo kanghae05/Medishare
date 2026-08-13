@@ -327,6 +327,7 @@ public class PacsServiceImpl implements PacsService {
     //
     // 기존 Study
     //      → Orthanc 최신 상태로 UPDATE
+    //      → 단, Orthanc 값이 비어 있으면 DB 기존 값 유지
     //      → Stable / Series Count / Instance Count 갱신
     // =========================================================
     @Override
@@ -472,41 +473,57 @@ public class PacsServiceImpl implements PacsService {
 
 
                     // Accession Number
+                    // Orthanc 값이 없으면 기존 DB 값 유지
                     existingStudy
                             .setAccessionNumber(
-                                    getTag(
-                                            studyTags,
-                                            "AccessionNumber"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "AccessionNumber"
+                                            ),
+                                            existingStudy.getAccessionNumber()
                                     )
                             );
 
 
                     // Study Date
+                    // Orthanc 값이 없으면 기존 DB 값 유지
                     existingStudy
                             .setStudyDate(
-                                    getTag(
-                                            studyTags,
-                                            "StudyDate"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "StudyDate"
+                                            ),
+                                            existingStudy.getStudyDate()
                                     )
                             );
 
 
                     // Study Time
+                    // Orthanc 값이 없으면 기존 DB 값 유지
                     existingStudy
                             .setStudyTime(
-                                    getTag(
-                                            studyTags,
-                                            "StudyTime"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "StudyTime"
+                                            ),
+                                            existingStudy.getStudyTime()
                                     )
                             );
 
 
                     // Study Description
+                    // 협진 화면 테스트 설명 등을 유지
                     existingStudy
                             .setStudyDescription(
-                                    getTag(
-                                            studyTags,
-                                            "StudyDescription"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "StudyDescription"
+                                            ),
+                                            existingStudy.getStudyDescription()
                                     )
                             );
 
@@ -514,9 +531,12 @@ public class PacsServiceImpl implements PacsService {
                     // Referring Physician
                     existingStudy
                             .setReferringPhysicianName(
-                                    getTag(
-                                            studyTags,
-                                            "ReferringPhysicianName"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "ReferringPhysicianName"
+                                            ),
+                                            existingStudy.getReferringPhysicianName()
                                     )
                             );
 
@@ -524,9 +544,13 @@ public class PacsServiceImpl implements PacsService {
                     // Requested Procedure
                     existingStudy
                             .setRequestedProcedureDescription(
-                                    getTag(
-                                            studyTags,
-                                            "RequestedProcedureDescription"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "RequestedProcedureDescription"
+                                            ),
+                                            existingStudy
+                                                    .getRequestedProcedureDescription()
                                     )
                             );
 
@@ -534,14 +558,17 @@ public class PacsServiceImpl implements PacsService {
                     // Study ID
                     existingStudy
                             .setStudyID(
-                                    getTag(
-                                            studyTags,
-                                            "StudyID"
+                                    keepExistingIfBlank(
+                                            getTag(
+                                                    studyTags,
+                                                    "StudyID"
+                                            ),
+                                            existingStudy.getStudyID()
                                     )
                             );
 
 
-                    // ★ Orthanc 최신 Stable 상태
+                    // Orthanc 최신 Stable 상태
                     existingStudy
                             .setStable(
                                     getBoolean(
@@ -675,6 +702,11 @@ public class PacsServiceImpl implements PacsService {
 
     // =========================================================
     // Patient 조회 또는 신규 저장
+    //
+    // 기존 Patient가 존재하면 DB 값 그대로 유지
+    // → 테스트용 환자명 / 성별 / 생년월일 유지
+    //
+    // 신규 Patient일 때만 Orthanc DICOM Tag로 생성
     // =========================================================
     private PacsPatient findOrCreatePatient(
             Map<String, Object> studyDetailData
@@ -982,33 +1014,49 @@ public class PacsServiceImpl implements PacsService {
                         );
 
 
+                // Modality
+                // Orthanc 값이 없으면 기존 DB 값 유지
                 existingSeries
                         .setModality(
-                                getTag(
-                                        seriesTags,
-                                        "Modality"
+                                keepExistingIfBlank(
+                                        getTag(
+                                                seriesTags,
+                                                "Modality"
+                                        ),
+                                        existingSeries.getModality()
                                 )
                         );
 
 
+                // Series Description
+                // Orthanc 값이 없으면 기존 DB 값 유지
                 existingSeries
                         .setSeriesDescription(
-                                getTag(
-                                        seriesTags,
-                                        "SeriesDescription"
+                                keepExistingIfBlank(
+                                        getTag(
+                                                seriesTags,
+                                                "SeriesDescription"
+                                        ),
+                                        existingSeries.getSeriesDescription()
                                 )
                         );
 
 
+                // Series Number
+                // Orthanc 값이 없으면 기존 DB 값 유지
                 existingSeries
                         .setSeriesNumber(
-                                getTag(
-                                        seriesTags,
-                                        "SeriesNumber"
+                                keepExistingIfBlank(
+                                        getTag(
+                                                seriesTags,
+                                                "SeriesNumber"
+                                        ),
+                                        existingSeries.getSeriesNumber()
                                 )
                         );
 
 
+                // Instance Count는 Orthanc 실제 값으로 갱신
                 existingSeries
                         .setInstanceCount(
                                 instanceCount
@@ -1195,6 +1243,33 @@ public class PacsServiceImpl implements PacsService {
         return tags.get(
                 key
         );
+    }
+
+
+    // =========================================================
+    // Orthanc 값이 비어 있으면 기존 DB 값 유지
+    //
+    // Orthanc 값 있음
+    //      → Orthanc 최신 값 사용
+    //
+    // Orthanc 값 NULL / 공백
+    //      → 기존 DB 값 유지
+    // =========================================================
+    private String keepExistingIfBlank(
+            String orthancValue,
+            String existingValue
+    ) {
+
+        if (
+                orthancValue == null
+                        || orthancValue.isBlank()
+        ) {
+
+            return existingValue;
+        }
+
+
+        return orthancValue;
     }
 
 
