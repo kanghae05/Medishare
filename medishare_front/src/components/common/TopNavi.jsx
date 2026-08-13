@@ -1,12 +1,11 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
+import { canAccessDPart, getStoredLogin } from "../dpart/dpartUtils";
 
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
-  const [login, setLogin] = useState(() => {
-    const data = localStorage.getItem("login");
-    return data ? JSON.parse(data) : null;
-  });
+  const [login, setLogin] = useState(getStoredLogin);
+  const showDPartMenu = Boolean(token && canAccessDPart());
 
   const logout = (event) => {
     event.preventDefault();
@@ -31,11 +30,13 @@ function TopNavi() {
                 Home
               </NavLink>
             </li>
-            <li className="nav-item">
-              <NavLink to="/d/dashboard" className="nav-link">
-                D Dashboard
-              </NavLink>
-            </li>
+            {showDPartMenu && (
+              <li className="nav-item">
+                <NavLink to="/d/dashboard" className="nav-link">
+                  Dashboard
+                </NavLink>
+              </li>
+            )}
             <li className="nav-item">
               <NavLink to="/notices" className="nav-link">
                 공지사항
