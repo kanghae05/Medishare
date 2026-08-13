@@ -42,9 +42,14 @@ function TopNavi() {
               </li>
             )}
             {isAdmin && (
-              <li className="nav-item">
-                <NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink>
-              </li>
+              <>
+                <li className="nav-item">
+                  <NavLink to="/admin/medical-staff" className="nav-link">의료진 관리</NavLink>
+                </li>
+                <li className="nav-item">
+                  <NavLink to="/admin/access-logs" className="nav-link">접근 이력</NavLink>
+                </li>
+              </>
             )}
             <li className="nav-item">
               <NavLink to="/notices" className="nav-link">
@@ -72,7 +77,8 @@ function TopNavi() {
             ) : (
               <>
                 <li className="nav-item"><Link className="nav-link" to="/member/logout" onClick={logout}>Logout</Link></li>
-                <li className="nav-item"><Link className="nav-link" to="/member/view">{login?.name || "사용자"}</Link></li>
+                {isAdmin && <li className="nav-item"><span className="nav-link">관리자</span></li>}
+                {!isAdmin && <li className="nav-item"><Link className="nav-link" to="/member/view">{login?.name || "사용자"}</Link></li>}
               </>
             )}
           </ul>

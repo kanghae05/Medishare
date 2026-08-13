@@ -12,6 +12,8 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.security.access.AccessDeniedException;
+import com.medishare.api.member.service.PacsAccessLogService;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -19,6 +21,11 @@ import java.util.Map;
 @RestControllerAdvice
 @Log4j2
 public class CustomExceptionHandler {
+    private final PacsAccessLogService pacsAccessLogService;
+
+    public CustomExceptionHandler(PacsAccessLogService pacsAccessLogService) {
+        this.pacsAccessLogService = pacsAccessLogService;
+    }
 
     @ExceptionHandler(ScheduleNotFoundException.class)
     public ResponseEntity<Map<String, String>> handleScheduleNotFound(ScheduleNotFoundException e) {
@@ -51,7 +58,18 @@ public class CustomExceptionHandler {
     }
 
     @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e) {
+    public ResponseEntity<Map<String, String>> handleAccessDenied(AccessDeniedException e, HttpServletRequest request) {
+        String uri = request.getRequestURI();
+        if ("/pacs/list.do".equals(uri) || "/pacs/view.do".equals(uri) || uri.startsWith("/pacs/thumbnail/")) {
+            try {
+                String studyId = request.getParameter("id");
+                if (uri.startsWith("/pacs/thumbnail/")) studyId = uri.substring(uri.lastIndexOf('/') + 1);
+                String dataType = uri.startsWith("/pacs/thumbnail/") ? "IMAGE" : "STUDY";
+                pacsAccessLogService.record(SecurityContextHolder.getContext().getAuthentication(), request, dataType, "VIEW", "DENIED", studyId);
+            } catch (RuntimeException logFailure) {
+                log.error("Unable to save denied PACS access log.", logFailure);
+            }
+        }
         return errorResponse(HttpStatus.FORBIDDEN, "Access denied.");
     }
 
