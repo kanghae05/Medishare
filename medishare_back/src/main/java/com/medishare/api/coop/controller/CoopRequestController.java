@@ -14,6 +14,7 @@ import com.medishare.api.coop.vo.DepartmentLookupVO;
 import com.medishare.api.coop.vo.DoctorLookupVO;
 import com.medishare.api.coop.vo.PatientLookupVO;
 import com.medishare.api.coop.vo.ReportLookupVO;
+import com.medishare.api.coop.vo.StudyDetailVO;
 import com.medishare.api.coop.vo.StudyLookupVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
@@ -260,12 +261,79 @@ public class CoopRequestController {
     // 그쪽 API를 호출하도록 바꾼다. (CoopPacsStudyLookupRepository, OrthancImageService도 같이 삭제)
     // ------------------------------------------------------------------
 
+    // 협진 상세화면에서 보여줄 환자/검사/시리즈 상세 정보
+    @GetMapping("/study/{studyNo}/detail.do")
+    public StudyDetailVO studyDetail(@PathVariable Long studyNo) {
+        PacsStudy s = pacsStudyRepository.findById(studyNo)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 검사입니다."));
+
+        StudyDetailVO vo = new StudyDetailVO();
+        vo.setStudyNo(s.getNo());
+        vo.setAccessionNumber(s.getAccessionNumber());
+        vo.setStudyDate(s.getStudyDate());
+        vo.setStudyTime(s.getStudyTime());
+        vo.setStudyDescription(s.getStudyDescription());
+        vo.setReferringPhysicianName(s.getReferringPhysicianName());
+        vo.setRequestedProcedureDescription(s.getRequestedProcedureDescription());
+        vo.setInstanceCount(s.getInstanceCount());
+        vo.setSeriesCount(s.getSeriesCount());
+        vo.setOrthancStudyId(s.getOrthancStudyId());
+        vo.setStudyInstanceUid(s.getStudyInstanceUID());
+
+        if (s.getPatient() != null) {
+            var p = s.getPatient();
+            vo.setPatientNo(p.getNo());
+            vo.setPatientIdText(p.getPatientId());
+            vo.setPatientName(p.getPatientName());
+            vo.setPatientSex(p.getPatientSex());
+            vo.setAge(calculateAge(p.getPatientBirthDate()));
+            vo.setOrthancPatientId(p.getOrthancPatientId());
+        }
+
+        if (s.getSeriesList() != null && !s.getSeriesList().isEmpty()) {
+            var series = s.getSeriesList().get(0);
+            vo.setModality(series.getModality());
+            vo.setSeriesDescription(series.getSeriesDescription());
+        }
+
+        return vo;
+    }
+
+    /** "yyyyMMdd" 형태의 생년월일로 만 나이를 계산한다. 형식이 안 맞으면 null. */
+    private Integer calculateAge(String birthDateRaw) {
+        if (birthDateRaw == null || birthDateRaw.length() != 8) {
+            return null;
+        }
+        try {
+            java.time.LocalDate birth = java.time.LocalDate.of(
+                    Integer.parseInt(birthDateRaw.substring(0, 4)),
+                    Integer.parseInt(birthDateRaw.substring(4, 6)),
+                    Integer.parseInt(birthDateRaw.substring(6, 8)));
+            return java.time.Period.between(birth, java.time.LocalDate.now()).getYears();
+        } catch (Exception e) {
+            return null;
+        }
+    }
+
     // 이 검사에 이미지가 몇 장 있는지 (프론트 이전/다음, 슬라이더 범위 계산용)
     @GetMapping("/study/{studyNo}/instances.do")
     public Map<String, Object> instanceCount(@PathVariable Long studyNo) {
         String orthancStudyId = resolveOrthancStudyId(studyNo);
         List<String> instanceIds = orthancImageService.listInstanceIds(orthancStudyId);
-        return Map.of("count", instanceIds.size());
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("count", instanceIds.size());
+
+        // 검사당 시리즈가 1개라는 전제로, 첫 시리즈의 설명/장비종류를 같이 내려준다.
+        pacsStudyRepository.findById(studyNo).ifPresent(s -> {
+            if (s.getSeriesList() != null && !s.getSeriesList().isEmpty()) {
+                var series = s.getSeriesList().get(0);
+                result.put("seriesDescription", series.getSeriesDescription());
+                result.put("modality", series.getModality());
+            }
+        });
+
+        return result;
     }
 
     // index번째(0부터 시작) 이미지를 PNG로 반환

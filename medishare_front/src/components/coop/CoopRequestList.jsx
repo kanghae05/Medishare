@@ -15,12 +15,12 @@ function renderDoctor(name, meta, id, fallbackLabel = "의사") {
 }
 
 const ALL_STATUSES = ["요청", "수락", "거절", "취소", "만료"];
-const DEFAULT_RECEIVED_STATUSES = ["요청", "수락", "거절", "만료"]; // 받은 협진함만 취소 기본 제외
+const DEFAULT_STATUSES = ["요청", "수락", "거절", "만료"]; // 취소는 기본 제외 (전체 화면 공통)
 
 const MODE_CONFIG = {
-  received: { title: "받은 협진함", endpoint: "/coop/received.do", defaultStatuses: DEFAULT_RECEIVED_STATUSES, hasUnreadFilter: true },
-  sent:     { title: "보낸 협진함", endpoint: "/coop/sent.do",     defaultStatuses: ALL_STATUSES,          hasUnreadFilter: false },
-  all:      { title: "전체 협진 내역", endpoint: "/coop/all.do",   defaultStatuses: ALL_STATUSES,          hasUnreadFilter: false },
+  received: { title: "받은 협진함", endpoint: "/coop/received.do", defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: true },
+  sent:     { title: "보낸 협진함", endpoint: "/coop/sent.do",     defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: false },
+  all:      { title: "전체 협진 내역", endpoint: "/coop/all.do",   defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: false },
 };
 
 function formatDateTime(str) {
@@ -232,6 +232,7 @@ function CoopRequestList({ mode }) {
                     <span className={"coop-row-counterpart-primary" + (isIncoming && !r.isRead ? " unread" : "")}>
                       {counterpartDisplay}
                     </span>
+                    <span className="coop-row-direction-text">{isIncoming ? "보냄" : "에게 보냄"}</span>
                     {mode === "all" && (
                       <span className={"coop-direction-badge" + (isIncoming ? " in" : " out")}>
                         {isIncoming ? "받음" : "보냄"}

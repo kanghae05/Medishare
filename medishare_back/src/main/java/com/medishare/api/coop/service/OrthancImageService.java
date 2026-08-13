@@ -17,12 +17,12 @@ import java.util.Map;
  * - 프론트는 Orthanc 서버에 직접 접근하지 않고, 항상 우리 백엔드(coop 도메인)를 거친다.
  * - Orthanc가 이미 DICOM -> PNG 변환(/instances/{id}/preview)을 대신 해주므로,
  *   여기서는 별도 DICOM 디코딩 라이브러리가 필요 없다.
+ * - Orthanc 자체에 Basic Auth가 걸려있어서, 요청마다 Authorization 헤더를 실어 보낸다.
  *
- * TODO: orthanc.base-url 을 application.yml(또는 properties)에 실제 주소로 채워야 동작한다.
- *   spring:
- *   ---
- *   orthanc:
- *     base-url: http://<PACS 서버 IP>:8042   # PACS 담당자에게 확인 필요
+ * application.properties에 추가해야 하는 설정:
+ *   orthanc.base-url=http://<PACS 서버 IP>:8042
+ *   orthanc.username=<Orthanc 계정>
+ *   orthanc.password=<Orthanc 비밀번호>
  *
  * TODO: 지금은 RestTemplate을 직접 new 해서 쓰는 임시 구성이다. 실제로 자주 쓰게 되면
  *   타임아웃 설정이 있는 관리형 RestTemplate/RestClient 빈으로 교체하는 게 좋다.
@@ -35,11 +35,26 @@ public class OrthancImageService {
     @Value("${orthanc.base-url:}")
     private String baseUrl;
 
+    @Value("${orthanc.username:}")
+    private String username;
+
+    @Value("${orthanc.password:}")
+    private String password;
+
     private void checkConfigured() {
         if (baseUrl == null || baseUrl.isBlank()) {
             throw new IllegalStateException(
-                    "orthanc.base-url이 설정되지 않았습니다. PACS 담당자에게 Orthanc 서버 주소를 확인해 application.yml에 추가하세요.");
+                    "orthanc.base-url이 설정되지 않았습니다. PACS 담당자에게 Orthanc 서버 주소를 확인해 application.properties에 추가하세요.");
         }
+    }
+
+    /** Orthanc 계정 정보가 설정돼 있으면 Basic Auth 헤더를 실어 보낸다. */
+    private HttpHeaders authHeaders() {
+        HttpHeaders headers = new HttpHeaders();
+        if (username != null && !username.isBlank()) {
+            headers.setBasicAuth(username, password == null ? "" : password);
+        }
+        return headers;
     }
 
     /**
@@ -51,7 +66,8 @@ public class OrthancImageService {
         checkConfigured();
 
         String url = baseUrl + "/studies/" + orthancStudyId + "/instances";
-        ResponseEntity<List> response = restTemplate.getForEntity(url, List.class);
+        HttpEntity<Void> request = new HttpEntity<>(authHeaders());
+        ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, request, List.class);
 
         List<Map<String, Object>> instances = response.getBody();
         if (instances == null) {
@@ -67,7 +83,7 @@ public class OrthancImageService {
         checkConfigured();
 
         String url = baseUrl + "/instances/" + instanceId + "/preview";
-        HttpEntity<Void> request = new HttpEntity<>(new HttpHeaders());
+        HttpEntity<Void> request = new HttpEntity<>(authHeaders());
         ResponseEntity<byte[]> response = restTemplate.exchange(url, HttpMethod.GET, request, byte[].class);
         return response.getBody();
     }
