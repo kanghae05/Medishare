@@ -3,6 +3,29 @@ import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import "./Coop.css";
 
+// 의사명 + 메타(진료과·세부전공·직급)를 같이 표시. 이름이 없으면 번호로 폴백.
+function renderDoctor(name, meta, id, fallbackLabel = "의사") {
+  if (!name) return `${fallbackLabel} #${id}`;
+  return (
+    <>
+      {name}
+      {meta && <span className="coop-doctor-meta"> ({meta})</span>}
+    </>
+  );
+}
+
+// 목록에서는 공간이 좁으니 메타 전체 대신 진료과만 짧게 보여준다.
+function renderDoctorShort(name, meta, id, fallbackLabel = "의사") {
+  if (!name) return `${fallbackLabel} #${id}`;
+  const dept = meta ? meta.split(" · ")[0] : null;
+  return (
+    <>
+      {name}
+      {dept && <span className="coop-doctor-meta"> ({dept})</span>}
+    </>
+  );
+}
+
 const ALL_STATUSES = ["요청", "수락", "거절", "취소", "만료"];
 const DEFAULT_RECEIVED_STATUSES = ["요청", "수락", "거절", "만료"]; // 받은 협진함만 취소 기본 제외
 
@@ -32,7 +55,6 @@ function CoopRequestList({ mode }) {
 
   const [list, setList] = useState([]);
   const [pageObject, setPageObject] = useState(null);
-  const [unreadCount, setUnreadCount] = useState(0);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
@@ -106,13 +128,6 @@ function CoopRequestList({ mode }) {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [mode, page, urlStatuses, urlUnreadOnly, urlFrom, urlTo]);
 
-  useEffect(() => {
-    api
-      .get("/coop/unreadCount.do")
-      .then((res) => setUnreadCount(res.data.unreadCount || 0))
-      .catch(() => {});
-  }, [list]);
-
   const toggleDraftStatus = (status) => {
     setDraftStatuses((prev) =>
       prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]
@@ -152,10 +167,7 @@ function CoopRequestList({ mode }) {
   return (
     <div className="coop-page">
       <div className="coop-header">
-        <h3 className="coop-title">
-          {config.title}
-          {unreadCount > 0 && <span className="count-badge">{unreadCount}</span>}
-        </h3>
+        <h3 className="coop-title">{config.title}</h3>
         <button type="button" className="btn-coop-filter" onClick={() => setFilterOpen((v) => !v)}>
           {isFilterModified && <span className="dot" />}
           필터 {filterOpen ? "▲" : "▼"}
@@ -211,17 +223,17 @@ function CoopRequestList({ mode }) {
           {list.map((r) => {
             const isIncoming = mode === "all" ? r.direction === "received" : mode === "received";
 
-            let counterpartName;
+            let counterpartDisplay;
             if (isIncoming) {
-              counterpartName = r.reqDoctorName || `요청의사 #${r.reqDoctorId}`;
+              counterpartDisplay = renderDoctorShort(r.reqDoctorName, r.reqDoctorMeta, r.reqDoctorId, "요청의사");
             } else if (r.acceptDoctorId) {
               // 진료과 요청이든 지정의사 요청이든, 이미 수락한 의사가 있으면 그 사람이 상대방
-              counterpartName = r.acceptDoctorName || `의사 #${r.acceptDoctorId}`;
+              counterpartDisplay = renderDoctorShort(r.acceptDoctorName, r.acceptDoctorMeta, r.acceptDoctorId, "의사");
             } else if (r.recvType === "지정의사") {
-              counterpartName = r.recvDoctorName || `의사 #${r.recvDoctorId}`;
+              counterpartDisplay = renderDoctorShort(r.recvDoctorName, r.recvDoctorMeta, r.recvDoctorId, "의사");
             } else {
               // 진료과 요청 + 아직 수락 전 = 진짜로 "누가 받을지 미정"인 상태
-              counterpartName = (r.recvDeptName || `진료과 #${r.recvDeptId}`) + " (미정)";
+              counterpartDisplay = (r.recvDeptName || `진료과 #${r.recvDeptId}`) + " (미정)";
             }
 
             return (
@@ -229,17 +241,18 @@ function CoopRequestList({ mode }) {
                 <span className={"coop-row-unread-dot" + (!isIncoming || r.isRead ? " hidden" : "")} />
                 <div className="coop-row-main">
                   <div className="coop-row-top">
-                    <span className={"coop-row-patient" + (isIncoming && !r.isRead ? " unread" : "")}>
-                      {r.patientName || `환자 #${r.patientId}`}
-                    </span>
-                    <span className="coop-row-counterpart">
-                      {isIncoming ? `${counterpartName} → 나` : `나 → ${counterpartName}`}
+                    <span className={"coop-row-counterpart-primary" + (isIncoming && !r.isRead ? " unread" : "")}>
+                      {counterpartDisplay}
                     </span>
                     {mode === "all" && (
                       <span className={"coop-direction-badge" + (isIncoming ? " in" : " out")}>
                         {isIncoming ? "받음" : "보냄"}
                       </span>
                     )}
+                  </div>
+                  <div className="coop-row-sub">
+                    <span className="coop-row-patient-label">환자</span>
+                    <span className="coop-row-patient">{r.patientName || `환자 #${r.patientId}`}</span>
                   </div>
                   <div className="coop-row-content">{r.reqContent}</div>
                 </div>
