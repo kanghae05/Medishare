@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
-import { Navigate } from "react-router-dom";
+import { Navigate, useNavigate } from "react-router-dom";
 import api from "../../components/common/api";
 
 const emptyFilters = { keyword: "", departmentNo: "", status: "" };
 
 export default function MedicalStaffManagement({ isAdmin }) {
+  const navigate = useNavigate();
   const [filters, setFilters] = useState(emptyFilters);
   const [departments, setDepartments] = useState([]);
   const [staffPage, setStaffPage] = useState({ content: [], totalPages: 0, number: 0 });
@@ -27,7 +28,8 @@ export default function MedicalStaffManagement({ isAdmin }) {
 
   useEffect(() => { if (isAdmin) loadStaff().catch(() => setMessage("의료진 목록을 불러오지 못했습니다.")); }, [isAdmin]);
 
-  const selectStaff = async (memberNo) => {
+  const selectStaff = (memberNo) => navigate(`/admin/medical-staff/${memberNo}`);
+  /*
     try {
       const response = await api.get(`/api/admin/medical-staff/${memberNo}`);
       setSelected(response.data);
@@ -35,6 +37,7 @@ export default function MedicalStaffManagement({ isAdmin }) {
     } catch { setMessage("의료진 상세 정보를 불러오지 못했습니다."); }
   };
 
+  */
   const updateSelected = (field, value) => setSelected((current) => ({ ...current, [field]: value }));
   const save = async (event) => {
     event.preventDefault();

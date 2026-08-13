@@ -1,24 +1,51 @@
-export const currentUser = {
-  memberId: 1,
-  doctorId: 1,
-  name: "김의사",
-  department: "영상의학과",
-  role: "DOCTOR",
-};
-
 export const getStoredLogin = () => {
   try {
-    return JSON.parse(localStorage.getItem("login")) ?? null;
+    return JSON.parse(localStorage.getItem("login")) || null;
   } catch {
     return null;
   }
 };
 
-export const canAccessDPart = () => {
-  const login = getStoredLogin();
-  return Array.isArray(login?.roles) && login.roles.some((role) => role === "ROLE_USER" || role === "ROLE_ADMIN" || role === "ADMIN");
+export const getAuthToken = () => localStorage.getItem("token");
+
+const deriveDoctorId = (login) => {
+  const explicitId = login?.doctorId || login?.doctor_id || login?.memberNo || login?.memberId || login?.no;
+  if (explicitId && !Number.isNaN(Number(explicitId))) {
+    return Number(explicitId);
+  }
+
+  const subject = login?.sub || login?.id || "";
+  const match = String(subject).match(/^doctor(\d+)$/i);
+  return match ? Number(match[1]) : 1;
 };
 
+export const getCurrentUser = () => {
+  const login = getStoredLogin();
+  const roles = Array.isArray(login?.roles) ? login.roles : [];
+  const isAdmin = roles.some((role) => role === "ADMIN" || role === "ROLE_ADMIN");
+  const subject = login?.sub || login?.id || "";
+  const isDoctorAccount = /^doctor\d+$/i.test(String(subject));
+
+  return {
+    isAuthenticated: Boolean(getAuthToken() && login),
+    memberId: login?.memberId || login?.memberNo || login?.no || subject || null,
+    doctorId: deriveDoctorId(login),
+    name: login?.name || subject || "사용자",
+    department: login?.department || "진료과 미연동",
+    role: isAdmin ? "ADMIN" : "DOCTOR",
+    roles,
+    isAdmin,
+    isDoctor: isDoctorAccount || !isAdmin,
+    isMock: !login?.doctorId && !login?.memberNo && !login?.no,
+  };
+};
+
+export const canAccessDPart = () => {
+  const user = getCurrentUser();
+  return user.isAuthenticated && (user.isAdmin || user.isDoctor);
+};
+
+export const currentUser = getCurrentUser();
 export const scheduleTypeLabels = {
   AVAILABLE: "진료 가능",
   RESERVED: "진료 예정",

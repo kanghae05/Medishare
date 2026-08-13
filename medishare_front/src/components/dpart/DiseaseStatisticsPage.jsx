@@ -24,19 +24,27 @@ function DiseaseStatisticsPage() {
   const loadStats = useCallback(async () => {
     setLoading(true);
     setError("");
-    try {
-      const params = { startDate: startDate || undefined, endDate: endDate || undefined };
-      const [allResponse, topResponse] = await Promise.all([
-        getDiseaseStatistics(params),
-        getTopDiseaseStatistics(5),
-      ]);
-      setRows(allResponse.data || []);
-      setTopRows(topResponse.data || []);
-    } catch (err) {
-      setError(extractErrorMessage(err, "질환별 통계를 불러오지 못했습니다."));
-    } finally {
-      setLoading(false);
+
+    const params = { startDate: startDate || undefined, endDate: endDate || undefined };
+    const [allResult, topResult] = await Promise.allSettled([
+      getDiseaseStatistics(params),
+      getTopDiseaseStatistics(5),
+    ]);
+
+    if (allResult.status === "fulfilled") {
+      setRows(allResult.value.data || []);
+    } else {
+      setRows([]);
+      setError(extractErrorMessage(allResult.reason, "질환별 통계를 불러오지 못했습니다."));
     }
+
+    if (topResult.status === "fulfilled") {
+      setTopRows(topResult.value.data || []);
+    } else {
+      setTopRows([]);
+    }
+
+    setLoading(false);
   }, [endDate, startDate]);
 
   useEffect(() => {
@@ -61,11 +69,11 @@ function DiseaseStatisticsPage() {
       </div>
 
       <div className="dpart-filter-band">
-        <input type="date" value={startDate} onChange={(e) => setStartDate(e.target.value)} />
+        <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
         <span>~</span>
-        <input type="date" value={endDate} onChange={(e) => setEndDate(e.target.value)} />
+        <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
         <label className="dpart-toggle">
-          <input type="checkbox" checked={useMock} onChange={(e) => setUseMock(e.target.checked)} />
+          <input type="checkbox" checked={useMock} onChange={(event) => setUseMock(event.target.checked)} />
           개발용 예시 데이터
         </label>
       </div>

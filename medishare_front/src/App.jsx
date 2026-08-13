@@ -1,4 +1,4 @@
-import { Routes, Route } from "react-router-dom"
+import { Navigate, Routes, Route } from "react-router-dom"
 import TopNavi from "./components/common/TopNavi"
 import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
@@ -15,8 +15,11 @@ import SpecialCaseDetail from "./pages/SpecialCase/SpecialCaseDetail"
 import SpecialCaseCreate from "./pages/SpecialCase/SpecialCaseCreate"
 import DPartComp from "./components/dpart/DPartComp"
 import MedicalStaffManagement from "./pages/Admin/MedicalStaffManagement"
+import MedicalStaffDetail from "./pages/Admin/MedicalStaffDetail"
 
 function App() {
+
+  const token = localStorage.getItem("token")
 
   const currentUser = (() => {
     try {
@@ -42,17 +45,18 @@ function App() {
           <Route path="/pacs/*" element={<PacsComp />} />
           <Route path="/coop/*" element={<CoopComp />} />
           {/* Notice module routes */}
-          <Route path="/notices" element={<NoticeList />} />
-          <Route path="/notices/new" element={<NoticeForm />} />
-          <Route path="/notices/:noticeId" element={<NoticeDetail isAdmin={isAdmin} />} />
-          <Route path="/notices/:noticeId/edit" element={<NoticeForm />} />
+          <Route path="/notices" element={token ? <NoticeList /> : <Navigate to="/" replace />} />
+          <Route path="/notices/new" element={token ? <NoticeForm /> : <Navigate to="/" replace />} />
+          <Route path="/notices/:noticeId" element={token ? <NoticeDetail isAdmin={isAdmin} /> : <Navigate to="/" replace />} />
+          <Route path="/notices/:noticeId/edit" element={token ? <NoticeForm /> : <Navigate to="/" replace />} />
           {/* Special Case Library module routes */}
-          <Route path="/special-cases" element={<SpecialCaseList />} />
-          <Route path="/special-cases/new" element={<SpecialCaseCreate />} />
-          <Route path="/special-cases/:caseId" element={<SpecialCaseDetail currentUser={currentUser} />} />
-          <Route path="/special-cases/:caseId/edit" element={<SpecialCaseCreate />} />
+          <Route path="/special-cases" element={token ? <SpecialCaseList /> : <Navigate to="/" replace />} />
+          <Route path="/special-cases/new" element={token ? <SpecialCaseCreate /> : <Navigate to="/" replace />} />
+          <Route path="/special-cases/:caseId" element={token ? <SpecialCaseDetail currentUser={currentUser} /> : <Navigate to="/" replace />} />
+          <Route path="/special-cases/:caseId/edit" element={token ? <SpecialCaseCreate /> : <Navigate to="/" replace />} />
           <Route path="/d/*" element={<DPartComp />} />
           <Route path="/admin/medical-staff" element={<MedicalStaffManagement isAdmin={isAdmin} />} />
+          <Route path="/admin/medical-staff/:memberNo" element={<MedicalStaffDetail isAdmin={isAdmin} />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>

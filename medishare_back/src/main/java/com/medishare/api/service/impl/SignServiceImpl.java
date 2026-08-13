@@ -76,6 +76,9 @@ public class SignServiceImpl implements SignService {
         if (!passwordEncoder.matches(pw, member.getPw())) {
             throw new RuntimeException("Invalid password.");
         }
+        if (!"ACTIVE".equals(member.getStatus())) {
+            throw new IllegalStateException("This account is inactive or suspended.");
+        }
         member.setRoles(memberRoleAuthorityService.getAuthorities(member.getNo()));
 
         SignInResultDto result = SignInResultDto.builder()

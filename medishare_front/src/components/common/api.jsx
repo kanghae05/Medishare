@@ -34,6 +34,7 @@ api.interceptors.response.use(
         if (error.response?.status === 401) {
 
             localStorage.removeItem("token");
+            localStorage.removeItem("login");
 
             window.location.href = "/member/login";
         }
