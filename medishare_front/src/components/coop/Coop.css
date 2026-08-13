@@ -336,6 +336,7 @@
 .coop-form-row.align-top .coop-form-label { padding-top: 8px; }
 .coop-form-input,
 .coop-form-textarea {
+  width: 230px;
   flex: 1;
   border: 1px solid var(--coop-border);
   border-radius: 4px;

@@ -9,7 +9,7 @@ import CoopRequestView from "./CoopRequestView";
 
 function CoopComp(){
   return (
-    <div className="mt-5">
+    <div>
       <h2>협진함</h2>
       <div className="coop-layout mt-5">
         <CoopSidebar />
