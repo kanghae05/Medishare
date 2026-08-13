@@ -1,11 +1,19 @@
 import { useState } from "react";
 import { Link, NavLink } from "react-router-dom";
-import { canAccessDPart, getStoredLogin } from "../dpart/dpartUtils";
+
+const getStoredLogin = () => {
+  try {
+    return JSON.parse(localStorage.getItem("login")) ?? null;
+  } catch {
+    return null;
+  }
+};
 
 function TopNavi() {
   const [token, setToken] = useState(localStorage.getItem("token"));
   const [login, setLogin] = useState(getStoredLogin);
-  const showDPartMenu = Boolean(token && canAccessDPart());
+  const roles = Array.isArray(login?.roles) ? login.roles : [login?.role].filter(Boolean);
+  const showDPartMenu = Boolean(token && roles.some((role) => ["DOCTOR", "ROLE_DOCTOR", "ADMIN", "ROLE_ADMIN"].includes(role)));
 
   const logout = (event) => {
     event.preventDefault();
@@ -25,33 +33,14 @@ function TopNavi() {
         </button>
         <div className="collapse navbar-collapse" id="mynavbar">
           <ul className="navbar-nav me-auto">
-<<<<<<< Updated upstream
             <li className="nav-item">
-              <NavLink to="/" className="nav-link">
-                Home
-              </NavLink>
+              <NavLink to="/" className="nav-link">Home</NavLink>
             </li>
             {showDPartMenu && (
               <li className="nav-item">
-                <NavLink to="/d/dashboard" className="nav-link">
-                  Dashboard
-                </NavLink>
+                <NavLink to="/d/dashboard" className="nav-link">Dashboard</NavLink>
               </li>
             )}
-            <li className="nav-item">
-              <NavLink to="/notices" className="nav-link">
-                공지사항
-              </NavLink>
-            </li>
-            <li className="nav-item">
-              <NavLink to="/special-cases" className="nav-link">
-                특이케이스
-              </NavLink>
-            </li>
-=======
-            <li className="nav-item"><NavLink to="/" className="nav-link">Home</NavLink></li>
-            <li className="nav-item"><NavLink to="/d/dashboard" className="nav-link">D Dashboard</NavLink></li>
->>>>>>> Stashed changes
             {token && (
               <>
                 <li className="nav-item"><NavLink to="/notices" className="nav-link">공지사항</NavLink></li>
