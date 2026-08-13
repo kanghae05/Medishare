@@ -29,6 +29,15 @@ function DashboardPage() {
     const today = todayString();
 
     async function loadDashboard() {
+      if (!user.doctorId) {
+        setTodaySchedules([]);
+        setStats(emptyStats);
+        setScheduleError("로그인한 의료진 ID를 확인할 수 없습니다.");
+        setStatsError("");
+        setLoading(false);
+        return;
+      }
+
       setLoading(true);
       setScheduleError("");
       setStatsError("");
@@ -64,13 +73,13 @@ function DashboardPage() {
   }, [user.doctorId]);
 
   return (
-    <section className="dpart-page">
+    <section className="dpart-page dpart-work-page">
       <div className="dpart-page-head">
         <div>
-          <h1>Dashboard</h1>
+          <h1>협진 관리</h1>
           <p>
-            {user.name}님의 오늘 일정과 협진 현황입니다.
-            {user.isMock && <span className="dpart-inline-note"> 인증 연동 대기: doctorId={user.doctorId}</span>}
+            오늘의 일정과 협진 흐름을 한 화면에서 확인합니다.
+            {user.isMock && user.doctorId && <span className="dpart-inline-note"> doctorId={user.doctorId}</span>}
           </p>
         </div>
       </div>
@@ -79,31 +88,40 @@ function DashboardPage() {
         <LoadingState />
       ) : (
         <>
-          <div className="dpart-stat-grid">
+          <div className="dpart-summary-strip">
             <StatCard label="오늘 일정" value={todaySchedules.length} tone="blue" />
             <StatCard label="협진 요청" value={stats.requestedCount} tone="warning" />
-            <StatCard label="진행 중 협진" value={stats.inProgressCount} tone="green" />
-            <StatCard label="완료 협진" value={stats.completedCount} tone="gray" />
+            <StatCard label="진행 중" value={stats.inProgressCount} tone="green" />
+            <StatCard label="완료" value={stats.completedCount} tone="gray" />
           </div>
 
           {statsError && <div className="dpart-alert error">{statsError}</div>}
 
-          <div className="dpart-panel">
-            <h2>오늘의 일정</h2>
+          <div className="dpart-panel dpart-work-panel">
+            <div className="dpart-section-head">
+              <div>
+                <h2>오늘의 일정</h2>
+                <p>{todayString()} 기준 등록된 진료 가능 시간과 예약 상태입니다.</p>
+              </div>
+            </div>
+
             {scheduleError ? (
               <div className="dpart-alert error">{scheduleError}</div>
             ) : todaySchedules.length === 0 ? (
               <EmptyState message="오늘 등록된 일정이 없습니다." />
             ) : (
-              <div className="dpart-timeline">
+              <div className="dpart-work-list">
                 {todaySchedules.map((schedule) => (
-                  <div className="dpart-timeline-item" key={schedule.scheduleId}>
-                    <time>
-                      {schedule.startTime?.slice(0, 5)} - {schedule.endTime?.slice(0, 5)}
+                  <div className="dpart-work-row" key={schedule.scheduleId}>
+                    <time className="dpart-row-time">
+                      {schedule.startTime?.slice(0, 5)} ~ {schedule.endTime?.slice(0, 5)}
                     </time>
-                    <div>
+                    <div className="dpart-row-main">
+                      <strong>{schedule.memo || "메모 없음"}</strong>
+                      <span>{schedule.scheduleDate}</span>
+                    </div>
+                    <div className="dpart-row-status">
                       <StatusBadge type={schedule.scheduleType} />
-                      <p>{schedule.memo || "메모 없음"}</p>
                     </div>
                   </div>
                 ))}

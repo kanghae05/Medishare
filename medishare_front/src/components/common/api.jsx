@@ -31,13 +31,13 @@ api.interceptors.response.use(
     (error) => {
 
         // 인증 실패 시 실행되는 조건문 - 토큰 없음, 토큰 만료, 잘못된 토큰 등
-        if (error.response?.status === 401) {
+        // if (error.response?.status === 401) {
 
-            localStorage.removeItem("token");
-            localStorage.removeItem("login");
+        //     localStorage.removeItem("token");
+        //     localStorage.removeItem("login");
 
-            window.location.href = "/member/login";
-        }
+        //     window.location.href = "/member/login";
+        // }
 
         // 통신 실패로 catch 처리로 이동
         return Promise.reject(error);

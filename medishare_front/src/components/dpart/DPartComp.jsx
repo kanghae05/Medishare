@@ -1,21 +1,37 @@
-import { NavLink, Navigate, Route, Routes } from "react-router-dom";
+import { NavLink, Navigate, Route, Routes, useLocation } from "react-router-dom";
 import NotFoundPage from "../error/NotFoundPage";
 import DashboardPage from "./DashboardPage";
 import SchedulePage from "./SchedulePage";
 import ConsultationStatusPage from "./ConsultationStatusPage";
 import DiseaseStatisticsPage from "./DiseaseStatisticsPage";
-import { canAccessDPart, getCurrentUser } from "./dpartUtils";
+import {
+  canAccessConsultationManagement,
+  canAccessDPart,
+  canAccessDiseaseStatistics,
+  getCurrentUser,
+} from "./dpartUtils";
 import "./DPart.css";
+
+function DoctorOnlyRoute({ children }) {
+  if (canAccessConsultationManagement()) return children;
+  if (canAccessDiseaseStatistics()) return <Navigate to="/d/statistics" replace />;
+  return <Navigate to="/member/login" replace />;
+}
+
+function AuthenticatedRoute({ children }) {
+  if (canAccessDiseaseStatistics()) return children;
+  return <Navigate to="/member/login" replace />;
+}
 
 function DPartComp() {
   const user = getCurrentUser();
+  const location = useLocation();
 
   if (!canAccessDPart()) {
     return <Navigate to="/member/login" replace />;
   }
 
-  const scheduleLabel = user.isAdmin ? "의료진 일정" : "의사 일정";
-  const consultationLabel = user.isAdmin ? "전체 협진 현황" : "협진 현황";
+  const isStatisticsArea = location.pathname.startsWith("/d/statistics") || !user.isDoctor;
 
   return (
     <div className="dpart-shell">
@@ -29,20 +45,25 @@ function DPartComp() {
             </div>
           </div>
           <nav className="dpart-menu">
-            <NavLink to="/d/dashboard">Dashboard</NavLink>
-            <NavLink to="/d/schedule">{scheduleLabel}</NavLink>
-            <NavLink to="/d/consultations">{consultationLabel}</NavLink>
-            <NavLink to="/d/statistics">질환별 통계</NavLink>
+            {isStatisticsArea ? (
+              <NavLink to="/d/statistics">질환별 통계</NavLink>
+            ) : (
+              <>
+                <NavLink to="/d/dashboard">협진 관리</NavLink>
+                <NavLink to="/d/schedule">의사 일정</NavLink>
+                <NavLink to="/d/consultations">협진 현황</NavLink>
+              </>
+            )}
           </nav>
         </aside>
 
         <main className="dpart-main">
           <Routes>
-            <Route index element={<Navigate to="dashboard" replace />} />
-            <Route path="dashboard" element={<DashboardPage />} />
-            <Route path="schedule" element={<SchedulePage />} />
-            <Route path="consultations" element={<ConsultationStatusPage />} />
-            <Route path="statistics" element={<DiseaseStatisticsPage />} />
+            <Route index element={<Navigate to={user.isDoctor ? "dashboard" : "statistics"} replace />} />
+            <Route path="dashboard" element={<DoctorOnlyRoute><DashboardPage /></DoctorOnlyRoute>} />
+            <Route path="schedule" element={<DoctorOnlyRoute><SchedulePage /></DoctorOnlyRoute>} />
+            <Route path="consultations" element={<DoctorOnlyRoute><ConsultationStatusPage /></DoctorOnlyRoute>} />
+            <Route path="statistics" element={<AuthenticatedRoute><DiseaseStatisticsPage /></AuthenticatedRoute>} />
             <Route path="*" element={<NotFoundPage />} />
           </Routes>
         </main>

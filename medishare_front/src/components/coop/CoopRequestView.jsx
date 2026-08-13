@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import CoopReasonModal from "./CoopReasonModal";
+import CoopStudyDetailPanel from "./CoopStudyDetailPanel";
+import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
 
 // 의사명 + 메타(진료과·세부전공·직급)를 같이 표시. 이름이 없으면 번호로 폴백.
@@ -151,6 +153,9 @@ function CoopRequestView() {
           </div>
         )}
       </div>
+
+      {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
+      {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
       {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">

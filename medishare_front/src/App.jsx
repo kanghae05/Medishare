@@ -2,7 +2,6 @@ import { Navigate, Routes, Route } from "react-router-dom"
 import TopNavi from "./components/common/TopNavi"
 import Home from "./components/common/Home"
 import NotFoundMenu from "./components/error/NotFoundMenu"
-import BoardComp from "./components/board/BoardComp"
 import MemberComp from "./components/member/MemberComp"
 import ReportComp from "./components/report/ReportComp"
 import PacsComp from "./components/pacs/PacsComp"
@@ -18,6 +17,8 @@ import MedicalStaffManagement from "./pages/Admin/MedicalStaffManagement"
 import MedicalStaffDetail from "./pages/Admin/MedicalStaffDetail"
 import AccessLogManagement from "./pages/Admin/AccessLogManagement"
 import AccessLogDetail from "./pages/Admin/AccessLogDetail"
+import ChangeHistoryManagement from "./pages/Admin/ChangeHistoryManagement"
+import ChangeHistoryDetail from "./pages/Admin/ChangeHistoryDetail"
 
 function App() {
 
@@ -41,7 +42,6 @@ function App() {
         {/* 라이팅 - 메뉴별 */}
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/board/*" element={<BoardComp />} />
           <Route path="/member/*" element={<MemberComp />} />
           <Route path="/report/*" element={<ReportComp />} />
           <Route path="/pacs/*" element={<PacsComp />} />
@@ -61,6 +61,8 @@ function App() {
           <Route path="/admin/medical-staff/:memberNo" element={<MedicalStaffDetail isAdmin={isAdmin} />} />
           <Route path="/admin/access-logs" element={<AccessLogManagement isAdmin={isAdmin} />} />
           <Route path="/admin/access-logs/:logNo" element={<AccessLogDetail isAdmin={isAdmin} />} />
+          <Route path="/admin/change-logs" element={<ChangeHistoryManagement isAdmin={isAdmin} />} />
+          <Route path="/admin/change-logs/:historyNo" element={<ChangeHistoryDetail isAdmin={isAdmin} />} />
           <Route path="*" element={<NotFoundMenu />} />
         </Routes>
       </div>
