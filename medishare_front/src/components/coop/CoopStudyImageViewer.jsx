@@ -10,7 +10,6 @@ function CoopStudyImageViewer({ pacsStudyId }) {
   const [seriesDescription, setSeriesDescription] = useState(null);
   const [modality, setModality] = useState(null);
   const [imageUrl, setImageUrl] = useState(null);
-  const [imageLoading, setImageLoading] = useState(false);
   const [infoError, setInfoError] = useState(null);
 
   // 검사 정보(전체 이미지 수, 시리즈 설명) 조회
@@ -37,15 +36,12 @@ function CoopStudyImageViewer({ pacsStudyId }) {
     };
   }, [pacsStudyId]);
 
-  // 현재 인덱스의 이미지를 blob으로 받아와서 표시
+  // 현재 인덱스의 이미지를 blob으로 받아와서 표시.
+  // 새 이미지가 도착하기 전까지는 imageUrl을 건드리지 않아 이전 이미지가 그대로 남아있는다.
   useEffect(() => {
     if (!pacsStudyId || !totalCount) return;
     let ignore = false;
     let objectUrl = null;
-
-    queueMicrotask(() => {
-      if (!ignore) setImageLoading(true);
-    });
 
     api
       .get(`/coop/study/${pacsStudyId}/instance/${index}/preview.do`, { responseType: "blob" })
@@ -56,9 +52,6 @@ function CoopStudyImageViewer({ pacsStudyId }) {
       })
       .catch(() => {
         if (!ignore) setImageUrl(null);
-      })
-      .finally(() => {
-        if (!ignore) setImageLoading(false);
       });
 
     return () => {
@@ -84,7 +77,6 @@ function CoopStudyImageViewer({ pacsStudyId }) {
       )}
 
       <div className="coop-image-viewer-frame">
-        {imageLoading && <div className="coop-image-viewer-loading">불러오는 중...</div>}
         {imageUrl && <img src={imageUrl} alt={`검사 이미지 ${index + 1}/${totalCount}`} className="coop-image-viewer-img" />}
       </div>
 
