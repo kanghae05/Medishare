@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import { NavLink } from "react-router-dom";
 import api from "../common/api";
-import "./Coop.css";
 
 function CoopSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
@@ -13,23 +12,23 @@ function CoopSidebar() {
       .catch(() => {});
   }, []);
 
-  const linkClass = ({ isActive }) => "coop-sidebar-link" + (isActive ? " active" : "");
+  const linkClass = ({ isActive }) => "coop-tab" + (isActive ? " active" : "");
 
   return (
-    <aside className="coop-sidebar">
+    <aside className="coop-tabstrip">
       <NavLink to="/coop/write" className="coop-sidebar-new">
         + 새 협진 요청
       </NavLink>
-      <nav className="coop-sidebar-nav">
+      <nav className="coop-tabstrip-nav">
         <NavLink to="/coop/received" className={linkClass}>
-          받은 협진함
+          <span className="coop-tab-label">받은 협진함</span>
           {unreadCount > 0 && <span className="count-badge">{unreadCount}</span>}
         </NavLink>
         <NavLink to="/coop/sent" className={linkClass}>
-          보낸 협진함
+          <span className="coop-tab-label">보낸 협진함</span>
         </NavLink>
         <NavLink to="/coop/all" className={linkClass}>
-          전체 협진 내역
+          <span className="coop-tab-label">전체 협진 내역</span>
         </NavLink>
       </nav>
     </aside>

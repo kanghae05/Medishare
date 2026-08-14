@@ -20,11 +20,11 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findReceived(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                          boolean unreadOnly, LocalDate from, LocalDate to,
+                                          LocalDate from, LocalDate to,
                                           long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(receivedCondition(doctorId, deptId),
-                        statusIn(statuses), unreadOnlyCond(unreadOnly),
+                        statusIn(statuses),
                         dateFrom(from), dateTo(to))
                 .orderBy(c.reqTime.desc())
                 .offset(offset)
@@ -34,11 +34,11 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findReceivedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                  boolean unreadOnly, LocalDate from, LocalDate to) {
+                                  LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(receivedCondition(doctorId, deptId),
-                        statusIn(statuses), unreadOnlyCond(unreadOnly),
+                        statusIn(statuses),
                         dateFrom(from), dateTo(to))
                 .fetchOne();
         return count == null ? 0 : count;
@@ -93,8 +93,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
     public long countUnread(Long doctorId, Long deptId, List<CoopStatus> statuses) {
         Long count = queryFactory.select(c.count())
                 .from(c)
-                .where(receivedCondition(doctorId, deptId),
-                        c.isRead.isFalse(), statusIn(statuses))
+                .where(receivedCondition(doctorId, deptId), statusIn(statuses))
                 .fetchOne();
         return count == null ? 0 : count;
     }
@@ -116,10 +115,6 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     private com.querydsl.core.types.dsl.BooleanExpression statusIn(List<CoopStatus> statuses) {
         return (statuses == null || statuses.isEmpty()) ? null : c.status.in(statuses);
-    }
-
-    private com.querydsl.core.types.dsl.BooleanExpression unreadOnlyCond(boolean unreadOnly) {
-        return unreadOnly ? c.isRead.isFalse() : null;
     }
 
     private com.querydsl.core.types.dsl.BooleanExpression dateFrom(LocalDate from) {

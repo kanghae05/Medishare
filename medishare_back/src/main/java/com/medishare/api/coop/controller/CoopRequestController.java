@@ -5,6 +5,7 @@ import com.medishare.api.pacs.entity.PacsStudy;
 import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
 import com.medishare.api.coop.repository.CoopMemberLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsPatientLookupRepository;
+import com.medishare.api.coop.repository.CoopPacsSeriesLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.repository.CoopReportLookupRepository;
 import com.medishare.api.coop.service.CoopRequestService;
@@ -15,6 +16,7 @@ import com.medishare.api.coop.vo.DoctorLookupVO;
 import com.medishare.api.coop.vo.PatientLookupVO;
 import com.medishare.api.coop.vo.ReportLookupVO;
 import com.medishare.api.coop.vo.StudyDetailVO;
+import com.medishare.api.coop.vo.SeriesLookupVO;
 import com.medishare.api.coop.vo.StudyLookupVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
@@ -38,6 +40,7 @@ public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
+    private final CoopPacsSeriesLookupRepository pacsSeriesRepository;
     private final OrthancImageService orthancImageService;
     private final CoopMemberLookupRepository memberRepository;
     private final CoopDepartmentLookupRepository departmentRepository;
@@ -68,7 +71,6 @@ public class CoopRequestController {
     // 받은 협진함 (4-5-1)
     @GetMapping("/received.do")
     public Map<String, Object> received(@RequestParam(required = false) String status,
-                                        @RequestParam(defaultValue = "false") boolean unreadOnly,
                                         @RequestParam(required = false) String from,
                                         @RequestParam(required = false) String to,
                                         HttpServletRequest request,
@@ -79,7 +81,7 @@ public class CoopRequestController {
 
         List<CoopRequestVO> list = coopRequestService.receivedList(
                 doctorId, deptId, pageObject,
-                parseStatuses(status), unreadOnly, parseDate(from), parseDate(to));
+                parseStatuses(status), parseDate(from), parseDate(to));
 
         Map<String, Object> result = new HashMap<>();
         result.put("list", list);
@@ -315,32 +317,33 @@ public class CoopRequestController {
         }
     }
 
-    // 이 검사에 이미지가 몇 장 있는지 (프론트 이전/다음, 슬라이더 범위 계산용)
-    @GetMapping("/study/{studyNo}/instances.do")
-    public Map<String, Object> instanceCount(@PathVariable Long studyNo) {
-        String orthancStudyId = resolveOrthancStudyId(studyNo);
-        List<String> instanceIds = orthancImageService.listInstanceIds(orthancStudyId);
+    // 해당 검사에 속한 시리즈 목록 (검사 하나에 시리즈가 여러 개일 수 있다)
+    @GetMapping("/study/{studyNo}/series.do")
+    public List<SeriesLookupVO> studySeries(@PathVariable Long studyNo) {
+        PacsStudy study = pacsStudyRepository.findById(studyNo)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 검사입니다."));
 
-        Map<String, Object> result = new HashMap<>();
-        result.put("count", instanceIds.size());
-
-        // 검사당 시리즈가 1개라는 전제로, 첫 시리즈의 설명/장비종류를 같이 내려준다.
-        pacsStudyRepository.findById(studyNo).ifPresent(s -> {
-            if (s.getSeriesList() != null && !s.getSeriesList().isEmpty()) {
-                var series = s.getSeriesList().get(0);
-                result.put("seriesDescription", series.getSeriesDescription());
-                result.put("modality", series.getModality());
-            }
-        });
-
-        return result;
+        if (study.getSeriesList() == null) {
+            return List.of();
+        }
+        return study.getSeriesList().stream()
+                .map(s -> new SeriesLookupVO(s.getNo(), s.getModality(), s.getSeriesDescription(), s.getInstanceCount()))
+                .toList();
     }
 
-    // index번째(0부터 시작) 이미지를 PNG로 반환
-    @GetMapping("/study/{studyNo}/instance/{index}/preview.do")
-    public ResponseEntity<byte[]> instancePreview(@PathVariable Long studyNo, @PathVariable int index) {
-        String orthancStudyId = resolveOrthancStudyId(studyNo);
-        List<String> instanceIds = orthancImageService.listInstanceIds(orthancStudyId);
+    // 이 시리즈에 이미지가 몇 장 있는지 (프론트 이전/다음, 슬라이더 범위 계산용)
+    @GetMapping("/series/{seriesNo}/instances.do")
+    public Map<String, Object> seriesInstanceCount(@PathVariable Long seriesNo) {
+        String orthancSeriesId = resolveOrthancSeriesId(seriesNo);
+        List<String> instanceIds = orthancImageService.listInstanceIdsForSeries(orthancSeriesId);
+        return Map.of("count", instanceIds.size());
+    }
+
+    // 시리즈 내 index번째(0부터 시작) 이미지를 PNG로 반환
+    @GetMapping("/series/{seriesNo}/instance/{index}/preview.do")
+    public ResponseEntity<byte[]> seriesInstancePreview(@PathVariable Long seriesNo, @PathVariable int index) {
+        String orthancSeriesId = resolveOrthancSeriesId(seriesNo);
+        List<String> instanceIds = orthancImageService.listInstanceIdsForSeries(orthancSeriesId);
 
         if (index < 0 || index >= instanceIds.size()) {
             throw new RuntimeException("해당 순번의 이미지가 존재하지 않습니다.");
@@ -350,10 +353,10 @@ public class CoopRequestController {
         return ResponseEntity.ok().contentType(MediaType.IMAGE_PNG).body(image);
     }
 
-    private String resolveOrthancStudyId(Long studyNo) {
-        PacsStudy study = pacsStudyRepository.findById(studyNo)
-                .orElseThrow(() -> new RuntimeException("존재하지 않는 검사입니다."));
-        return study.getOrthancStudyId();
+    private String resolveOrthancSeriesId(Long seriesNo) {
+        return pacsSeriesRepository.findById(seriesNo)
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 시리즈입니다."))
+                .getOrthancSeriesId();
     }
 
     // ------------------------------------------------------------------

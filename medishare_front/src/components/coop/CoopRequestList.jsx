@@ -18,9 +18,9 @@ const ALL_STATUSES = ["요청", "수락", "거절", "취소", "만료"];
 const DEFAULT_STATUSES = ["요청", "수락", "거절", "만료"]; // 취소는 기본 제외 (전체 화면 공통)
 
 const MODE_CONFIG = {
-  received: { title: "받은 협진함", endpoint: "/coop/received.do", defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: true },
-  sent:     { title: "보낸 협진함", endpoint: "/coop/sent.do",     defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: false },
-  all:      { title: "전체 협진 내역", endpoint: "/coop/all.do",   defaultStatuses: DEFAULT_STATUSES, hasUnreadFilter: false },
+  received: { title: "받은 협진함", endpoint: "/coop/received.do", defaultStatuses: DEFAULT_STATUSES },
+  sent:     { title: "보낸 협진함", endpoint: "/coop/sent.do",     defaultStatuses: DEFAULT_STATUSES },
+  all:      { title: "전체 협진 내역", endpoint: "/coop/all.do",   defaultStatuses: DEFAULT_STATUSES },
 };
 
 function formatDateTime(str) {
@@ -37,7 +37,6 @@ function CoopRequestList({ mode }) {
 
   const page = Number(searchParams.get("page") || 1);
   const urlStatuses = searchParams.get("status");
-  const urlUnreadOnly = searchParams.get("unreadOnly") === "true";
   const urlFrom = searchParams.get("from") || "";
   const urlTo = searchParams.get("to") || "";
 
@@ -50,7 +49,6 @@ function CoopRequestList({ mode }) {
   const [draftStatuses, setDraftStatuses] = useState(
     urlStatuses ? urlStatuses.split(",") : config.defaultStatuses
   );
-  const [draftUnreadOnly, setDraftUnreadOnly] = useState(urlUnreadOnly);
   const [draftFrom, setDraftFrom] = useState(urlFrom);
   const [draftTo, setDraftTo] = useState(urlTo);
 
@@ -60,7 +58,6 @@ function CoopRequestList({ mode }) {
     queueMicrotask(() => {
       if (ignore) return;
       setDraftStatuses(urlStatuses ? urlStatuses.split(",") : config.defaultStatuses);
-      setDraftUnreadOnly(urlUnreadOnly);
       setDraftFrom(urlFrom);
       setDraftTo(urlTo);
     });
@@ -74,7 +71,6 @@ function CoopRequestList({ mode }) {
   const isFilterModified =
     appliedStatuses.length !== config.defaultStatuses.length ||
     !appliedStatuses.every((s) => config.defaultStatuses.includes(s)) ||
-    urlUnreadOnly ||
     urlFrom ||
     urlTo;
 
@@ -94,7 +90,6 @@ function CoopRequestList({ mode }) {
       from: urlFrom || undefined,
       to: urlTo || undefined,
     };
-    if (config.hasUnreadFilter) params.unreadOnly = urlUnreadOnly || undefined;
 
     api
       .get(config.endpoint, { params })
@@ -114,7 +109,7 @@ function CoopRequestList({ mode }) {
       ignore = true;
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [mode, page, urlStatuses, urlUnreadOnly, urlFrom, urlTo]);
+  }, [mode, page, urlStatuses, urlFrom, urlTo]);
 
   const toggleDraftStatus = (status) => {
     setDraftStatuses((prev) =>
@@ -127,7 +122,6 @@ function CoopRequestList({ mode }) {
     if (draftStatuses.length && draftStatuses.length !== ALL_STATUSES.length) {
       params.status = draftStatuses.join(",");
     }
-    if (config.hasUnreadFilter && draftUnreadOnly) params.unreadOnly = "true";
     if (draftFrom) params.from = draftFrom;
     if (draftTo) params.to = draftTo;
     setSearchParams(params);
@@ -136,7 +130,6 @@ function CoopRequestList({ mode }) {
 
   const resetFilter = () => {
     setDraftStatuses(config.defaultStatuses);
-    setDraftUnreadOnly(false);
     setDraftFrom("");
     setDraftTo("");
     setSearchParams({ page: "1" });
@@ -146,7 +139,6 @@ function CoopRequestList({ mode }) {
   const goPage = (p) => {
     const params = { page: String(p) };
     if (urlStatuses) params.status = urlStatuses;
-    if (config.hasUnreadFilter && urlUnreadOnly) params.unreadOnly = "true";
     if (urlFrom) params.from = urlFrom;
     if (urlTo) params.to = urlTo;
     setSearchParams(params);
@@ -184,12 +176,6 @@ function CoopRequestList({ mode }) {
             <input type="date" className="coop-filter-date" value={draftFrom} onChange={(e) => setDraftFrom(e.target.value)} />
             <span style={{ color: "var(--coop-muted)" }}>~</span>
             <input type="date" className="coop-filter-date" value={draftTo} onChange={(e) => setDraftTo(e.target.value)} />
-            {config.hasUnreadFilter && (
-              <label className="coop-filter-checkbox">
-                <input type="checkbox" checked={draftUnreadOnly} onChange={(e) => setDraftUnreadOnly(e.target.checked)} />
-                안읽음만 보기
-              </label>
-            )}
           </div>
           <div className="coop-filter-actions">
             <button type="button" className="btn-coop-reset" onClick={resetFilter}>초기화</button>
@@ -207,8 +193,15 @@ function CoopRequestList({ mode }) {
           {mode === "received" ? "받은" : mode === "sent" ? "보낸" : ""} 협진 요청이 없습니다.
         </div>
       ) : (
-        <div className="coop-list-card">
-          {list.map((r) => {
+        <div className="coop-ledger">
+          <div className="coop-ledger-row coop-ledger-head">
+            <span></span>
+            <span className="coop-ledger-no">NO</span>
+            <span>요청 내용</span>
+            <span className="coop-ledger-col-status">상태</span>
+            <span className="coop-ledger-col-time">시각</span>
+          </div>
+          {list.map((r, idx) => {
             const isIncoming = mode === "all" ? r.direction === "received" : mode === "received";
 
             let counterpartDisplay;
@@ -224,32 +217,42 @@ function CoopRequestList({ mode }) {
               counterpartDisplay = r.recvDeptName || `진료과 #${r.recvDeptId}`;
             }
 
+            // 사이드바 배지와 동일한 기준: status가 "요청"인 것만 강조 표시 (아직 응답 안 함)
+            const isUnread = isIncoming && r.status === "요청";
+
             return (
-              <div key={r.coopRequestId} className="coop-row" onClick={() => navigate(`/coop/view?no=${r.coopRequestId}`)}>
-                <span className={"coop-row-unread-dot" + (!isIncoming || r.isRead ? " hidden" : "")} />
-                <div className="coop-row-main">
+              <div
+                key={r.coopRequestId}
+                className={"coop-ledger-row" + (isUnread ? " unread" : "")}
+                onClick={() => navigate(`/coop/view?no=${r.coopRequestId}`)}
+              >
+                <span className={"coop-row-unread-dot" + (isUnread ? "" : " hidden")} />
+                <span className="coop-ledger-no">{String(idx + 1).padStart(2, "0")}</span>
+                <div className="coop-ledger-main">
                   <div className="coop-row-top">
-                    <span className={"coop-row-counterpart-primary" + (isIncoming && !r.isRead ? " unread" : "")}>
+                    <span className={"coop-row-counterpart-primary" + (isUnread ? " unread" : "")}>
                       {counterpartDisplay}
                     </span>
+                    {isIncoming && r.recvType === "진료과" && (
+                      <span className="coop-dept-badge">{r.recvDeptName ? `${r.recvDeptName} 요청` : "진료과 요청"}</span>
+                    )}
                     {mode === "all" && (
                       <span className={"coop-direction-badge" + (isIncoming ? " in" : " out")}>
                         {isIncoming ? "받음" : "보냄"}
                       </span>
                     )}
                   </div>
-                  <div className="coop-row-sub">
+                  <div className="coop-row-sub coop-row-sub-last">
                     <span className="coop-row-patient-label">환자</span>
                     <span className="coop-row-patient">{r.patientName || `환자 #${r.patientId}`}</span>
                   </div>
-                  <div className="coop-row-content">{r.reqContent}</div>
                 </div>
-                <div className="coop-row-side">
+                <span className="coop-ledger-col-status">
                   <span className={"coop-pill status-" + (r.displayStatus || r.status)}>
                     {r.displayStatus || r.status}
                   </span>
-                  <span className="coop-row-time">{formatDateTime(r.reqTime)}</span>
-                </div>
+                </span>
+                <span className="coop-ledger-col-time coop-row-time">{formatDateTime(r.reqTime)}</span>
               </div>
             );
           })}

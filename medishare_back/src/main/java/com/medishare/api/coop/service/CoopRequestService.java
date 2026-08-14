@@ -11,7 +11,7 @@ public interface CoopRequestService {
 
     // 받은 협진함 (acceptMode=1)
     List<CoopRequestVO> receivedList(Long doctorId, Long deptId, PageObject pageObject,
-                                     List<String> statuses, boolean unreadOnly,
+                                     List<String> statuses,
                                      LocalDate from, LocalDate to);
 
     // 보낸 협진함 (acceptMode=2)

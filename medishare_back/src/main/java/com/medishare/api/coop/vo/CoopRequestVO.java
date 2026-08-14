@@ -69,9 +69,6 @@ public class CoopRequestVO {
     // 지정의사 요청 거절 사유
     private String rejectReason;
 
-    private Boolean isRead;
-    private String readTime;
-
     // 전체 협진 내역 조회 시: "received" 또는 "sent"
     private String direction;
 

@@ -107,43 +107,44 @@ function CoopRequestView() {
       </div>
 
       <div className="coop-view-card">
-        <div className="coop-view-row">
-          <span className="coop-view-label">요청 의사</span>
-          <span className="coop-view-value">
-            {renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}
-          </span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">수신 대상</span>
-          <span className="coop-view-value">
-            {vo.recvType === "지정의사"
-              ? renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
-              : vo.acceptDoctorId
-              ? renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)
-              : vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
-            {vo.recvType === "진료과" && !vo.acceptDoctorId && " (아직 미수락)"}
-          </span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">요청 시각</span>
-          <span className="coop-view-value">{vo.reqTime}</span>
-        </div>
-        {vo.respTime && (
-          <div className="coop-view-row">
-            <span className="coop-view-label">응답 시각</span>
-            <span className="coop-view-value">{vo.respTime}</span>
+        <div className="coop-detail-section-title">협진 요청</div>
+        <div className="coop-view-grid">
+          <div>
+            <span className="coop-view-label">요청 의사</span>
+            <span className="coop-view-value">{renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}</span>
           </div>
-        )}
-        <div className="coop-view-row align-top">
-          <span className="coop-view-label">요청 내용</span>
-          <span className="coop-view-value">{vo.reqContent}</span>
-        </div>
-        {vo.rejectReason && (
-          <div className="coop-view-row align-top">
-            <span className="coop-view-label">거절 사유</span>
-            <span className="coop-view-value coop-view-danger">{vo.rejectReason}</span>
+          <div>
+            <span className="coop-view-label">수신 대상</span>
+            <span className="coop-view-value">
+              {vo.recvType === "지정의사"
+                ? renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
+                : vo.acceptDoctorId
+                ? renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)
+                : vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
+              {vo.recvType === "진료과" && !vo.acceptDoctorId && " (아직 미수락)"}
+            </span>
           </div>
-        )}
+          <div>
+            <span className="coop-view-label">요청 시각</span>
+            <span className="coop-view-value">{vo.reqTime}</span>
+          </div>
+          {vo.respTime && (
+            <div>
+              <span className="coop-view-label">응답 시각</span>
+              <span className="coop-view-value">{vo.respTime}</span>
+            </div>
+          )}
+          <div className="coop-view-span2">
+            <span className="coop-view-label">요청 내용</span>
+            <span className="coop-view-value">{vo.reqContent}</span>
+          </div>
+          {vo.rejectReason && (
+            <div className="coop-view-span2">
+              <span className="coop-view-label">거절 사유</span>
+              <span className="coop-view-value coop-view-danger">{vo.rejectReason}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}

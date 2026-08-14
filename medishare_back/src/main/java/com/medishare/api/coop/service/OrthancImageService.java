@@ -58,14 +58,17 @@ public class OrthancImageService {
     }
 
     /**
-     * 해당 검사(study)에 속한 모든 이미지(instance)의 Orthanc ID 목록을 순서대로 반환한다.
-     * Orthanc의 GET /studies/{id}/instances 는 그 검사에 속한 모든 인스턴스를 평탄화해서 준다.
+     * 해당 시리즈(series)에 속한 이미지(instance) ID 목록을 순서대로 반환한다.
+     * 검사(study) 하나에 시리즈가 여러 개일 수 있어서, 반드시 시리즈 단위로 가져와야
+     * 서로 다른 시리즈의 이미지가 한 슬라이더에 섞이지 않는다.
+     * (예전엔 GET /studies/{id}/instances로 검사 전체를 평탄화해서 가져왔는데,
+     *  시리즈가 여러 개면 서로 다른 촬영이 순서 구분 없이 이어져 보이는 문제가 있었다.)
      */
     @SuppressWarnings("unchecked")
-    public List<String> listInstanceIds(String orthancStudyId) {
+    public List<String> listInstanceIdsForSeries(String orthancSeriesId) {
         checkConfigured();
 
-        String url = baseUrl + "/studies/" + orthancStudyId + "/instances";
+        String url = baseUrl + "/series/" + orthancSeriesId + "/instances";
         HttpEntity<Void> request = new HttpEntity<>(authHeaders());
         ResponseEntity<List> response = restTemplate.exchange(url, HttpMethod.GET, request, List.class);
 

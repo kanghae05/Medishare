@@ -321,8 +321,6 @@ CREATE TABLE coop_request (
     req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resp_time          DATETIME NULL,
     reject_reason      TEXT NULL,
-    is_read            BOOLEAN NOT NULL DEFAULT FALSE,
-    read_time          DATETIME NULL,
 
     CONSTRAINT chk_recv_type_match CHECK (
         (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)

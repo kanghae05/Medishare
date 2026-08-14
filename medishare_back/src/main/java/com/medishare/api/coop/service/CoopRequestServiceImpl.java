@@ -29,7 +29,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     private static final DateTimeFormatter DATETIME_FMT = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
     private static final List<CoopStatus> DEFAULT_RECEIVED_STATUSES =
             List.of(CoopStatus.요청, CoopStatus.수락, CoopStatus.거절, CoopStatus.만료); // 취소는 기본 제외
-    private static final List<CoopStatus> UNREAD_STATUSES = List.of(CoopStatus.요청, CoopStatus.만료);
+    private static final List<CoopStatus> PENDING_STATUSES = List.of(CoopStatus.요청); // 배지/점 표시 기준 - "지금 응답이 필요한 것"만
 
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
@@ -47,15 +47,15 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> receivedList(Long doctorId, Long deptId, PageObject pageObject,
-                                            List<String> statuses, boolean unreadOnly,
+                                            List<String> statuses,
                                             LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, DEFAULT_RECEIVED_STATUSES);
 
-        long total = coopRequestRepository.findReceivedCount(doctorId, deptId, statusList, unreadOnly, from, to);
+        long total = coopRequestRepository.findReceivedCount(doctorId, deptId, statusList, from, to);
         pageObject.setTotalRow(total);
 
         List<CoopRequest> list = coopRequestRepository.findReceived(
-                doctorId, deptId, statusList, unreadOnly, from, to,
+                doctorId, deptId, statusList, from, to,
                 pageObject.getLimit(), pageObject.getPerPageNum());
 
         List<CoopRequestVO> result = new ArrayList<>();
@@ -123,16 +123,6 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     public CoopRequestVO view(Long coopRequestId, Long viewerDoctorId) {
         CoopRequest c = findEntity(coopRequestId);
 
-        // 열람 처리 (4-6) - 요청자 본인이 아니라 수신 측(상대방)이 볼 때만 처리
-        // 진료과 요청은 소속 의사 누구나 볼 수 있어 개별 검증은 목록 조회 단계에서 걸러졌다고 보고,
-        // 여기서는 "요청자 본인이 아니면 수신 측 열람"으로 단순화한다.
-        boolean isRecipientView = !viewerDoctorId.equals(c.getReqDoctorId());
-        if (isRecipientView && !c.isRead()) {
-            c.setRead(true);
-            c.setReadTime(java.time.LocalDateTime.now());
-            coopRequestRepository.save(c);
-        }
-
         CoopRequestVO vo = toVO(c, viewerDoctorId);
         boolean isSent = c.getReqDoctorId().equals(viewerDoctorId);
         vo.setDirection(isSent ? "sent" : "received");
@@ -192,7 +182,6 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 .originRequestId(vo.getOriginRequestId())
                 .reqContent(vo.getReqContent())
                 .status(CoopStatus.요청)
-                .isRead(false)
                 .build();
 
         return toVO(coopRequestRepository.save(entity), vo.getReqDoctorId());
@@ -316,7 +305,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public UnreadCountVO unreadCount(Long doctorId, Long deptId) {
-        long count = coopRequestRepository.countUnread(doctorId, deptId, UNREAD_STATUSES);
+        long count = coopRequestRepository.countUnread(doctorId, deptId, PENDING_STATUSES);
         return new UnreadCountVO(count);
     }
 
@@ -394,8 +383,6 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         vo.setReqTime(c.getReqTime() == null ? null : c.getReqTime().format(DATETIME_FMT));
         vo.setRespTime(c.getRespTime() == null ? null : c.getRespTime().format(DATETIME_FMT));
         vo.setRejectReason(c.getRejectReason());
-        vo.setIsRead(c.isRead());
-        vo.setReadTime(c.getReadTime() == null ? null : c.getReadTime().format(DATETIME_FMT));
 
         // 검사 설명 + 촬영일 + 환자 정보 (PacsStudy 조회 한 번으로 전부 해결)
         // patient_id 컬럼을 없애면서, 환자는 이제 pacs_study -> patient(FK) 통해서만 얻는다.
@@ -413,8 +400,9 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                     }
                 });
 
-        // 요청/수신/수락 의사 이름 - 조회하는 본인이면 "나"로, 아니면 이름+메타(진료과·세부전공·직급)로 채운다.
-        applyDoctorName(c.getReqDoctorId(), viewerId, vo::setReqDoctorName, vo::setReqDoctorMeta);
+        // 요청자(발신인)는 조회자가 누구든 항상 실제 이름을 보여준다 ("나"로 치환하지 않음).
+        // "나" 치환은 "내가 받는/수락하는 쪽일 때"만 의미가 있어서 recv/accept 필드에만 적용한다.
+        applyRealDoctorName(c.getReqDoctorId(), vo::setReqDoctorName, vo::setReqDoctorMeta);
         if (c.getRecvDoctorId() != null) {
             applyDoctorName(c.getRecvDoctorId(), viewerId, vo::setRecvDoctorName, vo::setRecvDoctorMeta);
         }
@@ -429,10 +417,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return vo;
     }
 
-    /**
-     * 의사 이름을 채운다. 조회하는 본인(viewerId)과 같은 사람이면 "나"로 표시하고
-     * 메타(진료과·세부전공·직급)는 비워둔다. 남이면 실제 이름+메타를 채운다.
-     */
+    /** 수신/수락 의사 이름 - 조회하는 본인이면 "나"로, 아니면 이름+메타로 채운다. */
     private void applyDoctorName(Long doctorId, Long viewerId,
                                  java.util.function.Consumer<String> nameSetter,
                                  java.util.function.Consumer<String> metaSetter) {
@@ -440,6 +425,13 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             nameSetter.accept("나");
             return;
         }
+        applyRealDoctorName(doctorId, nameSetter, metaSetter);
+    }
+
+    /** 요청자(발신인) 이름 - 조회자와 무관하게 항상 실제 이름+메타를 채운다. */
+    private void applyRealDoctorName(Long doctorId,
+                                     java.util.function.Consumer<String> nameSetter,
+                                     java.util.function.Consumer<String> metaSetter) {
         memberRepository.findById(doctorId).ifPresent(m -> {
             nameSetter.accept(m.getName());
             List<String> metaParts = new ArrayList<>();
