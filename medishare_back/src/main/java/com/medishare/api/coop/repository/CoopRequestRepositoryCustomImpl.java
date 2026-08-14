@@ -103,14 +103,20 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
     // ------------------------------------------------------------------
 
     private BooleanBuilder receivedCondition(Long doctorId, Long deptId) {
-        return new BooleanBuilder(c.recvDoctorId.eq(doctorId))
-                .or(c.recvDeptId.eq(deptId));
+        BooleanBuilder b = new BooleanBuilder(c.recvDoctorId.eq(doctorId));
+        if (deptId != null) {
+            b.or(c.recvDeptId.eq(deptId));
+        }
+        return b;
     }
 
     private BooleanBuilder allRelatedCondition(Long doctorId, Long deptId) {
-        return new BooleanBuilder(c.reqDoctorId.eq(doctorId))
-                .or(c.recvDoctorId.eq(doctorId))
-                .or(c.recvDeptId.eq(deptId));
+        BooleanBuilder b = new BooleanBuilder(c.reqDoctorId.eq(doctorId))
+                .or(c.recvDoctorId.eq(doctorId));
+        if (deptId != null) {
+            b.or(c.recvDeptId.eq(deptId));
+        }
+        return b;
     }
 
     private com.querydsl.core.types.dsl.BooleanExpression statusIn(List<CoopStatus> statuses) {

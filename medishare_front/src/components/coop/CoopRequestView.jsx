@@ -29,6 +29,7 @@ function CoopRequestView() {
   const [actionError, setActionError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [modal, setModal] = useState(null); // "reject" | "deptReject" | null
+  const [chatOpen, setChatOpen] = useState(false);
 
   const load = () => {
     let ignore = false;
@@ -97,6 +98,9 @@ function CoopRequestView() {
   const isSent = vo.direction === "sent";
   const canCancel = isSent && vo.status === "요청";
   const canRerequest = isSent && (vo.status === "거절" || vo.status === "만료");
+  // 채팅은 "수락된 상태" + "요청자 본인이거나, 내가 그 수락한 의사인 경우"만 가능.
+  // 이름은 이제 항상 실명으로 보이므로, "내가 수락자인지"는 별도 필드(viewerIsAcceptDoctor)로 판단한다.
+  const canChat = vo.status === "수락" && (isSent || vo.viewerIsAcceptDoctor);
 
   return (
     <div className="coop-page">
@@ -117,12 +121,22 @@ function CoopRequestView() {
           <div>
             <span className="coop-view-label">수신 대상</span>
             <span className="coop-view-value">
-              {vo.recvType === "지정의사"
-                ? renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
-                : vo.acceptDoctorId
-                ? renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)
-                : vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
-              {vo.recvType === "진료과" && !vo.acceptDoctorId && " (아직 미수락)"}
+              {vo.recvType === "지정의사" ? (
+                renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
+              ) : (
+                <>
+                  {vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
+                  {vo.acceptDoctorId ? (
+                    <>
+                      {" → "}
+                      {renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)}
+                      {" (수락)"}
+                    </>
+                  ) : (
+                    " (아직 미수락)"
+                  )}
+                </>
+              )}
             </span>
           </div>
           <div>
@@ -159,8 +173,6 @@ function CoopRequestView() {
 
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
       {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
-
-      <CoopChatPanel coopRequestId={vo.coopRequestId} />
 
       {isSent && vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
@@ -213,7 +225,15 @@ function CoopRequestView() {
             재요청
           </button>
         )}
+
+        {canChat && (
+          <button type="button" className="btn-coop-apply" onClick={() => setChatOpen((v) => !v)}>
+            {chatOpen ? "채팅 닫기" : "채팅"}
+          </button>
+        )}
       </div>
+
+      {canChat && chatOpen && <CoopChatPanel coopRequestId={vo.coopRequestId} />}
 
       {modal === "reject" && (
         <CoopReasonModal

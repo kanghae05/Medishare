@@ -2,7 +2,7 @@ package com.medishare.api.coop.service;
 
 import com.medishare.api.coop.entity.CoopMessage;
 import com.medishare.api.coop.entity.CoopRequest;
-import com.medishare.api.coop.entity.RecvType;
+import com.medishare.api.coop.entity.CoopStatus;
 import com.medishare.api.coop.repository.CoopMemberLookupRepository;
 import com.medishare.api.coop.repository.CoopMessageRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
@@ -54,17 +54,13 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         if (c == null) {
             return false;
         }
-        if (doctorId.equals(c.getReqDoctorId())) {
-            return true;
+        // 수락되기 전(요청/거절/취소/만료)에는 채팅 자체를 열 수 없다.
+        // 진료과 요청은 수락 전에 소속과 누구나 볼 수 있었지만, 채팅은 실제로
+        // "이 건을 맡기로 한 사람"과 요청자 둘만 - 그래서 acceptDoctorId 기준으로만 판단한다.
+        if (c.getStatus() != CoopStatus.수락) {
+            return false;
         }
-        if (doctorId.equals(c.getAcceptDoctorId())) {
-            return true;
-        }
-        if (c.getRecvType() == RecvType.지정의사) {
-            return doctorId.equals(c.getRecvDoctorId());
-        }
-        // 진료과 요청: 소속과가 일치하면 당사자 (아직 응답 전인 동료도 채팅 참여는 가능하게 둔다 - 협의 목적)
-        return deptId != null && deptId.equals(c.getRecvDeptId());
+        return doctorId.equals(c.getReqDoctorId()) || doctorId.equals(c.getAcceptDoctorId());
     }
 
     private CoopMessageVO toVO(CoopMessage m, Long viewerId) {

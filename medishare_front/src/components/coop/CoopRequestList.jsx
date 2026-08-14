@@ -233,7 +233,7 @@ function CoopRequestList({ mode }) {
                     <span className={"coop-row-counterpart-primary" + (isUnread ? " unread" : "")}>
                       {counterpartDisplay}
                     </span>
-                    {isIncoming && r.recvType === "진료과" && (
+                    {r.recvType === "진료과" && (
                       <span className="coop-dept-badge">{r.recvDeptName ? `${r.recvDeptName} 요청` : "진료과 요청"}</span>
                     )}
                     {mode === "all" && (

@@ -79,7 +79,7 @@ public class CoopRequestController {
                                         HttpServletRequest request,
                                         Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
-        Long deptId = currentDeptId(authentication);
+        Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
 
         List<CoopRequestVO> list = coopRequestService.receivedList(
@@ -119,7 +119,7 @@ public class CoopRequestController {
                                    HttpServletRequest request,
                                    Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
-        Long deptId = currentDeptId(authentication);
+        Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
 
         List<CoopRequestVO> list = coopRequestService.allList(
@@ -162,7 +162,7 @@ public class CoopRequestController {
     @GetMapping("/unreadCount.do")
     public UnreadCountVO unreadCount(Authentication authentication) {
         Long doctorId = currentDoctorId(authentication);
-        Long deptId = currentDeptId(authentication);
+        Long deptId = safeCurrentDeptId(authentication);
         return coopRequestService.unreadCount(doctorId, deptId);
     }
 
@@ -228,7 +228,9 @@ public class CoopRequestController {
     public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q,
                                               Authentication authentication) {
         Long myDoctorId = currentDoctorId(authentication);
+        List<Long> adminIds = memberRepository.findAdminMemberIds();
         return memberRepository.searchDoctors(q, myDoctorId).stream()
+                .filter(m -> !adminIds.contains(m.getNo()))
                 .map(m -> new DoctorLookupVO(
                         m.getNo(),
                         m.getName(),

@@ -410,15 +410,16 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                     }
                 });
 
-        // 요청자(발신인)는 조회자가 누구든 항상 실제 이름을 보여준다 ("나"로 치환하지 않음).
-        // "나" 치환은 "내가 받는/수락하는 쪽일 때"만 의미가 있어서 recv/accept 필드에만 적용한다.
+        // 요청자/수신자/수락자 이름은 조회자가 누구든 항상 실제 이름을 보여준다 ("나"로 치환하지 않음).
         applyRealDoctorName(c.getReqDoctorId(), vo::setReqDoctorName, vo::setReqDoctorMeta);
         if (c.getRecvDoctorId() != null) {
-            applyDoctorName(c.getRecvDoctorId(), viewerId, vo::setRecvDoctorName, vo::setRecvDoctorMeta);
+            applyRealDoctorName(c.getRecvDoctorId(), vo::setRecvDoctorName, vo::setRecvDoctorMeta);
         }
         if (c.getAcceptDoctorId() != null) {
-            applyDoctorName(c.getAcceptDoctorId(), viewerId, vo::setAcceptDoctorName, vo::setAcceptDoctorMeta);
+            applyRealDoctorName(c.getAcceptDoctorId(), vo::setAcceptDoctorName, vo::setAcceptDoctorMeta);
         }
+        // "조회자가 수락한 그 의사 본인인지"는 이름과 별개로 항상 계산해둔다 (채팅 버튼 노출 등에 사용).
+        vo.setViewerIsAcceptDoctor(c.getAcceptDoctorId() != null && c.getAcceptDoctorId().equals(viewerId));
         if (c.getRecvDeptId() != null) {
             departmentRepository.findById(c.getRecvDeptId())
                     .ifPresent(d -> vo.setRecvDeptName(d.getDepartmentName()));
@@ -427,18 +428,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return vo;
     }
 
-    /** 수신/수락 의사 이름 - 조회하는 본인이면 "나"로, 아니면 이름+메타로 채운다. */
-    private void applyDoctorName(Long doctorId, Long viewerId,
-                                 java.util.function.Consumer<String> nameSetter,
-                                 java.util.function.Consumer<String> metaSetter) {
-        if (doctorId.equals(viewerId)) {
-            nameSetter.accept("나");
-            return;
-        }
-        applyRealDoctorName(doctorId, nameSetter, metaSetter);
-    }
-
-    /** 요청자(발신인) 이름 - 조회자와 무관하게 항상 실제 이름+메타를 채운다. */
+    /** 요청자/수신자/수락자 이름 - 조회자와 무관하게 항상 실제 이름+메타를 채운다. */
     private void applyRealDoctorName(Long doctorId,
                                      java.util.function.Consumer<String> nameSetter,
                                      java.util.function.Consumer<String> metaSetter) {

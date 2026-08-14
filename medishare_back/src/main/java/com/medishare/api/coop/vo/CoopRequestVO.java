@@ -34,6 +34,8 @@ public class CoopRequestVO {
     private Long acceptDoctorId;
     private String acceptDoctorName;
     private String acceptDoctorMeta;
+    // 이름 표시는 항상 실명이지만, "채팅 버튼을 보여줄지" 같은 판단엔 실명만으론 알 수 없어서 별도로 내려준다.
+    private Boolean viewerIsAcceptDoctor;
 
     private Long patientId;
     private String patientName;
