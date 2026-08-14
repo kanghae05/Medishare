@@ -836,7 +836,7 @@ function PacsList() {
 
 
     const viewerUrl =
-      `http://localhost:3000/viewer?StudyInstanceUIDs=${
+      `http://${window.location.hostname}:3000/viewer?StudyInstanceUIDs=${
         encodeURIComponent(
           study.studyInstanceUID
         )

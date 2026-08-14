@@ -2,7 +2,7 @@ import axios from "axios";
 
 // axios 객체로 기본 URL을 세팅하여 api 객체 생성 - 실제적인 통신을 담당
 const api = axios.create({
-    baseURL: "http://localhost"
+    baseURL: `http://${window.location.hostname}`
 });
 
 // 비동기 통신을 요청하기 전에 자동으로 실행되는 처리문
