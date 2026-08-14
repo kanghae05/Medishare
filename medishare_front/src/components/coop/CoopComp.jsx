@@ -9,7 +9,7 @@ import "./Coop.css";
 // App.jsx에는 <Route path="/coop/*" element={<CoopComp />} /> 한 줄만 등록한다.
 function CoopComp() {
   return (
-    <div className="mt-5">
+    <div className="mb-5">
       <div className="coop-module-header">
         <span className="coop-module-eyebrow">MEDISHARE · CONSULTATION</span>
         <h2 className="coop-page-title">협진함</h2>

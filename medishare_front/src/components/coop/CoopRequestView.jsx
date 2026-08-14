@@ -138,6 +138,15 @@ function CoopRequestView() {
             <span className="coop-view-label">요청 내용</span>
             <span className="coop-view-value">{vo.reqContent}</span>
           </div>
+          {vo.originRequestId && vo.originReqContent && (
+            <div className="coop-view-span2">
+              <span className="coop-view-label">이전 요청 내용</span>
+              <span className="coop-view-value">
+                "{vo.originReqContent}"
+                {vo.originReqTime && <span style={{ color: "var(--coop-faint)" }}> ({vo.originReqTime})</span>}
+              </span>
+            </div>
+          )}
           {vo.rejectReason && (
             <div className="coop-view-span2">
               <span className="coop-view-label">거절 사유</span>
@@ -150,7 +159,7 @@ function CoopRequestView() {
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
       {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
-      {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
+      {isSent && vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
           <div className="coop-quote-label">진료과 개인별 거절 내역</div>
           {vo.deptRejections.map((r, i) => (

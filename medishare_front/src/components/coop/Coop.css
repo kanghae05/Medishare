@@ -1,35 +1,45 @@
 /* ============================================================
-   협진(coop) 도메인 디자인 시스템
-   컨셉: 병원 검사의뢰서 / 차트 / 접수 장부 — 실제 의료 서식지의 구조를 가져온다.
-   라벨은 서식지 인쇄체(대문자·자간)를, 식별자·날짜·수치는 모노스페이스를 쓴다.
-   목록은 카드 나열이 아니라 장부(ledger)형 표로, 사이드바는 독립 박스가 아니라
-   본문에 붙는 탭 스트립으로 구성한다.
+   협진(coop) 도메인 디자인 시스템 (가독성 개선판)
+
+   원칙:
+   1. 한글이 들어가는 요소는 전부 Pretendard(가변 굵기 산세리프) 하나로 통일한다.
+      모노스페이스(JetBrains Mono)는 한글 글리프가 없어서, 한글에 적용하면
+      브라우저가 몰래 다른 폰트로 대체해 폰트가 뒤섞여 지저분해진다.
+      그래서 모노스페이스는 순수 숫자/영문(시각, 접수번호, ID)에만 쓴다.
+   2. 안읽음 표시는 "굵은 글씨 + 작은 점"만으로 한다. 행 전체에 배경색을
+      칠하지 않는다 (Gmail/네이버 메일 참고 - 이게 실제로 더 잘 읽힌다).
+   3. 라벨/배지에 테두리·배경 박스를 남발하지 않는다. 텍스트 크기·색·굵기
+      차이만으로 위계를 준다.
+   4. 두꺼운 검정 밑줄/장식선은 신문 지면처럼 무거워 보이므로 얇고 연하게.
    ============================================================ */
 
 @import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
 @import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap');
 
 :root {
-  --coop-ink: #16232B;
-  --coop-muted: #5B6B76;
-  --coop-line: #D8DEE3;
-  --coop-paper: #F3F6F8;
+  --coop-ink: #1B2730;
+  --coop-muted: #6B7A84;
+  --coop-faint: #97A3AB;
+  --coop-line: #E1E6EA;
+  --coop-paper: #F5F7F8;
   --coop-card: #FFFFFF;
 
   --coop-accent: #0F6B66;
   --coop-accent-deep: #0A4F4B;
   --coop-accent-soft: #E1EEEC;
 
-  --coop-status-pending: #8A5A00;
+  --coop-status-pending: #96650A;
   --coop-status-pending-bg: #FBF1DC;
-  --coop-status-accepted: #1F6B45;
+  --coop-status-accepted: #237A50;
   --coop-status-accepted-bg: #E4F2EA;
-  --coop-status-rejected: #8C3529;
+  --coop-status-rejected: #A2453A;
   --coop-status-rejected-bg: #F8E9E6;
-  --coop-status-closed: #55636D;
+  --coop-status-closed: #6B7A84;
   --coop-status-closed-bg: #EEF1F3;
 
+  /* 한글 포함 텍스트는 전부 이 서체 하나로 */
   --coop-font-sans: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  /* 순수 숫자/영문(시각, ID, 접수번호)에만 사용 - 한글에는 절대 쓰지 않는다 */
   --coop-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
 
   --coop-page-bg: var(--coop-paper);
@@ -39,7 +49,7 @@
 
 .coop-page { color: var(--coop-ink); font-family: var(--coop-font-sans); }
 
-/* ---------- 모듈 헤더 (eyebrow + 제목) ---------- */
+/* ---------- 모듈 헤더 ---------- */
 .coop-module-header {
   max-width: 1360px;
   margin: 0 auto 18px;
@@ -47,7 +57,7 @@
 }
 .coop-module-eyebrow {
   display: block;
-  font-family: var(--coop-font-mono);
+  font-family: var(--coop-font-mono); /* 영문(MEDISHARE · CONSULTATION)이라 모노 유지 */
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.14em;
@@ -55,16 +65,16 @@
   margin-bottom: 4px;
 }
 .coop-page-title {
-  font-size: 26px;
+  font-size: 25px;
   font-weight: 700;
   color: var(--coop-ink);
   letter-spacing: -0.01em;
   margin: 0;
-  padding-bottom: 12px;
-  border-bottom: 3px solid var(--coop-ink);
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--coop-line);
 }
 
-/* ---------- 레이아웃 - 사이드바가 본문에 붙는다 ---------- */
+/* ---------- 레이아웃 ---------- */
 .coop-layout {
   display: flex;
   align-items: stretch;
@@ -73,7 +83,7 @@
   margin: 0 auto;
   font-family: var(--coop-font-sans);
   border: 1px solid var(--coop-line);
-  border-radius: 3px;
+  border-radius: 4px;
   background: var(--coop-card);
   overflow: hidden;
 }
@@ -93,9 +103,8 @@
   color: #fff;
   font-weight: 700;
   font-size: 13px;
-  letter-spacing: 0.02em;
   padding: 9px 0;
-  border-radius: 2px;
+  border-radius: 4px;
   text-decoration: none;
   margin-bottom: 18px;
   border: none;
@@ -114,7 +123,7 @@
   border-left: 3px solid transparent;
   color: var(--coop-muted);
   font-size: 13.5px;
-  font-weight: 600;
+  font-weight: 500;
   text-decoration: none;
   transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
@@ -129,12 +138,11 @@
 .coop-tab .count-badge {
   background: var(--coop-accent);
   color: #fff;
-  font-family: var(--coop-font-mono);
-  font-size: 10.5px;
+  font-size: 11px;
   font-weight: 700;
   min-width: 18px;
   height: 18px;
-  border-radius: 2px;
+  border-radius: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -148,7 +156,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
 .coop-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
 .coop-title .count-badge {
@@ -159,10 +167,9 @@
   height: 20px;
   padding: 0 6px;
   margin-left: 8px;
-  border-radius: 2px;
+  border-radius: 10px;
   background: var(--coop-accent);
   color: #fff;
-  font-family: var(--coop-font-mono);
   font-size: 11px;
   font-weight: 700;
   vertical-align: middle;
@@ -175,7 +182,7 @@
   font-weight: 600;
   font-size: 13px;
   padding: 7px 14px;
-  border-radius: 2px;
+  border-radius: 4px;
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -189,18 +196,15 @@
 .coop-filter-panel {
   background: var(--coop-paper);
   border: 1px solid var(--coop-line);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 14px 16px;
   margin-bottom: 16px;
 }
 .coop-filter-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
 .coop-filter-row:last-child { margin-bottom: 0; }
 .coop-filter-label {
-  font-family: var(--coop-font-mono);
-  font-size: 11px;
+  font-size: 12.5px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--coop-muted);
   width: 44px;
   flex-shrink: 0;
@@ -213,72 +217,63 @@
   font-size: 12.5px;
   font-weight: 600;
   padding: 5px 12px;
-  border-radius: 2px;
+  border-radius: 4px;
   cursor: pointer;
   transition: all 0.15s ease;
 }
 .coop-chip.active { background: var(--coop-accent-soft); border-color: var(--coop-accent); color: var(--coop-accent-deep); }
-.coop-filter-date { border: 1px solid var(--coop-line); border-radius: 2px; padding: 5px 8px; font-family: var(--coop-font-mono); font-size: 12.5px; color: var(--coop-ink); background: var(--coop-card); }
+.coop-filter-date { border: 1px solid var(--coop-line); border-radius: 4px; padding: 5px 8px; font-family: var(--coop-font-mono); font-size: 12.5px; color: var(--coop-ink); background: var(--coop-card); }
 .coop-filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--coop-ink); cursor: pointer; }
 .coop-filter-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
-.btn-coop-apply { background: var(--coop-accent); border: 1px solid var(--coop-accent); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 2px; cursor: pointer; }
+.btn-coop-apply { background: var(--coop-accent); border: 1px solid var(--coop-accent); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer; }
 .btn-coop-apply:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); }
-.btn-coop-reset { background: transparent; border: 1px solid var(--coop-line); color: var(--coop-muted); font-weight: 600; font-size: 13px; padding: 7px 18px; border-radius: 2px; cursor: pointer; }
+.btn-coop-reset { background: transparent; border: 1px solid var(--coop-line); color: var(--coop-muted); font-weight: 600; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer; }
 .btn-coop-reset:hover { border-color: var(--coop-muted); color: var(--coop-ink); }
 
-/* ---------- 상태 태그 (차트 플래그) ---------- */
+/* ---------- 상태 태그 - 테두리/좌측바 없이 부드러운 배경만 ---------- */
 .coop-pill {
   display: inline-flex;
   align-items: center;
-  border-radius: 2px;
-  font-family: var(--coop-font-mono);
-  font-size: 10.5px;
+  border-radius: 4px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  padding: 3px 9px;
-  border: 1px solid transparent;
-  border-left-width: 3px;
+  padding: 3px 10px;
   white-space: nowrap;
 }
-.coop-pill.status-요청 { background: var(--coop-status-pending-bg); color: var(--coop-status-pending); border-color: var(--coop-status-pending); }
-.coop-pill.status-수락 { background: var(--coop-status-accepted-bg); color: var(--coop-status-accepted); border-color: var(--coop-status-accepted); }
-.coop-pill.status-거절 { background: var(--coop-status-rejected-bg); color: var(--coop-status-rejected); border-color: var(--coop-status-rejected); }
+.coop-pill.status-요청 { background: var(--coop-status-pending-bg); color: var(--coop-status-pending); }
+.coop-pill.status-수락 { background: var(--coop-status-accepted-bg); color: var(--coop-status-accepted); }
+.coop-pill.status-거절 { background: var(--coop-status-rejected-bg); color: var(--coop-status-rejected); }
 .coop-pill.status-취소,
 .coop-pill.status-만료,
-.coop-pill.status-종료 { background: var(--coop-status-closed-bg); color: var(--coop-status-closed); border-color: var(--coop-status-closed); }
+.coop-pill.status-종료 { background: var(--coop-status-closed-bg); color: var(--coop-status-closed); }
 
-/* ---------- 목록 - 장부(ledger)형 표 ---------- */
-.coop-ledger { border-top: 2px solid var(--coop-ink); }
+/* ---------- 목록 - 표 형태, Gmail식 절제된 위계 ---------- */
+.coop-ledger { border-top: 1px solid var(--coop-line); }
 .coop-ledger-row {
   display: grid;
-  grid-template-columns: 10px 30px 1fr 92px 90px;
+  grid-template-columns: 10px 26px 1fr 92px 130px;
   align-items: center;
   gap: 12px;
-  padding: 12px 4px;
+  padding: 11px 4px;
   border-bottom: 1px solid var(--coop-line);
   cursor: pointer;
   transition: background 0.12s ease;
 }
 .coop-ledger-row:not(.coop-ledger-head):hover { background: var(--coop-paper); }
-.coop-ledger-row.unread { background: var(--coop-accent-soft); }
-.coop-ledger-row.unread:hover { background: var(--coop-accent-soft); }
+/* 안읽음은 배경색이 아니라 굵은 글씨 + 점으로만 표시한다 (Gmail 참고) */
 
 .coop-ledger-head {
   cursor: default;
   padding: 0 4px 8px;
-  border-bottom: 2px solid var(--coop-ink);
-  font-family: var(--coop-font-mono);
-  font-size: 10.5px;
+  border-bottom: 1px solid var(--coop-line);
+  font-size: 11.5px;
   font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color: var(--coop-muted);
+  color: var(--coop-faint);
 }
 .coop-ledger-no {
   font-family: var(--coop-font-mono);
   font-size: 11px;
-  color: var(--coop-muted);
+  color: var(--coop-faint);
   text-align: center;
 }
 .coop-ledger-col-status { text-align: left; }
@@ -289,24 +284,8 @@
 
 .coop-ledger-main { min-width: 0; }
 .coop-row-top { display: flex; align-items: baseline; margin-bottom: 2px; }
-.coop-row-counterpart-primary { font-size: 14px; font-weight: 600; color: var(--coop-ink); margin-right: 8px; }
+.coop-row-counterpart-primary { font-size: 14px; font-weight: 500; color: var(--coop-ink); margin-right: 8px; }
 .coop-row-counterpart-primary.unread { font-weight: 700; }
-.coop-row-sub { display: flex; align-items: baseline; margin-bottom: 3px; }
-.coop-row-patient-label {
-  font-family: var(--coop-font-mono);
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
-  color: var(--coop-muted);
-  background: var(--coop-paper);
-  border: 1px solid var(--coop-line);
-  border-radius: 2px;
-  padding: 0 5px;
-  line-height: 16px;
-  margin-right: 6px;
-}
-.coop-row-patient { font-size: 13px; color: var(--coop-ink); }
 .coop-row-content {
   font-size: 13px;
   color: var(--coop-muted);
@@ -314,7 +293,7 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
-.coop-row-time { font-family: var(--coop-font-mono); font-size: 11px; color: var(--coop-muted); }
+.coop-row-time { font-family: var(--coop-font-mono); font-size: 11.5px; color: var(--coop-faint); }
 
 .coop-empty { text-align: center; padding: 48px 16px; color: var(--coop-muted); font-size: 14px; }
 
@@ -323,26 +302,23 @@
   background: var(--coop-paper);
   border: 1px solid var(--coop-line);
   border-left: 3px solid var(--coop-accent);
-  border-radius: 0 2px 2px 0;
+  border-radius: 0 4px 4px 0;
   padding: 12px 16px;
   margin-bottom: 20px;
 }
-.coop-quote-label { font-family: var(--coop-font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--coop-muted); margin-bottom: 6px; }
+.coop-quote-label { font-size: 12px; font-weight: 700; color: var(--coop-muted); margin-bottom: 6px; }
 .coop-quote-content { font-size: 13.5px; color: var(--coop-ink); font-style: italic; }
 .coop-quote-reason { font-size: 13px; color: var(--coop-status-rejected); margin-top: 6px; font-style: italic; }
 
-.coop-form { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 3px; padding: 24px; }
+.coop-form { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 24px; }
 .coop-form-row { display: flex; align-items: center; margin-bottom: 16px; }
 .coop-form-row.align-top { align-items: flex-start; }
 .coop-form-row:last-of-type { margin-bottom: 0; }
 .coop-form-label {
   width: 110px;
   flex-shrink: 0;
-  font-family: var(--coop-font-mono);
-  font-size: 11.5px;
+  font-size: 13px;
   font-weight: 700;
-  letter-spacing: 0.05em;
-  text-transform: uppercase;
   color: var(--coop-muted);
 }
 .coop-form-row.align-top .coop-form-label { padding-top: 8px; }
@@ -351,7 +327,7 @@
   width: 220px;
   flex: 1;
   border: 1px solid var(--coop-line);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 8px 12px;
   font-size: 13.5px;
   color: var(--coop-ink);
@@ -365,7 +341,7 @@
   background: var(--coop-status-rejected-bg);
   border: 1px solid var(--coop-status-rejected);
   color: var(--coop-status-rejected);
-  border-radius: 2px;
+  border-radius: 4px;
   padding: 10px 14px;
   font-size: 13px;
   margin-top: 16px;
@@ -373,15 +349,14 @@
 .coop-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--coop-line); }
 
 .coop-direction-badge {
-  font-family: var(--coop-font-mono);
-  font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 2px; margin-left: 4px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-left: 4px;
 }
 .coop-direction-badge.in { background: var(--coop-accent-soft); color: var(--coop-accent-deep); }
 .coop-direction-badge.out { background: var(--coop-status-closed-bg); color: var(--coop-status-closed); }
 
-/* ---------- 상세(열람) 화면 - 2단 그리드 서식 ---------- */
-.coop-view-card { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 3px; padding: 18px 20px; margin-bottom: 16px; }
+/* ---------- 상세(열람) 화면 ---------- */
+.coop-view-card { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 18px 20px; margin-bottom: 16px; }
 .coop-view-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -391,26 +366,23 @@
 .coop-view-grid > div { display: flex; flex-direction: column; gap: 2px; }
 .coop-view-span2 { grid-column: span 2; }
 .coop-view-label {
-  font-family: var(--coop-font-mono);
-  font-size: 11px;
+  font-size: 12px;
   font-weight: 700;
-  letter-spacing: 0.06em;
-  text-transform: uppercase;
   color: var(--coop-muted);
 }
 .coop-view-value { color: var(--coop-ink); font-size: 13.5px; white-space: pre-wrap; }
 .coop-view-value.coop-view-danger,
 .coop-view-danger { color: var(--coop-status-rejected); }
 
-.coop-dept-reject-box { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 3px; padding: 14px 18px; margin-bottom: 16px; }
+.coop-dept-reject-box { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 14px 18px; margin-bottom: 16px; }
 .coop-dept-reject-item { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; font-size: 13px; flex-wrap: wrap; }
 .coop-dept-reject-doctor { font-weight: 700; color: var(--coop-ink); }
 .coop-dept-reject-reason { color: var(--coop-muted); font-style: italic; flex: 1; }
-.coop-dept-reject-time { font-family: var(--coop-font-mono); color: var(--coop-muted); font-size: 11.5px; }
+.coop-dept-reject-time { font-family: var(--coop-font-mono); color: var(--coop-faint); font-size: 11.5px; }
 
 .btn-coop-danger {
   background: transparent; border: 1px solid var(--coop-status-rejected); color: var(--coop-status-rejected);
-  font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 2px; cursor: pointer;
+  font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer;
 }
 .btn-coop-danger:hover { background: var(--coop-status-rejected); border-color: var(--coop-status-rejected); color: #fff; }
 .btn-coop-danger:disabled { opacity: 0.6; cursor: not-allowed; }
@@ -421,8 +393,8 @@
 .coop-autocomplete { position: relative; flex: 1; }
 .coop-autocomplete-dropdown {
   position: absolute; top: calc(100% + 4px); left: 0; right: 0;
-  background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 2px;
-  box-shadow: 0 4px 16px rgba(22,35,43,0.10); max-height: 260px; overflow-y: auto; z-index: 20;
+  background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(27,39,48,0.10); max-height: 260px; overflow-y: auto; z-index: 20;
 }
 .coop-autocomplete-item { padding: 9px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
 .coop-autocomplete-item:hover { background: var(--coop-paper); }
@@ -430,57 +402,58 @@
 .coop-autocomplete-meta { font-size: 12px; color: var(--coop-muted); }
 .coop-autocomplete-empty { padding: 12px 14px; font-size: 13px; color: var(--coop-muted); text-align: center; }
 
-.coop-form-readonly { flex: 1; padding: 8px 12px; font-size: 13.5px; color: var(--coop-muted); background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 2px; }
+.coop-form-readonly { flex: 1; padding: 8px 12px; font-size: 13.5px; color: var(--coop-muted); background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; }
 .coop-study-reason { flex: 1; font-size: 12.5px; color: var(--coop-muted); padding: 6px 0; }
 .coop-doctor-meta { font-size: 12px; color: var(--coop-muted); font-weight: 400; }
 
 /* ---------- 검사 이미지 뷰어 ---------- */
-.coop-image-viewer { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 3px; padding: 16px 20px; margin-bottom: 16px; }
-.coop-image-viewer-empty { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 2px; padding: 20px; text-align: center; color: var(--coop-muted); font-size: 13px; margin-bottom: 16px; }
-.coop-image-viewer-series { font-family: var(--coop-font-mono); font-size: 12.5px; color: var(--coop-muted); margin-bottom: 10px; }
-.coop-image-viewer-frame { background: #0A0F12; border-radius: 2px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.coop-image-viewer { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
+.coop-image-viewer-empty { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 20px; text-align: center; color: var(--coop-muted); font-size: 13px; margin-bottom: 16px; }
+.coop-image-viewer-series { font-size: 12.5px; color: var(--coop-muted); margin-bottom: 10px; }
+.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
 .coop-image-viewer-img { max-width: 100%; max-height: 480px; display: block; }
 .coop-image-viewer-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .coop-image-viewer-slider { flex: 1; accent-color: var(--coop-accent); }
 .coop-image-viewer-count { font-family: var(--coop-font-mono); font-size: 12px; color: var(--coop-muted); min-width: 60px; text-align: right; }
 
 /* ---------- 환자/검사 상세 정보 패널 ---------- */
-.coop-detail-panel { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 3px; padding: 16px 20px; margin-bottom: 16px; }
+.coop-detail-panel { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
 .coop-detail-section { margin-bottom: 14px; }
 .coop-detail-section:last-of-type { margin-bottom: 0; }
 .coop-detail-section-title {
-  font-family: var(--coop-font-mono); font-size: 11px; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase;
+  font-size: 12.5px; font-weight: 700;
   color: var(--coop-muted); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--coop-line);
 }
 .coop-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 13px; color: var(--coop-ink); }
 .coop-detail-span2 { grid-column: span 2; }
-.coop-detail-label { font-family: var(--coop-font-mono); color: var(--coop-muted); letter-spacing: 0.03em; margin-right: 6px; font-size: 11.5px; }
+.coop-detail-label { color: var(--coop-muted); font-weight: 600; margin-right: 6px; font-size: 12px; }
 .coop-detail-tech-toggle {
-  background: none; border: none; color: var(--coop-muted); font-family: var(--coop-font-mono);
-  font-size: 11px; letter-spacing: 0.03em; cursor: pointer; padding: 8px 0 0; margin-top: 10px;
+  background: none; border: none; color: var(--coop-faint);
+  font-size: 12px; cursor: pointer; padding: 8px 0 0; margin-top: 10px;
   border-top: 1px solid var(--coop-line); width: 100%; text-align: left;
 }
 .coop-detail-tech-toggle:hover { color: var(--coop-ink); }
-.coop-detail-tech-box { margin-top: 8px; padding: 10px 12px; background: var(--coop-paper); border-radius: 2px; font-size: 11px; color: var(--coop-muted); font-family: var(--coop-font-mono); }
+.coop-detail-tech-box { margin-top: 8px; padding: 10px 12px; background: var(--coop-paper); border-radius: 4px; font-size: 11px; color: var(--coop-muted); font-family: var(--coop-font-mono); }
 .coop-detail-tech-box > div { margin-bottom: 4px; word-break: break-all; }
 .coop-detail-tech-box .coop-detail-label { font-family: inherit; }
 
 .coop-dept-badge {
-  font-family: var(--coop-font-mono); font-size: 10px; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase;
-  padding: 2px 8px; border-radius: 2px; margin-right: 6px; background: var(--coop-accent-soft); color: var(--coop-accent-deep);
+  font-size: 11.5px; font-weight: 700;
+  margin-right: 6px; color: var(--coop-accent-deep);
 }
+.coop-dept-badge::before { content: "· "; color: var(--coop-faint); }
 
 /* ---------- 반응형 ---------- */
 @media (max-width: 720px) {
   .coop-layout { flex-direction: column; }
   .coop-tabstrip { width: 100%; border-right: none; border-bottom: 1px solid var(--coop-line); }
-  .coop-ledger-row { grid-template-columns: 10px 24px 1fr; }
+  .coop-ledger-row { grid-template-columns: 10px 22px 1fr; }
   .coop-ledger-col-status, .coop-ledger-col-time { display: none; }
   .coop-view-grid { grid-template-columns: 1fr; }
   .coop-view-span2 { grid-column: span 1; }
 }
 
-/* ---------- 시리즈 선택 탭 (검사당 시리즈가 여러 개일 때) ---------- */
+/* ---------- 시리즈 선택 탭 ---------- */
 .coop-series-tabs {
   display: flex;
   gap: 6px;
@@ -494,7 +467,7 @@
   font-size: 12px;
   font-weight: 600;
   padding: 5px 12px;
-  border-radius: 2px;
+  border-radius: 4px;
   cursor: pointer;
 }
 .coop-series-tab.active {
@@ -502,3 +475,17 @@
   border-color: var(--coop-accent);
   color: var(--coop-accent-deep);
 }
+
+.coop-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: var(--coop-ink);
+  font-family: var(--coop-font-sans);
+  resize: vertical;
+}
+.coop-modal-textarea:focus { outline: none; border-color: var(--coop-accent); }
+.coop-modal-textarea.is-invalid { border-color: var(--coop-status-rejected); }

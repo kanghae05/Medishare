@@ -26,7 +26,7 @@ const MODE_CONFIG = {
 function formatDateTime(str) {
   if (!str) return "-";
   const [date, time] = str.split(" ");
-  return `${date.slice(5)} ${time}`;
+  return `${date} ${time.slice(0, 5)}`;
 }
 
 // mode: "received" | "sent" | "all"
@@ -242,10 +242,7 @@ function CoopRequestList({ mode }) {
                       </span>
                     )}
                   </div>
-                  <div className="coop-row-sub coop-row-sub-last">
-                    <span className="coop-row-patient-label">환자</span>
-                    <span className="coop-row-patient">{r.patientName || `환자 #${r.patientId}`}</span>
-                  </div>
+                  <div className="coop-row-content">{r.reqContent}</div>
                 </div>
                 <span className="coop-ledger-col-status">
                   <span className={"coop-pill status-" + (r.displayStatus || r.status)}>

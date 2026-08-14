@@ -133,8 +133,18 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             applyDisplayStatus(vo, c, viewerDoctorId);
         }
 
-        // 진료과 요청이면 거절자 목록 함께 반환 (요청자/수신자 모두 확인 가능)
-        if (c.getRecvType() == RecvType.진료과) {
+        // 재요청이면 이전 요청 내용을 참고용으로 같이 보여준다 (환자/검사/수신대상은 원본과 동일하니 내용만).
+        if (c.getOriginRequestId() != null) {
+            coopRequestRepository.findById(c.getOriginRequestId()).ifPresent(origin -> {
+                vo.setOriginReqContent(origin.getReqContent());
+                vo.setOriginReqTime(origin.getReqTime() == null ? null : origin.getReqTime().format(DATETIME_FMT));
+            });
+        }
+
+        // 진료과 요청의 개인별 거절 상세(누가/왜)는 요청자(보낸 사람)한테만 보여준다.
+        // 같은 과 동료들끼리는 서로의 거절 사유를 볼 필요가 없고, 오히려 솔직하게
+        // 사유를 적기 부담스러워질 수 있어서 지정의사 요청처럼(=상세 없이) 보이게 한다.
+        if (isSent && c.getRecvType() == RecvType.진료과) {
             List<CoopRequestDeptRejectVO> rejections = new ArrayList<>();
             for (CoopRequestDeptReject r : deptRejectRepository.findByCoopRequestIdOrderByRejectedAtAsc(coopRequestId)) {
                 CoopRequestDeptRejectVO rv = new CoopRequestDeptRejectVO();
