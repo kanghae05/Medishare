@@ -34,6 +34,8 @@ public class CoopRequestVO {
     private Long acceptDoctorId;
     private String acceptDoctorName;
     private String acceptDoctorMeta;
+    // 이름 표시는 항상 실명이지만, "채팅 버튼을 보여줄지" 같은 판단엔 실명만으론 알 수 없어서 별도로 내려준다.
+    private Boolean viewerIsAcceptDoctor;
 
     private Long patientId;
     private String patientName;
@@ -46,6 +48,9 @@ public class CoopRequestVO {
 
     // 재요청(이메일 답장 패턴) - 이전 요청 ID
     private Long originRequestId;
+    // 재요청일 때, 상세화면에 참고용으로 같이 보여줄 이전 요청의 내용/시각
+    private String originReqContent;
+    private String originReqTime;
 
     private String reqContent;
 
@@ -68,9 +73,6 @@ public class CoopRequestVO {
 
     // 지정의사 요청 거절 사유
     private String rejectReason;
-
-    private Boolean isRead;
-    private String readTime;
 
     // 전체 협진 내역 조회 시: "received" 또는 "sent"
     private String direction;

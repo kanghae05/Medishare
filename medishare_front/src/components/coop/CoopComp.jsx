@@ -1,17 +1,20 @@
-import { Routes, Route } from "react-router-dom"; 
+import { Routes, Route } from "react-router-dom";
 import NotFoundPage from "../error/NotFoundPage";
-import CoopRequestWriteForm from "./CoopRequestWriteForm";
-import CoopRequestList from "./CoopRequestList";
 import CoopSidebar from "./CoopSidebar";
-import "./Coop.css";
+import CoopRequestList from "./CoopRequestList";
+import CoopRequestWriteForm from "./CoopRequestWriteForm";
 import CoopRequestView from "./CoopRequestView";
+import "./Coop.css";
 
-
-function CoopComp(){
+// App.jsx에는 <Route path="/coop/*" element={<CoopComp />} /> 한 줄만 등록한다.
+function CoopComp() {
   return (
-    <div>
-      <h2>협진함</h2>
-      <div className="coop-layout mt-5">
+    <div className="mb-5">
+      <div className="coop-module-header">
+        <span className="coop-module-eyebrow">MEDISHARE · CONSULTATION</span>
+        <h2 className="coop-page-title">협진함</h2>
+      </div>
+      <div className="coop-layout">
         <CoopSidebar />
         <div className="coop-content">
           <Routes>
@@ -25,7 +28,7 @@ function CoopComp(){
         </div>
       </div>
     </div>
-  )
+  );
 }
 
 export default CoopComp;

@@ -1,42 +1,99 @@
-/* 협진(coop) 도메인 공용 스타일 - 부트스트랩 기본 톤에 맞춘 무난한 팔레트 */
+/* ============================================================
+   협진(coop) 도메인 디자인 시스템 (가독성 개선판)
+
+   원칙:
+   1. 한글이 들어가는 요소는 전부 Pretendard(가변 굵기 산세리프) 하나로 통일한다.
+      모노스페이스(JetBrains Mono)는 한글 글리프가 없어서, 한글에 적용하면
+      브라우저가 몰래 다른 폰트로 대체해 폰트가 뒤섞여 지저분해진다.
+      그래서 모노스페이스는 순수 숫자/영문(시각, 접수번호, ID)에만 쓴다.
+   2. 안읽음 표시는 "굵은 글씨 + 작은 점"만으로 한다. 행 전체에 배경색을
+      칠하지 않는다 (Gmail/네이버 메일 참고 - 이게 실제로 더 잘 읽힌다).
+   3. 라벨/배지에 테두리·배경 박스를 남발하지 않는다. 텍스트 크기·색·굵기
+      차이만으로 위계를 준다.
+   4. 두꺼운 검정 밑줄/장식선은 신문 지면처럼 무거워 보이므로 얇고 연하게.
+   ============================================================ */
+
+@import url('https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css');
+@import url('https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@500;700&display=swap');
+
 :root {
-  --coop-ink: #212529;
-  --coop-muted: #6C757D;
-  --coop-border: #DEE2E6;
+  --coop-ink: #1B2730;
+  --coop-muted: #6B7A84;
+  --coop-faint: #97A3AB;
+  --coop-line: #E1E6EA;
+  --coop-paper: #F5F7F8;
   --coop-card: #FFFFFF;
-  --coop-page-bg: #F8F9FA;
-  --coop-accent: #0D6EFD;
-  --coop-accent-hover: #0B5ED7;
-  --coop-accent-soft: #E7F1FF;
+
+  --coop-accent: #0F6B66;
+  --coop-accent-deep: #0A4F4B;
+  --coop-accent-soft: #E1EEEC;
+
+  --coop-status-pending: #96650A;
+  --coop-status-pending-bg: #FBF1DC;
+  --coop-status-accepted: #237A50;
+  --coop-status-accepted-bg: #E4F2EA;
+  --coop-status-rejected: #A2453A;
+  --coop-status-rejected-bg: #F8E9E6;
+  --coop-status-closed: #6B7A84;
+  --coop-status-closed-bg: #EEF1F3;
+
+  /* 한글 포함 텍스트는 전부 이 서체 하나로 */
+  --coop-font-sans: 'Pretendard', -apple-system, 'Apple SD Gothic Neo', 'Malgun Gothic', sans-serif;
+  /* 순수 숫자/영문(시각, ID, 접수번호)에만 사용 - 한글에는 절대 쓰지 않는다 */
+  --coop-font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', Consolas, monospace;
+
+  --coop-page-bg: var(--coop-paper);
+  --coop-border: var(--coop-line);
+  --coop-accent-hover: var(--coop-accent-deep);
 }
 
-.coop-page {
-  color: var(--coop-ink);
-}
+.coop-page { color: var(--coop-ink); font-family: var(--coop-font-sans); }
 
+/* ---------- 모듈 헤더 ---------- */
+.coop-module-header {
+  max-width: 1360px;
+  margin: 0 auto 18px;
+  padding: 0 4px;
+}
+.coop-module-eyebrow {
+  display: block;
+  font-family: var(--coop-font-mono); /* 영문(MEDISHARE · CONSULTATION)이라 모노 유지 */
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  color: var(--coop-accent);
+  margin-bottom: 4px;
+}
 .coop-page-title {
-  font-size: 28px;
+  font-size: 25px;
   font-weight: 700;
   color: var(--coop-ink);
-  margin-bottom: 20px;
-  text-align: center;
+  letter-spacing: -0.01em;
+  margin: 0;
+  padding-bottom: 10px;
+  border-bottom: 1px solid var(--coop-line);
 }
 
+/* ---------- 레이아웃 ---------- */
 .coop-layout {
   display: flex;
-  align-items: flex-start;
-  gap: 24px;
+  align-items: stretch;
   width: 100%;
-}
-.coop-sidebar {
-  width: 200px;
-  flex-shrink: 0;
+  max-width: 1360px;
+  margin: 0 auto;
+  font-family: var(--coop-font-sans);
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
   background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 16px;
-  position: sticky;
-  top: 16px;
+  overflow: hidden;
+}
+
+.coop-tabstrip {
+  width: 176px;
+  flex-shrink: 0;
+  background: var(--coop-paper);
+  border-right: 1px solid var(--coop-line);
+  padding: 16px 12px;
 }
 .coop-sidebar-new {
   display: block;
@@ -45,55 +102,63 @@
   background: var(--coop-accent);
   color: #fff;
   font-weight: 700;
-  font-size: 13.5px;
+  font-size: 13px;
   padding: 9px 0;
   border-radius: 4px;
   text-decoration: none;
-  margin-bottom: 16px;
+  margin-bottom: 18px;
   border: none;
   cursor: pointer;
 }
-.coop-sidebar-new:hover { background: var(--coop-accent-hover); color: #fff; }
+.coop-sidebar-new:hover { background: var(--coop-accent-deep); color: #fff; }
 
-.coop-sidebar-nav { display: flex; flex-direction: column; gap: 2px; }
-.coop-sidebar-link {
+.coop-tabstrip-nav { display: flex; flex-direction: column; }
+.coop-tab {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  padding: 9px 12px;
-  border-radius: 4px;
+  gap: 6px;
+  padding: 10px 10px;
+  margin: 0 -12px;
+  padding-left: 22px;
+  border-left: 3px solid transparent;
   color: var(--coop-muted);
-  font-size: 14px;
-  font-weight: 600;
+  font-size: 13.5px;
+  font-weight: 500;
   text-decoration: none;
-  transition: background 0.12s ease, color 0.12s ease;
+  transition: background 0.12s ease, color 0.12s ease, border-color 0.12s ease;
 }
-.coop-sidebar-link:hover { background: var(--coop-page-bg); color: var(--coop-ink); }
-.coop-sidebar-link.active { background: var(--coop-accent-soft); color: var(--coop-accent-hover); }
-.coop-sidebar-link .count-badge {
+.coop-tab-label { flex: 1; }
+.coop-tab:hover { background: var(--coop-card); color: var(--coop-ink); }
+.coop-tab.active {
+  background: var(--coop-card);
+  color: var(--coop-accent-deep);
+  border-left-color: var(--coop-accent);
+  font-weight: 700;
+}
+.coop-tab .count-badge {
   background: var(--coop-accent);
   color: #fff;
   font-size: 11px;
   font-weight: 700;
   min-width: 18px;
   height: 18px;
-  border-radius: 999px;
+  border-radius: 9px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
   padding: 0 5px;
 }
-.coop-sidebar-link.active .count-badge { background: var(--coop-accent-hover); }
+.coop-tab.active .count-badge { background: var(--coop-accent-deep); }
 
-.coop-content { flex: 1; min-width: 0; }
+.coop-content { flex: 1; min-width: 0; padding: 22px 26px; }
 
 .coop-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-bottom: 16px;
+  margin-bottom: 14px;
 }
-.coop-title { font-size: 20px; font-weight: 700; margin: 0; }
+.coop-title { font-size: 17px; font-weight: 700; margin: 0; letter-spacing: -0.01em; }
 .coop-title .count-badge {
   display: inline-flex;
   align-items: center;
@@ -102,21 +167,21 @@
   height: 20px;
   padding: 0 6px;
   margin-left: 8px;
-  border-radius: 999px;
+  border-radius: 10px;
   background: var(--coop-accent);
   color: #fff;
-  font-size: 12px;
+  font-size: 11px;
   font-weight: 700;
   vertical-align: middle;
 }
 
 .btn-coop-filter {
   background: var(--coop-card);
-  border: 1px solid var(--coop-border);
+  border: 1px solid var(--coop-line);
   color: var(--coop-ink);
   font-weight: 600;
-  font-size: 13.5px;
-  padding: 8px 16px;
+  font-size: 13px;
+  padding: 7px 14px;
   border-radius: 4px;
   display: inline-flex;
   align-items: center;
@@ -125,38 +190,29 @@
   transition: border-color 0.15s ease, color 0.15s ease;
 }
 .btn-coop-filter:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
-.btn-coop-filter .dot {
-  width: 6px; height: 6px; border-radius: 50%;
-  background: var(--coop-accent);
-}
+.btn-coop-filter .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--coop-accent); }
 
-/* ---------- 필터 패널 (기본 숨김, 버튼 클릭 시 펼쳐짐) ---------- */
+/* ---------- 필터 패널 ---------- */
 .coop-filter-panel {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 16px 18px;
+  background: var(--coop-paper);
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 14px 16px;
   margin-bottom: 16px;
 }
-.coop-filter-row {
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  flex-wrap: wrap;
-  margin-bottom: 12px;
-}
+.coop-filter-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-bottom: 12px; }
 .coop-filter-row:last-child { margin-bottom: 0; }
 .coop-filter-label {
   font-size: 12.5px;
   font-weight: 700;
   color: var(--coop-muted);
-  width: 40px;
+  width: 44px;
   flex-shrink: 0;
 }
 .coop-chip-group { display: flex; gap: 6px; flex-wrap: wrap; }
 .coop-chip {
-  border: 1px solid var(--coop-border);
-  background: var(--coop-page-bg);
+  border: 1px solid var(--coop-line);
+  background: var(--coop-card);
   color: var(--coop-muted);
   font-size: 12.5px;
   font-weight: 600;
@@ -165,115 +221,71 @@
   cursor: pointer;
   transition: all 0.15s ease;
 }
-.coop-chip.active {
-  background: var(--coop-accent-soft);
-  border-color: var(--coop-accent);
-  color: var(--coop-accent-hover);
-}
-.coop-filter-date {
-  border: 1px solid var(--coop-border);
-  border-radius: 4px;
-  padding: 5px 8px;
-  font-size: 13px;
-  color: var(--coop-ink);
-}
-.coop-filter-checkbox {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  font-size: 13px;
-  color: var(--coop-ink);
-  cursor: pointer;
-}
-.coop-filter-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
-.btn-coop-apply {
-  background: var(--coop-accent);
-  border: 1px solid var(--coop-accent);
-  color: #fff;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 7px 18px;
-  border-radius: 4px;
-  cursor: pointer;
-}
-.btn-coop-apply:hover { background: var(--coop-accent-hover); border-color: var(--coop-accent-hover); }
-.btn-coop-reset {
-  background: transparent;
-  border: 1px solid var(--coop-border);
-  color: var(--coop-muted);
-  font-weight: 600;
-  font-size: 13px;
-  padding: 7px 18px;
-  border-radius: 4px;
-  cursor: pointer;
-}
+.coop-chip.active { background: var(--coop-accent-soft); border-color: var(--coop-accent); color: var(--coop-accent-deep); }
+.coop-filter-date { border: 1px solid var(--coop-line); border-radius: 4px; padding: 5px 8px; font-family: var(--coop-font-mono); font-size: 12.5px; color: var(--coop-ink); background: var(--coop-card); }
+.coop-filter-checkbox { display: flex; align-items: center; gap: 6px; font-size: 13px; color: var(--coop-ink); cursor: pointer; }
+.coop-filter-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 4px; }
+.btn-coop-apply { background: var(--coop-accent); border: 1px solid var(--coop-accent); color: #fff; font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer; }
+.btn-coop-apply:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); }
+.btn-coop-reset { background: transparent; border: 1px solid var(--coop-line); color: var(--coop-muted); font-weight: 600; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer; }
 .btn-coop-reset:hover { border-color: var(--coop-muted); color: var(--coop-ink); }
 
-/* ---------- 상태 pill ---------- */
+/* ---------- 상태 태그 - 테두리/좌측바 없이 부드러운 배경만 ---------- */
 .coop-pill {
-  display: inline-block;
+  display: inline-flex;
+  align-items: center;
   border-radius: 4px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 700;
   padding: 3px 10px;
-  border: 1px solid transparent;
   white-space: nowrap;
 }
-.coop-pill.status-요청 { background: #FFF3CD; color: #664D03; border-color: #FFE69C; }
-.coop-pill.status-수락 { background: #D1E7DD; color: #0F5132; border-color: #A3CFBB; }
-.coop-pill.status-거절 { background: #F8D7DA; color: #842029; border-color: #F1AEB5; }
-.coop-pill.status-취소 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
-.coop-pill.status-만료 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
-.coop-pill.status-종료 { background: #E2E3E5; color: #41464B; border-color: #C4C8CB; }
+.coop-pill.status-요청 { background: var(--coop-status-pending-bg); color: var(--coop-status-pending); }
+.coop-pill.status-수락 { background: var(--coop-status-accepted-bg); color: var(--coop-status-accepted); }
+.coop-pill.status-거절 { background: var(--coop-status-rejected-bg); color: var(--coop-status-rejected); }
+.coop-pill.status-취소,
+.coop-pill.status-만료,
+.coop-pill.status-종료 { background: var(--coop-status-closed-bg); color: var(--coop-status-closed); }
 
-/* ---------- 목록 ---------- */
-.coop-list-card {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  overflow: hidden;
-}
-.coop-row {
-  display: flex;
+/* ---------- 목록 - 표 형태, Gmail식 절제된 위계 ---------- */
+.coop-ledger { border-top: 1px solid var(--coop-line); }
+.coop-ledger-row {
+  display: grid;
+  grid-template-columns: 10px 26px 1fr 92px 130px;
   align-items: center;
-  gap: 14px;
-  padding: 14px 18px;
-  border-bottom: 1px solid var(--coop-border);
+  gap: 12px;
+  padding: 11px 4px;
+  border-bottom: 1px solid var(--coop-line);
   cursor: pointer;
   transition: background 0.12s ease;
 }
-.coop-row:last-child { border-bottom: none; }
-.coop-row:hover { background: var(--coop-page-bg); }
+.coop-ledger-row:not(.coop-ledger-head):hover { background: var(--coop-paper); }
+/* 안읽음은 배경색이 아니라 굵은 글씨 + 점으로만 표시한다 (Gmail 참고) */
 
-.coop-row-unread-dot {
-  width: 8px; height: 8px; border-radius: 50%;
-  background: var(--coop-accent);
-  flex-shrink: 0;
+.coop-ledger-head {
+  cursor: default;
+  padding: 0 4px 8px;
+  border-bottom: 1px solid var(--coop-line);
+  font-size: 11.5px;
+  font-weight: 700;
+  color: var(--coop-faint);
 }
+.coop-ledger-no {
+  font-family: var(--coop-font-mono);
+  font-size: 11px;
+  color: var(--coop-faint);
+  text-align: center;
+}
+.coop-ledger-col-status { text-align: left; }
+.coop-ledger-col-time { text-align: right; }
+
+.coop-row-unread-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--coop-accent); flex-shrink: 0; }
 .coop-row-unread-dot.hidden { visibility: hidden; }
 
-.coop-row-main { flex: 1; min-width: 0; }
+.coop-ledger-main { min-width: 0; }
 .coop-row-top { display: flex; align-items: baseline; margin-bottom: 2px; }
-.coop-row-counterpart-primary { font-size: 14.5px; font-weight: 600; color: var(--coop-ink); margin-right: 6px; }
+.coop-row-counterpart-primary { font-size: 14px; font-weight: 500; color: var(--coop-ink); margin-right: 8px; }
 .coop-row-counterpart-primary.unread { font-weight: 700; }
-.coop-row-direction-text { font-size: 12px; color: var(--coop-muted); margin-right: 6px; }
-.coop-row-sub { display: flex; align-items: baseline; margin-bottom: 3px; }
-.coop-row-patient-label {
-  font-size: 11px;
-  color: var(--coop-muted);
-  background: var(--coop-page-bg);
-  border: 1px solid var(--coop-border);
-  border-radius: 3px;
-  padding: 0 5px;
-  line-height: 16px;
-  margin-right: 5px;
-}
-.coop-row-patient { font-size: 13px; color: var(--coop-ink); }
 .coop-row-content {
   font-size: 13px;
   color: var(--coop-muted);
@@ -281,348 +293,285 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+.coop-row-time { font-family: var(--coop-font-mono); font-size: 11.5px; color: var(--coop-faint); }
 
-.coop-row-side {
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  gap: 6px;
-  flex-shrink: 0;
-}
-.coop-row-time { font-size: 12px; color: var(--coop-muted); }
-
-.coop-empty {
-  text-align: center;
-  padding: 48px 16px;
-  color: var(--coop-muted);
-  font-size: 14px;
-}
+.coop-empty { text-align: center; padding: 48px 16px; color: var(--coop-muted); font-size: 14px; }
 
 /* ---------- 등록/재요청 폼 ---------- */
 .coop-quote-box {
-  background: var(--coop-page-bg);
-  border: 1px solid var(--coop-border);
+  background: var(--coop-paper);
+  border: 1px solid var(--coop-line);
   border-left: 3px solid var(--coop-accent);
-  border-radius: 0 6px 6px 0;
+  border-radius: 0 4px 4px 0;
   padding: 12px 16px;
   margin-bottom: 20px;
 }
-.coop-quote-label {
-  font-size: 12px;
-  font-weight: 700;
-  color: var(--coop-muted);
-  margin-bottom: 6px;
-}
-.coop-quote-content {
-  font-size: 13.5px;
-  color: var(--coop-ink);
-  font-style: italic;
-}
-.coop-quote-reason {
-  font-size: 13px;
-  color: #842029;
-  margin-top: 6px;
-  font-style: italic;
-}
+.coop-quote-label { font-size: 12px; font-weight: 700; color: var(--coop-muted); margin-bottom: 6px; }
+.coop-quote-content { font-size: 13.5px; color: var(--coop-ink); font-style: italic; }
+.coop-quote-reason { font-size: 13px; color: var(--coop-status-rejected); margin-top: 6px; font-style: italic; }
 
-.coop-form {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 24px;
-}
-.coop-form-row {
-  display: flex;
-  align-items: center;
-  margin-bottom: 16px;
-}
+.coop-form { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 24px; }
+.coop-form-row { display: flex; align-items: center; margin-bottom: 16px; }
 .coop-form-row.align-top { align-items: flex-start; }
 .coop-form-row:last-of-type { margin-bottom: 0; }
 .coop-form-label {
   width: 110px;
   flex-shrink: 0;
-  font-size: 13.5px;
+  font-size: 13px;
   font-weight: 700;
-  color: var(--coop-ink);
+  color: var(--coop-muted);
 }
 .coop-form-row.align-top .coop-form-label { padding-top: 8px; }
 .coop-form-input,
 .coop-form-textarea {
   width: 220px;
   flex: 1;
-  border: 1px solid var(--coop-border);
+  border: 1px solid var(--coop-line);
   border-radius: 4px;
   padding: 8px 12px;
   font-size: 13.5px;
   color: var(--coop-ink);
-  font-family: inherit;
+  font-family: var(--coop-font-sans);
 }
-.coop-form-input:disabled { background: var(--coop-page-bg); color: var(--coop-muted); }
-.coop-form-input:focus,
-.coop-form-textarea:focus {
-  outline: none;
-  border-color: var(--coop-accent);
-}
+.coop-form-input:disabled { background: var(--coop-paper); color: var(--coop-muted); }
+.coop-form-input:focus, .coop-form-textarea:focus { outline: none; border-color: var(--coop-accent); }
 .coop-form-textarea { resize: vertical; }
 
 .coop-form-error {
-  background: #F8D7DA;
-  border: 1px solid #F1AEB5;
-  color: #842029;
+  background: var(--coop-status-rejected-bg);
+  border: 1px solid var(--coop-status-rejected);
+  color: var(--coop-status-rejected);
   border-radius: 4px;
   padding: 10px 14px;
   font-size: 13px;
   margin-top: 16px;
 }
-
-.coop-form-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 24px;
-  padding-top: 20px;
-  border-top: 1px solid var(--coop-border);
-}
+.coop-form-actions { display: flex; justify-content: flex-end; gap: 8px; margin-top: 24px; padding-top: 20px; border-top: 1px solid var(--coop-line); }
 
 .coop-direction-badge {
-  font-size: 11px;
-  font-weight: 700;
-  padding: 1px 8px;
-  border-radius: 999px;
-  margin-left: 2px;
+  font-size: 11px; font-weight: 700;
+  padding: 2px 8px; border-radius: 4px; margin-left: 4px;
 }
-.coop-direction-badge.in { background: var(--coop-accent-soft); color: var(--coop-accent-hover); }
-.coop-direction-badge.out { background: #E2E3E5; color: #41464B; }
+.coop-direction-badge.in { background: var(--coop-accent-soft); color: var(--coop-accent-deep); }
+.coop-direction-badge.out { background: var(--coop-status-closed-bg); color: var(--coop-status-closed); }
 
 /* ---------- 상세(열람) 화면 ---------- */
-.coop-view-card {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
+.coop-view-card { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 18px 20px; margin-bottom: 16px; }
+.coop-view-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px 24px;
+  margin-top: 10px;
 }
-.coop-view-row {
-  display: flex;
-  padding: 10px 0;
-  border-bottom: 1px solid var(--coop-border);
-  font-size: 13.5px;
-}
-.coop-view-row:last-child { border-bottom: none; }
-.coop-view-row.align-top { align-items: flex-start; }
+.coop-view-grid > div { display: flex; flex-direction: column; gap: 2px; }
+.coop-view-span2 { grid-column: span 2; }
 .coop-view-label {
-  width: 100px;
-  flex-shrink: 0;
+  font-size: 12px;
   font-weight: 700;
   color: var(--coop-muted);
 }
-.coop-view-value { flex: 1; color: var(--coop-ink); white-space: pre-wrap; }
-.coop-view-value.coop-view-danger { color: #842029; }
+.coop-view-value { color: var(--coop-ink); font-size: 13.5px; white-space: pre-wrap; }
+.coop-view-value.coop-view-danger,
+.coop-view-danger { color: var(--coop-status-rejected); }
 
-.coop-dept-reject-box {
-  background: var(--coop-page-bg);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 14px 18px;
-  margin-bottom: 16px;
-}
-.coop-dept-reject-item {
-  display: flex;
-  align-items: baseline;
-  gap: 10px;
-  padding: 6px 0;
-  font-size: 13px;
-  flex-wrap: wrap;
-}
+.coop-dept-reject-box { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 14px 18px; margin-bottom: 16px; }
+.coop-dept-reject-item { display: flex; align-items: baseline; gap: 10px; padding: 6px 0; font-size: 13px; flex-wrap: wrap; }
 .coop-dept-reject-doctor { font-weight: 700; color: var(--coop-ink); }
 .coop-dept-reject-reason { color: var(--coop-muted); font-style: italic; flex: 1; }
-.coop-dept-reject-time { color: var(--coop-muted); font-size: 12px; }
+.coop-dept-reject-time { font-family: var(--coop-font-mono); color: var(--coop-faint); font-size: 11.5px; }
 
 .btn-coop-danger {
-  background: transparent;
-  border: 1px solid #F1AEB5;
-  color: #842029;
-  font-weight: 700;
-  font-size: 13px;
-  padding: 7px 18px;
-  border-radius: 4px;
-  cursor: pointer;
+  background: transparent; border: 1px solid var(--coop-status-rejected); color: var(--coop-status-rejected);
+  font-weight: 700; font-size: 13px; padding: 7px 18px; border-radius: 4px; cursor: pointer;
 }
-.btn-coop-danger:hover { background: #842029; border-color: #842029; color: #fff; }
+.btn-coop-danger:hover { background: var(--coop-status-rejected); border-color: var(--coop-status-rejected); color: #fff; }
 .btn-coop-danger:disabled { opacity: 0.6; cursor: not-allowed; }
 
-.coop-modal-error {
-  color: #842029;
-  font-size: 12.5px;
-  margin-top: 6px;
-}
+.coop-modal-error { color: var(--coop-status-rejected); font-size: 12.5px; margin-top: 6px; }
 
 /* ---------- 의사 검색 자동완성 ---------- */
-.coop-autocomplete {
-  position: relative;
-  flex: 1;
-}
+.coop-autocomplete { position: relative; flex: 1; }
 .coop-autocomplete-dropdown {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  max-height: 260px;
-  overflow-y: auto;
-  z-index: 20;
+  position: absolute; top: calc(100% + 4px); left: 0; right: 0;
+  background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px;
+  box-shadow: 0 4px 16px rgba(27,39,48,0.10); max-height: 260px; overflow-y: auto; z-index: 20;
 }
-.coop-autocomplete-item {
-  padding: 9px 14px;
-  cursor: pointer;
-  display: flex;
-  flex-direction: column;
-  gap: 2px;
-}
-.coop-autocomplete-item:hover { background: var(--coop-page-bg); }
+.coop-autocomplete-item { padding: 9px 14px; cursor: pointer; display: flex; flex-direction: column; gap: 2px; }
+.coop-autocomplete-item:hover { background: var(--coop-paper); }
 .coop-autocomplete-name { font-size: 13.5px; font-weight: 600; color: var(--coop-ink); }
 .coop-autocomplete-meta { font-size: 12px; color: var(--coop-muted); }
-.coop-autocomplete-empty {
-  padding: 12px 14px;
-  font-size: 13px;
-  color: var(--coop-muted);
-  text-align: center;
-}
+.coop-autocomplete-empty { padding: 12px 14px; font-size: 13px; color: var(--coop-muted); text-align: center; }
 
-.coop-form-readonly {
-  flex: 1;
-  padding: 8px 12px;
-  font-size: 13.5px;
-  color: var(--coop-muted);
-  background: var(--coop-page-bg);
-  border: 1px solid var(--coop-border);
-  border-radius: 4px;
-}
-
-.coop-study-reason {
-  flex: 1;
-  font-size: 12.5px;
-  color: var(--coop-muted);
-  padding: 6px 0;
-}
-
-.coop-doctor-meta {
-  font-size: 12px;
-  color: var(--coop-muted);
-  font-weight: 400;
-}
+.coop-form-readonly { flex: 1; padding: 8px 12px; font-size: 13.5px; color: var(--coop-muted); background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; }
+.coop-study-reason { flex: 1; font-size: 12.5px; color: var(--coop-muted); padding: 6px 0; }
+.coop-doctor-meta { font-size: 12px; color: var(--coop-muted); font-weight: 400; }
 
 /* ---------- 검사 이미지 뷰어 ---------- */
-.coop-image-viewer {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
-.coop-image-viewer-empty {
-  background: var(--coop-page-bg);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 20px;
-  text-align: center;
-  color: var(--coop-muted);
-  font-size: 13px;
-  margin-bottom: 16px;
-}
-.coop-image-viewer-series {
-  font-size: 13px;
-  color: var(--coop-muted);
-  margin-bottom: 10px;
-}
-.coop-image-viewer-frame {
-  background: #000;
-  border-radius: 4px;
-  min-height: 320px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  overflow: hidden;
-  position: relative;
-}
-.coop-image-viewer-loading {
-  color: #999;
-  font-size: 13px;
-}
-.coop-image-viewer-img {
-  max-width: 100%;
-  max-height: 480px;
-  display: block;
-}
-.coop-image-viewer-controls {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-  margin-top: 12px;
-}
-.coop-image-viewer-slider { flex: 1; }
-.coop-image-viewer-count {
-  font-size: 12.5px;
-  color: var(--coop-muted);
-  min-width: 60px;
-  text-align: right;
-}
+.coop-image-viewer { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
+.coop-image-viewer-empty { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 20px; text-align: center; color: var(--coop-muted); font-size: 13px; margin-bottom: 16px; }
+.coop-image-viewer-series { font-size: 12.5px; color: var(--coop-muted); margin-bottom: 10px; }
+.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.coop-image-viewer-img { max-width: 100%; max-height: 480px; display: block; }
+.coop-image-viewer-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+.coop-image-viewer-slider { flex: 1; accent-color: var(--coop-accent); }
+.coop-image-viewer-count { font-family: var(--coop-font-mono); font-size: 12px; color: var(--coop-muted); min-width: 60px; text-align: right; }
 
 /* ---------- 환자/검사 상세 정보 패널 ---------- */
-.coop-detail-panel {
-  background: var(--coop-card);
-  border: 1px solid var(--coop-border);
-  border-radius: 6px;
-  padding: 16px 20px;
-  margin-bottom: 16px;
-}
+.coop-detail-panel { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
 .coop-detail-section { margin-bottom: 14px; }
 .coop-detail-section:last-of-type { margin-bottom: 0; }
 .coop-detail-section-title {
-  font-size: 12.5px;
-  font-weight: 700;
-  color: var(--coop-muted);
-  margin-bottom: 8px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid var(--coop-border);
+  font-size: 12.5px; font-weight: 700;
+  color: var(--coop-muted); margin-bottom: 8px; padding-bottom: 4px; border-bottom: 1px solid var(--coop-line);
 }
-.coop-detail-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 6px 20px;
-  font-size: 13px;
-  color: var(--coop-ink);
-}
+.coop-detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 20px; font-size: 13px; color: var(--coop-ink); }
 .coop-detail-span2 { grid-column: span 2; }
-.coop-detail-label {
-  color: var(--coop-muted);
-  margin-right: 6px;
-  font-size: 12px;
-}
+.coop-detail-label { color: var(--coop-muted); font-weight: 600; margin-right: 6px; font-size: 12px; }
 .coop-detail-tech-toggle {
-  background: none;
-  border: none;
-  color: var(--coop-muted);
-  font-size: 12px;
-  cursor: pointer;
-  padding: 8px 0 0;
-  margin-top: 10px;
-  border-top: 1px solid var(--coop-border);
-  width: 100%;
-  text-align: left;
+  background: none; border: none; color: var(--coop-faint);
+  font-size: 12px; cursor: pointer; padding: 8px 0 0; margin-top: 10px;
+  border-top: 1px solid var(--coop-line); width: 100%; text-align: left;
 }
 .coop-detail-tech-toggle:hover { color: var(--coop-ink); }
-.coop-detail-tech-box {
-  margin-top: 8px;
-  padding: 10px 12px;
-  background: var(--coop-page-bg);
-  border-radius: 4px;
-  font-size: 11.5px;
-  color: var(--coop-muted);
-  font-family: monospace;
-}
+.coop-detail-tech-box { margin-top: 8px; padding: 10px 12px; background: var(--coop-paper); border-radius: 4px; font-size: 11px; color: var(--coop-muted); font-family: var(--coop-font-mono); }
 .coop-detail-tech-box > div { margin-bottom: 4px; word-break: break-all; }
 .coop-detail-tech-box .coop-detail-label { font-family: inherit; }
+
+.coop-dept-badge {
+  font-size: 11.5px; font-weight: 700;
+  margin-right: 6px; color: var(--coop-accent-deep);
+}
+.coop-dept-badge::before { content: "· "; color: var(--coop-faint); }
+
+/* ---------- 반응형 ---------- */
+@media (max-width: 720px) {
+  .coop-layout { flex-direction: column; }
+  .coop-tabstrip { width: 100%; border-right: none; border-bottom: 1px solid var(--coop-line); }
+  .coop-ledger-row { grid-template-columns: 10px 22px 1fr; }
+  .coop-ledger-col-status, .coop-ledger-col-time { display: none; }
+  .coop-view-grid { grid-template-columns: 1fr; }
+  .coop-view-span2 { grid-column: span 1; }
+}
+
+/* ---------- 시리즈 선택 탭 ---------- */
+.coop-series-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.coop-series-tab {
+  border: 1px solid var(--coop-line);
+  background: var(--coop-paper);
+  color: var(--coop-muted);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+.coop-series-tab.active {
+  background: var(--coop-accent-soft);
+  border-color: var(--coop-accent);
+  color: var(--coop-accent-deep);
+}
+
+.coop-modal-textarea {
+  width: 100%;
+  box-sizing: border-box;
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 10px 12px;
+  font-size: 13.5px;
+  color: var(--coop-ink);
+  font-family: var(--coop-font-sans);
+  resize: vertical;
+}
+.coop-modal-textarea:focus { outline: none; border-color: var(--coop-accent); }
+.coop-modal-textarea.is-invalid { border-color: var(--coop-status-rejected); }
+
+/* ---------- 협진요청 건별 채팅 ---------- */
+.coop-chat-panel {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 16px 20px;
+  margin-bottom: 16px;
+}
+.coop-chat-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 10px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--coop-line);
+}
+.coop-chat-status {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--coop-faint);
+}
+.coop-chat-status.online { color: var(--coop-accent); }
+
+.coop-chat-messages {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-height: 320px;
+  overflow-y: auto;
+  padding: 4px 2px;
+  margin-bottom: 12px;
+}
+.coop-chat-empty {
+  text-align: center;
+  color: var(--coop-faint);
+  font-size: 13px;
+  padding: 24px 0;
+}
+.coop-chat-bubble-row {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  max-width: 72%;
+}
+.coop-chat-bubble-row.mine { align-self: flex-end; align-items: flex-end; }
+.coop-chat-sender {
+  font-size: 11.5px;
+  font-weight: 600;
+  color: var(--coop-muted);
+  margin-bottom: 2px;
+}
+.coop-chat-bubble {
+  background: var(--coop-paper);
+  border: 1px solid var(--coop-line);
+  border-radius: 10px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: var(--coop-ink);
+  white-space: pre-wrap;
+  word-break: break-word;
+}
+.coop-chat-bubble-row.mine .coop-chat-bubble {
+  background: var(--coop-accent-soft);
+  border-color: var(--coop-accent);
+  color: var(--coop-accent-deep);
+}
+.coop-chat-time {
+  font-family: var(--coop-font-mono);
+  font-size: 10.5px;
+  color: var(--coop-faint);
+  margin-top: 2px;
+}
+
+.coop-chat-input-row { display: flex; gap: 8px; }
+.coop-chat-input {
+  flex: 1;
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 8px 12px;
+  font-size: 13.5px;
+  color: var(--coop-ink);
+  font-family: var(--coop-font-sans);
+}
+.coop-chat-input:focus { outline: none; border-color: var(--coop-accent); }
+.coop-chat-input:disabled { background: var(--coop-paper); color: var(--coop-muted); }

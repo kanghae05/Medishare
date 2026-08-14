@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import CoopReasonModal from "./CoopReasonModal";
+import CoopChatPanel from "./CoopChatPanel";
 import CoopStudyDetailPanel from "./CoopStudyDetailPanel";
 import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
@@ -28,6 +29,7 @@ function CoopRequestView() {
   const [actionError, setActionError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [modal, setModal] = useState(null); // "reject" | "deptReject" | null
+  const [chatOpen, setChatOpen] = useState(false);
 
   const load = () => {
     let ignore = false;
@@ -96,6 +98,9 @@ function CoopRequestView() {
   const isSent = vo.direction === "sent";
   const canCancel = isSent && vo.status === "요청";
   const canRerequest = isSent && (vo.status === "거절" || vo.status === "만료");
+  // 채팅은 "수락된 상태" + "요청자 본인이거나, 내가 그 수락한 의사인 경우"만 가능.
+  // 이름은 이제 항상 실명으로 보이므로, "내가 수락자인지"는 별도 필드(viewerIsAcceptDoctor)로 판단한다.
+  const canChat = vo.status === "수락" && (isSent || vo.viewerIsAcceptDoctor);
 
   return (
     <div className="coop-page">
@@ -107,57 +112,69 @@ function CoopRequestView() {
       </div>
 
       <div className="coop-view-card">
-        <div className="coop-view-row">
-          <span className="coop-view-label">환자</span>
-          <span className="coop-view-value">{vo.patientName || `환자 #${vo.patientId}`}</span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">검사</span>
-          <span className="coop-view-value">{vo.pacsStudyLabel || `검사 #${vo.pacsStudyId}`}</span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">요청 의사</span>
-          <span className="coop-view-value">
-            {renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}
-          </span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">수신 대상</span>
-          <span className="coop-view-value">
-            {vo.recvType === "지정의사"
-              ? renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
-              : vo.acceptDoctorId
-              ? renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)
-              : vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
-            {vo.recvType === "진료과" && !vo.acceptDoctorId && " (아직 미수락)"}
-          </span>
-        </div>
-        <div className="coop-view-row">
-          <span className="coop-view-label">요청 시각</span>
-          <span className="coop-view-value">{vo.reqTime}</span>
-        </div>
-        {vo.respTime && (
-          <div className="coop-view-row">
-            <span className="coop-view-label">응답 시각</span>
-            <span className="coop-view-value">{vo.respTime}</span>
+        <div className="coop-detail-section-title">협진 요청</div>
+        <div className="coop-view-grid">
+          <div>
+            <span className="coop-view-label">요청 의사</span>
+            <span className="coop-view-value">{renderDoctor(vo.reqDoctorName, vo.reqDoctorMeta, vo.reqDoctorId)}</span>
           </div>
-        )}
-        <div className="coop-view-row align-top">
-          <span className="coop-view-label">요청 내용</span>
-          <span className="coop-view-value">{vo.reqContent}</span>
-        </div>
-        {vo.rejectReason && (
-          <div className="coop-view-row align-top">
-            <span className="coop-view-label">거절 사유</span>
-            <span className="coop-view-value coop-view-danger">{vo.rejectReason}</span>
+          <div>
+            <span className="coop-view-label">수신 대상</span>
+            <span className="coop-view-value">
+              {vo.recvType === "지정의사" ? (
+                renderDoctor(vo.recvDoctorName, vo.recvDoctorMeta, vo.recvDoctorId)
+              ) : (
+                <>
+                  {vo.recvDeptName || `진료과 #${vo.recvDeptId}`}
+                  {vo.acceptDoctorId ? (
+                    <>
+                      {" → "}
+                      {renderDoctor(vo.acceptDoctorName, vo.acceptDoctorMeta, vo.acceptDoctorId)}
+                      {" (수락)"}
+                    </>
+                  ) : (
+                    " (아직 미수락)"
+                  )}
+                </>
+              )}
+            </span>
           </div>
-        )}
+          <div>
+            <span className="coop-view-label">요청 시각</span>
+            <span className="coop-view-value">{vo.reqTime}</span>
+          </div>
+          {vo.respTime && (
+            <div>
+              <span className="coop-view-label">응답 시각</span>
+              <span className="coop-view-value">{vo.respTime}</span>
+            </div>
+          )}
+          <div className="coop-view-span2">
+            <span className="coop-view-label">요청 내용</span>
+            <span className="coop-view-value">{vo.reqContent}</span>
+          </div>
+          {vo.originRequestId && vo.originReqContent && (
+            <div className="coop-view-span2">
+              <span className="coop-view-label">이전 요청 내용</span>
+              <span className="coop-view-value">
+                "{vo.originReqContent}"
+                {vo.originReqTime && <span style={{ color: "var(--coop-faint)" }}> ({vo.originReqTime})</span>}
+              </span>
+            </div>
+          )}
+          {vo.rejectReason && (
+            <div className="coop-view-span2">
+              <span className="coop-view-label">거절 사유</span>
+              <span className="coop-view-value coop-view-danger">{vo.rejectReason}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
       {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
-      {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
+      {isSent && vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
           <div className="coop-quote-label">진료과 개인별 거절 내역</div>
           {vo.deptRejections.map((r, i) => (
@@ -208,7 +225,15 @@ function CoopRequestView() {
             재요청
           </button>
         )}
+
+        {canChat && (
+          <button type="button" className="btn-coop-apply" onClick={() => setChatOpen((v) => !v)}>
+            {chatOpen ? "채팅 닫기" : "채팅"}
+          </button>
+        )}
       </div>
+
+      {canChat && chatOpen && <CoopChatPanel coopRequestId={vo.coopRequestId} />}
 
       {modal === "reject" && (
         <CoopReasonModal

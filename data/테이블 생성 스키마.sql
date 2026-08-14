@@ -321,8 +321,6 @@ CREATE TABLE coop_request (
     req_time           DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     resp_time          DATETIME NULL,
     reject_reason      TEXT NULL,
-    is_read            BOOLEAN NOT NULL DEFAULT FALSE,
-    read_time          DATETIME NULL,
 
     CONSTRAINT chk_recv_type_match CHECK (
         (recv_type = '지정의사' AND recv_doctor_id IS NOT NULL AND recv_dept_id IS NULL)
@@ -376,4 +374,18 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
     INDEX idx_schedule_date (schedule_date),
     INDEX idx_schedule_doctor_date (doctor_id, schedule_date),
     INDEX idx_schedule_type (schedule_type)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 10. 협진 채팅 테이블
+-- ============================================================
+CREATE TABLE coop_message (
+    coop_message_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coop_request_id BIGINT NOT NULL,
+    sender_doctor_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
+    FOREIGN KEY (sender_doctor_id) REFERENCES member(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

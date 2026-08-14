@@ -80,9 +80,17 @@ public class SignServiceImpl implements SignService {
             throw new IllegalStateException("This account is inactive or suspended.");
         }
         member.setRoles(memberRoleAuthorityService.getAuthorities(member.getNo()));
+        Long departmentNo = member.getDepartment() == null ? null : member.getDepartment().getNo();
+        String departmentName = member.getDepartment() == null ? null : member.getDepartment().getDepartmentName();
 
         SignInResultDto result = SignInResultDto.builder()
-                .token(jwtTokenProvider.createToken(member.getId(), member.getName(), member.getRoles()))
+                .token(jwtTokenProvider.createToken(
+                        member.getId(),
+                        member.getName(),
+                        member.getNo(),
+                        departmentNo,
+                        departmentName,
+                        member.getRoles()))
                 .build();
         setSuccessResult(result);
         return result;

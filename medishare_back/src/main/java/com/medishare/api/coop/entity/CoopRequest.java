@@ -73,12 +73,6 @@ public class CoopRequest {
     @Column(length = 1000)
     private String rejectReason;
 
-    @Builder.Default
-    @Column(nullable = false)
-    private boolean isRead = false;
-
-    private LocalDateTime readTime;
-
     @PrePersist
     void prePersist() {
         if (this.reqTime == null) {

@@ -68,7 +68,10 @@ function CoopRequestWriteForm() {
     api
       .get("/coop/view.do", { params: { no: originRequestId } })
       .then((res) => {
-        if (!ignore) setOrigin(res.data);
+        if (!ignore) {
+          setOrigin(res.data);
+          setReqContent(res.data.reqContent || "");
+        }
       })
       .catch(() => {
         if (!ignore) setError("원본 협진 요청 정보를 불러오지 못했습니다.");
@@ -147,8 +150,7 @@ function CoopRequestWriteForm() {
 
   const validate = () => {
     if (originRequestId) {
-      if (recvType === "지정의사" && !selectedDoctor) return "수신 의사를 검색해서 선택해주세요.";
-      if (recvType === "진료과" && !recvDeptId) return "수신 진료과를 선택해주세요.";
+      if (!origin) return "원본 요청 정보를 불러오는 중입니다.";
       if (!reqContent.trim()) return "요청 내용을 입력해주세요.";
       return null;
     }
@@ -172,9 +174,13 @@ function CoopRequestWriteForm() {
     setError(null);
 
     const payload = {
-      recvType,
-      recvDoctorId: recvType === "지정의사" ? selectedDoctor.no : null,
-      recvDeptId: recvType === "진료과" ? Number(recvDeptId) : null,
+      recvType: originRequestId ? origin.recvType : recvType,
+      recvDoctorId: originRequestId
+        ? (origin.recvType === "지정의사" ? origin.recvDoctorId : null)
+        : (recvType === "지정의사" ? selectedDoctor.no : null),
+      recvDeptId: originRequestId
+        ? (origin.recvType === "진료과" ? origin.recvDeptId : null)
+        : (recvType === "진료과" ? Number(recvDeptId) : null),
       pacsStudyId: originRequestId ? null : Number(selectedStudyId),
       reportId: originRequestId ? null : attachReport && availableReport ? availableReport.no : null,
       reqContent,
@@ -211,51 +217,67 @@ function CoopRequestWriteForm() {
       )}
 
       <form className="coop-form" onSubmit={handleSubmit}>
-        <div className="coop-form-row">
-          <label className="coop-form-label">수신 대상</label>
-          <div className="coop-chip-group">
-            <button
-              type="button"
-              className={"coop-chip" + (recvType === "지정의사" ? " active" : "")}
-              onClick={() => setRecvType("지정의사")}
-            >
-              지정의사
-            </button>
-            <button
-              type="button"
-              className={"coop-chip" + (recvType === "진료과" ? " active" : "")}
-              onClick={() => setRecvType("진료과")}
-            >
-              진료과
-            </button>
-          </div>
-        </div>
-
-        {recvType === "지정의사" ? (
+        {originRequestId ? (
           <div className="coop-form-row">
-            <label className="coop-form-label">받는 의사</label>
-            <DoctorAutocomplete
-              value={selectedDoctor}
-              onSelect={setSelectedDoctor}
-              placeholder="이름, 진료과, 세부전공으로 검색"
-            />
+            <label className="coop-form-label">수신 대상</label>
+            <div className="coop-form-readonly">
+              {origin
+                ? origin.recvType === "지정의사"
+                  ? origin.recvDoctorName || `의사 #${origin.recvDoctorId}`
+                  : origin.recvDeptName || `진료과 #${origin.recvDeptId}`
+                : "-"}
+              <span style={{ color: "var(--coop-faint)", marginLeft: 6 }}/>
+            </div>
           </div>
         ) : (
-          <div className="coop-form-row">
-            <label className="coop-form-label">받는 진료과</label>
-            <select
-              className="coop-form-input"
-              value={recvDeptId}
-              onChange={(e) => setRecvDeptId(e.target.value)}
-            >
-              <option value="">진료과 선택</option>
-              {departments.map((d) => (
-                <option key={d.no} value={d.no}>
-                  {d.departmentName}
-                </option>
-              ))}
-            </select>
-          </div>
+          <>
+            <div className="coop-form-row">
+              <label className="coop-form-label">수신 대상</label>
+              <div className="coop-chip-group">
+                <button
+                  type="button"
+                  className={"coop-chip" + (recvType === "지정의사" ? " active" : "")}
+                  onClick={() => setRecvType("지정의사")}
+                >
+                  지정의사
+                </button>
+                <button
+                  type="button"
+                  className={"coop-chip" + (recvType === "진료과" ? " active" : "")}
+                  onClick={() => setRecvType("진료과")}
+                >
+                  진료과
+                </button>
+              </div>
+            </div>
+
+            {recvType === "지정의사" ? (
+              <div className="coop-form-row">
+                <label className="coop-form-label">받는 의사</label>
+                <DoctorAutocomplete
+                  value={selectedDoctor}
+                  onSelect={setSelectedDoctor}
+                  placeholder="이름, 진료과, 세부전공으로 검색"
+                />
+              </div>
+            ) : (
+              <div className="coop-form-row">
+                <label className="coop-form-label">받는 진료과</label>
+                <select
+                  className="coop-form-input"
+                  value={recvDeptId}
+                  onChange={(e) => setRecvDeptId(e.target.value)}
+                >
+                  <option value="">진료과 선택</option>
+                  {departments.map((d) => (
+                    <option key={d.no} value={d.no}>
+                      {d.departmentName}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            )}
+          </>
         )}
 
         {originRequestId ? (

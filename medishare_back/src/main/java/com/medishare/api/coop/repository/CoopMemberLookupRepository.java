@@ -22,9 +22,9 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
      * 협진 요청 등록 폼의 "받는 의사" 자동완성용.
      * excludeNo: 검색하는 본인 계정은 결과에서 제외 (자기 자신에게 협진 요청 불가)
      *
-     * TODO(3번 회원관리 연동): role(의사/관리자 구분)이 정식으로 필드화되면
-     * 관리자는 결과에서 제외하도록 조건을 추가한다. 지금은 그 필드가 없어서
-     * status='ACTIVE'인 계정이면 관리자든 의사든 다 검색되는 상태다.
+     * 관리자 제외는 여기서 안 하고, findAdminMemberIds()로 따로 관리자 ID를 뽑아서
+     * Controller에서 걸러낸다 (Member 엔티티가 role을 어떻게 매핑하는지 몰라도
+     * member_role/role 테이블을 네이티브 SQL로 직접 조회하면 안전하게 되니까).
      */
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department " +
             "WHERE m.status = 'ACTIVE' " +
@@ -34,4 +34,10 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
             "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
             "ORDER BY m.name")
     List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
+
+    /** ROLE_ADMIN을 가진 회원번호 목록 (member_role + role 테이블 직접 조회) */
+    @Query(value = "SELECT mr.member_no FROM member_role mr " +
+            "JOIN role r ON mr.role_no = r.no " +
+            "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
+    List<Long> findAdminMemberIds();
 }

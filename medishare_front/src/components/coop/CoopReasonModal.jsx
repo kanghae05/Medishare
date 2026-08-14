@@ -26,7 +26,7 @@ function CoopReasonModal({ title, submitLabel = "확인", submitting, onSubmit, 
           </div>
           <div className="modal-body">
             <textarea
-              className={"coop-form-textarea" + (isInvalid ? " is-invalid" : "")}
+              className={"coop-modal-textarea" + (isInvalid ? " is-invalid" : "")}
               rows={4}
               placeholder="사유를 입력하세요."
               value={reason}
