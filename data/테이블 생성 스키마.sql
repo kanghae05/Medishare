@@ -375,3 +375,17 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
     INDEX idx_schedule_doctor_date (doctor_id, schedule_date),
     INDEX idx_schedule_type (schedule_type)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- ============================================================
+-- 10. 협진 채팅 테이블
+-- ============================================================
+CREATE TABLE coop_message (
+    coop_message_id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    coop_request_id BIGINT NOT NULL,
+    sender_doctor_id BIGINT NOT NULL,
+    content TEXT NOT NULL,
+    sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
+    FOREIGN KEY (sender_doctor_id) REFERENCES member(no)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

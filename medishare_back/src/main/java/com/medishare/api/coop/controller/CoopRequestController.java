@@ -8,8 +8,10 @@ import com.medishare.api.coop.repository.CoopPacsPatientLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsSeriesLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.repository.CoopReportLookupRepository;
+import com.medishare.api.coop.service.CoopMessageService;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
+import com.medishare.api.coop.vo.CoopMessageVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.DepartmentLookupVO;
 import com.medishare.api.coop.vo.DoctorLookupVO;
@@ -39,6 +41,7 @@ import java.util.Map;
 public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
+    private final CoopMessageService coopMessageService;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopPacsSeriesLookupRepository pacsSeriesRepository;
     private final OrthancImageService orthancImageService;
@@ -133,6 +136,26 @@ public class CoopRequestController {
     public CoopRequestVO view(@RequestParam Long no, Authentication authentication) {
         Long doctorId = currentDoctorId(authentication);
         return coopRequestService.view(no, doctorId);
+    }
+
+    // 이 협진요청의 채팅 이력 (WebSocket 연결 전에 처음 한 번 불러오는 용도)
+    @GetMapping("/{coopRequestId}/messages.do")
+    public List<CoopMessageVO> messages(@PathVariable Long coopRequestId, Authentication authentication) {
+        Long doctorId = currentDoctorId(authentication);
+        Long deptId = safeCurrentDeptId(authentication);
+        if (!coopMessageService.isParticipant(coopRequestId, doctorId, deptId)) {
+            throw new RuntimeException("이 협진요청의 채팅에 참여할 수 있는 권한이 없습니다.");
+        }
+        return coopMessageService.history(coopRequestId, doctorId);
+    }
+
+    /** 진료과 미배정 계정도 (그 사람이 당사자인 채팅 자체는) 조회할 수 있도록, deptId 없으면 null로 처리 */
+    private Long safeCurrentDeptId(Authentication authentication) {
+        try {
+            return currentDeptId(authentication);
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
 
     // 안 읽은 개수 (4-7, 폴링용)
