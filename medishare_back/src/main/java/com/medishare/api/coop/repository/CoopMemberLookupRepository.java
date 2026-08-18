@@ -24,7 +24,7 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
      *
      * 관리자 제외는 여기서 안 하고, findAdminMemberIds()로 따로 관리자 ID를 뽑아서
      * Controller에서 걸러낸다 (Member 엔티티가 role을 어떻게 매핑하는지 몰라도
-     * member_role/role 테이블을 네이티브 SQL로 직접 조회하면 안전하게 되니까).
+     * member_roles/role 테이블을 네이티브 SQL로 직접 조회하면 안전하게 되니까).
      */
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department " +
             "WHERE m.status = 'ACTIVE' " +
@@ -42,8 +42,8 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department WHERE m.no IN :ids")
     List<Member> findAllByIdWithDepartment(@Param("ids") java.util.Collection<Long> ids);
 
-    /** ROLE_ADMIN을 가진 회원번호 목록 (member_role + role 테이블 직접 조회) */
-    @Query(value = "SELECT mr.member_no FROM member_role mr " +
+    /** ROLE_ADMIN을 가진 회원번호 목록 (member_roles + role 테이블 직접 조회) */
+    @Query(value = "SELECT mr.member_no FROM member_roles mr " +
             "JOIN role r ON mr.role_no = r.no " +
             "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
     List<Long> findAdminMemberIds();
