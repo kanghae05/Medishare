@@ -289,6 +289,26 @@ function Home() {
     searchParams.get("search") === "open";
 
 
+  const moveToService = (path) => {
+    const requiresLogin =
+      path === "/notices" ||
+      path.startsWith("/notices/") ||
+      path === "/special-cases" ||
+      path.startsWith("/special-cases/");
+
+    if (
+      requiresLogin &&
+      !localStorage.getItem("token")
+    ) {
+      alert("로그인이 필요한 서비스입니다.");
+      navigate("/member/login");
+      return;
+    }
+
+    navigate(path);
+  };
+
+
   const services = [
     {
       number: "01",
@@ -442,7 +462,7 @@ function Home() {
 
 
     if (service) {
-      navigate(service.path);
+      moveToService(service.path);
       return;
     }
 
@@ -461,7 +481,7 @@ function Home() {
 
 
       if (result.length) {
-        navigate(
+        moveToService(
           `/notices/${result[0].noticeId}`
         );
         return;
@@ -807,7 +827,7 @@ function Home() {
                   key={service.title}
                   className="home-service-card"
                   onClick={() =>
-                    navigate(service.path)
+                    moveToService(service.path)
                   }
                 >
 
@@ -893,7 +913,7 @@ function Home() {
               type="button"
               className="notice-more-button"
               onClick={() =>
-                navigate("/notices")
+                moveToService("/notices")
               }
             >
               공지사항 전체보기
@@ -926,7 +946,7 @@ function Home() {
                     key={notice.noticeId}
                     className="home-notice-card"
                     onClick={() =>
-                      navigate(
+                      moveToService(
                         `/notices/${notice.noticeId}`
                       )
                     }
@@ -1091,7 +1111,7 @@ function Home() {
                     type="button"
                     key={service.title}
                     onClick={() =>
-                      navigate(service.path)
+                      moveToService(service.path)
                     }
                   >
                     {service.title}

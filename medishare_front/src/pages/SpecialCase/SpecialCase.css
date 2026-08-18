@@ -1,1 +1,402 @@
-.case-shell{background:#f4f7fa;color:#172331;margin:-8px -12px 32px;min-height:calc(100vh - 96px);padding:32px 24px}.case-page{margin:0 auto;max-width:1056px;position:relative}.case-page-head{align-items:flex-start;display:flex;gap:16px;justify-content:space-between;margin-bottom:18px}.case-page-head h1,.case-detail-head h1{font-size:26px;font-weight:800;margin:0}.case-page-head p,.case-detail-head p{color:#647482;margin:6px 0 0}.case-primary,.case-secondary,.case-danger,.case-pagination button{border-radius:7px;font-weight:700;text-decoration:none}.case-primary{background:#0f766e;border:1px solid #0f766e;color:#fff;padding:9px 16px}.case-secondary{background:#fff;border:1px solid #cfdae3;color:#40505f;padding:8px 14px}.case-danger{background:#fff;border:1px solid #efc3c0;color:#a43d37;padding:8px 14px}.case-filter{background:#fff;border:1px solid #dce4ea;border-radius:8px;display:grid;gap:10px;grid-template-columns:minmax(220px,1fr) repeat(3,140px);margin-bottom:14px;padding:12px}.case-filter input,.case-filter select,.case-form-card input,.case-form-card textarea{background:#fff;border:1px solid #cfdae3;border-radius:7px;color:#172331;outline:none;padding:10px 12px;width:100%}.case-filter input:focus,.case-filter select:focus,.case-form-card input:focus,.case-form-card textarea:focus{border-color:#0f766e;box-shadow:0 0 0 3px rgba(15,118,110,.1)}.case-state{background:#fff;border:1px dashed #c7d3dc;border-radius:8px;color:#647482;font-weight:700;padding:54px 16px;text-align:center}.case-grid{display:grid;gap:14px;grid-template-columns:repeat(3,minmax(0,1fr))}.case-card{background:#fff;border:1px solid #dce4ea;border-radius:8px;color:#172331;overflow:hidden;text-decoration:none;transition:box-shadow .15s,transform .15s}.case-card:hover{box-shadow:0 7px 20px rgba(15,35,45,.09);color:#172331;transform:translateY(-2px)}.case-thumbnail{align-items:center;background:#e8f1f2;color:#0f766e;display:flex;font-size:12px;font-weight:800;height:150px;justify-content:center;letter-spacing:.08em;overflow:hidden}.case-thumbnail img{height:100%;object-fit:cover;width:100%}.case-card-body{padding:16px}.case-card-body h2{font-size:18px;font-weight:800;margin:11px 0 7px}.case-card-body p{color:#526371;display:-webkit-box;line-height:1.55;margin:0 0 14px;min-height:48px;overflow:hidden;-webkit-box-orient:vertical;-webkit-line-clamp:2}.case-card-body small{color:#647482}.case-badges{display:flex;gap:6px}.case-badges span,.case-tags span{background:#e6f3f1;border:1px solid #c4e1dd;border-radius:999px;color:#0f766e;font-size:12px;font-weight:800;padding:3px 9px}.case-badges span+span{background:#f2f4f5;border-color:#dce4ea;color:#526371}.case-pagination{align-items:center;display:flex;gap:14px;justify-content:center;margin-top:18px}.case-pagination button{background:#fff;border:1px solid #cfdae3;color:#40505f;padding:8px 14px}.case-pagination button:disabled{color:#a4afb8;cursor:not-allowed}.case-detail-head,.case-detail-card,.case-viewer,.case-form-card{background:#fff;border:1px solid #dce4ea;border-radius:8px}.case-detail-head{margin-bottom:14px;padding:22px 24px}.case-detail-head h1{margin-top:10px}.case-detail-card{display:grid;gap:24px;padding:24px}.case-detail-card h2{font-size:16px;font-weight:800;margin:0 0 9px}.case-detail-card p{margin:0;white-space:pre-wrap}.case-tags{display:flex;flex-wrap:wrap;gap:6px}.case-viewer{aspect-ratio:16/9;margin-top:14px;overflow:hidden;position:relative}.case-viewer iframe{border:0;height:100%;width:100%}.case-actions{display:flex;gap:8px;justify-content:flex-end;margin-top:14px}.case-form-card{display:grid;gap:16px;grid-template-columns:repeat(3,minmax(0,1fr));padding:24px}.case-form-card label{display:grid;gap:7px}.case-form-card label>span{color:#526371;font-size:13px;font-weight:800}.case-form-card textarea{resize:vertical}.case-form-card .case-full{grid-column:1/-1}.case-form-card .case-actions{display:flex;margin-top:0}.case-primary:hover{background:#0c665f;color:#fff}.case-secondary:hover{background:#f8fafb;color:#172331}@media(max-width:800px){.case-filter{grid-template-columns:1fr 1fr}.case-grid{grid-template-columns:repeat(2,minmax(0,1fr))}.case-form-card{grid-template-columns:1fr 1fr}}@media(max-width:600px){.case-shell{padding:24px 14px}.case-page-head{align-items:stretch;flex-direction:column}.case-filter,.case-grid,.case-form-card{grid-template-columns:1fr}.case-form-card label,.case-form-card .case-full{grid-column:1}.case-actions{flex-wrap:wrap}}
+/* ==========================================================================
+   Medishare - 특이케이스 모듈 전체 스타일 (SpecialCase.css)
+   ========================================================================== */
+
+/* 1. 레이아웃 및 메인 컨테이너 */
+.case-shell {
+  background: #f4f7fa;
+  color: #172331;
+  margin: -8px -12px 32px;
+  min-height: calc(100vh - 96px);
+  padding: 32px 24px;
+}
+
+.case-page {
+  margin: 0 auto;
+  max-width: 1056px;
+  position: relative;
+}
+
+.case-page-head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  margin-bottom: 18px;
+}
+
+.case-page-head h1,
+.case-detail-head h1 {
+  font-size: 26px;
+  font-weight: 800;
+  margin: 0;
+}
+
+.case-page-head p,
+.case-detail-head p {
+  color: #647482;
+  margin: 6px 0 0;
+}
+
+
+/* 2. 공통 버튼 및 태그/배지 */
+.case-primary,
+.case-secondary,
+.case-danger,
+.case-pagination button {
+  border-radius: 7px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.case-primary {
+  background: #0f766e;
+  border: 1px solid #0f766e;
+  color: #fff;
+  padding: 9px 16px;
+}
+
+.case-primary:hover {
+  background: #0c665f;
+  color: #fff;
+}
+
+.case-secondary {
+  background: #fff;
+  border: 1px solid #cfdae3;
+  color: #40505f;
+  padding: 8px 14px;
+}
+
+.case-secondary:hover {
+  background: #f8fafb;
+  color: #172331;
+}
+
+.case-danger {
+  background: #fff;
+  border: 1px solid #efc3c0;
+  color: #a43d37;
+  padding: 8px 14px;
+}
+
+.case-badges {
+  display: flex;
+  gap: 6px;
+}
+
+.case-badges span,
+.case-tags span {
+  background: #e6f3f1;
+  border: 1px solid #c4e1dd;
+  border-radius: 999px;
+  color: #0f766e;
+  font-size: 12px;
+  font-weight: 800;
+  padding: 3px 9px;
+}
+
+.case-badges span + span {
+  background: #f2f4f5;
+  border-color: #dce4ea;
+  color: #526371;
+}
+
+.case-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+
+/* 3. 검색 필터 및 폼 요소 */
+.case-filter {
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 10px;
+  grid-template-columns: minmax(220px, 1fr) repeat(3, 140px);
+  margin-bottom: 14px;
+  padding: 12px;
+}
+
+.case-filter input,
+.case-filter select,
+.case-form-card input,
+.case-form-card textarea {
+  background: #fff;
+  border: 1px solid #cfdae3;
+  border-radius: 7px;
+  color: #172331;
+  outline: none;
+  padding: 10px 12px;
+  width: 100%;
+}
+
+.case-filter input:focus,
+.case-filter select:focus,
+.case-form-card input:focus,
+.case-form-card textarea:focus {
+  border-color: #0f766e;
+  box-shadow: 0 0 0 3px rgba(15, 118, 110, 0.1);
+}
+
+.case-form-card {
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  display: grid;
+  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  padding: 24px;
+}
+
+.case-form-card label {
+  display: grid;
+  gap: 7px;
+}
+
+.case-form-card label > span {
+  color: #526371;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+.case-form-card textarea {
+  resize: vertical;
+}
+
+.case-form-card .case-full {
+  grid-column: 1 / -1;
+}
+
+.case-form-card .case-actions {
+  display: flex;
+  margin-top: 0;
+}
+
+
+/* 4. 카드 리스트 그리드 및 상태 카드 */
+.case-state {
+  background: #fff;
+  border: 1px dashed #c7d3dc;
+  border-radius: 8px;
+  color: #647482;
+  font-weight: 700;
+  padding: 54px 16px;
+  text-align: center;
+}
+
+.case-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+}
+
+.case-card {
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+  color: #172331;
+  overflow: hidden;
+  text-decoration: none;
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.case-card:hover {
+  box-shadow: 0 7px 20px rgba(15, 35, 45, 0.09);
+  color: #172331;
+  transform: translateY(-2px);
+}
+
+.case-thumbnail {
+  align-items: center;
+  background: #e8f1f2;
+  color: #0f766e;
+  display: flex;
+  font-size: 12px;
+  font-weight: 800;
+  height: 150px;
+  justify-content: center;
+  letter-spacing: 0.08em;
+  overflow: hidden;
+}
+
+.case-thumbnail img {
+  height: 100%;
+  object-fit: cover;
+  width: 100%;
+}
+
+.case-card-body {
+  padding: 16px;
+}
+
+.case-card-body h2 {
+  font-size: 18px;
+  font-weight: 800;
+  margin: 11px 0 7px;
+}
+
+.case-card-body p {
+  color: #526371;
+  display: -webkit-box;
+  line-height: 1.55;
+  margin: 0 0 14px;
+  min-height: 48px;
+  overflow: hidden;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+}
+
+.case-card-body small {
+  color: #647482;
+}
+
+.case-pagination {
+  align-items: center;
+  display: flex;
+  gap: 14px;
+  justify-content: center;
+  margin-top: 18px;
+}
+
+.case-pagination button {
+  background: #fff;
+  border: 1px solid #cfdae3;
+  color: #40505f;
+  padding: 8px 14px;
+}
+
+.case-pagination button:disabled {
+  color: #a4afb8;
+  cursor: not-allowed;
+}
+
+
+/* 5. 상세 보기 및 PACS Viewer */
+.case-detail-head,
+.case-detail-card,
+.case-viewer {
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-radius: 8px;
+}
+
+.case-detail-head {
+  margin-bottom: 14px;
+  padding: 22px 24px;
+}
+
+.case-detail-head h1 {
+  margin-top: 10px;
+}
+
+.case-detail-card {
+  display: grid;
+  gap: 24px;
+  padding: 24px;
+}
+
+.case-detail-card h2 {
+  font-size: 16px;
+  font-weight: 800;
+  margin: 0 0 9px;
+}
+
+.case-detail-card p {
+  margin: 0;
+  white-space: pre-wrap;
+}
+
+.case-viewer {
+  aspect-ratio: 16 / 9;
+  margin-top: 14px;
+  overflow: hidden;
+  position: relative;
+}
+
+.case-viewer iframe {
+  border: 0;
+  height: 100%;
+  width: 100%;
+}
+
+.case-preview {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.case-viewer-state {
+  align-items: center;
+  color: #647482;
+  display: flex;
+  font-weight: 700;
+  height: 100%;
+  justify-content: center;
+}
+
+.case-actions {
+  display: flex;
+  gap: 8px;
+  justify-content: flex-end;
+  margin-top: 14px;
+}
+
+
+/* 6. 워터마크 (오른쪽 상단 단일 배치) */
+.watermark-overlay {
+  background-image: none !important;
+  background-color: rgba(230, 243, 241, 0.92);
+  border: 1px solid #c4e1dd;
+  border-radius: 6px;
+  color: #526371;
+  font-size: 12px;
+  font-weight: 700;
+  padding: 6px 12px;
+  pointer-events: none;
+  position: absolute;
+  right: 24px;
+  top: 18px;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+
+/* 7. 반응형 스타일 */
+@media (max-width: 800px) {
+  .case-filter {
+    grid-template-columns: 1fr 1fr;
+  }
+  .case-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .case-form-card {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+@media (max-width: 600px) {
+  .case-shell {
+    padding: 24px 14px;
+  }
+  .case-page-head {
+    align-items: stretch;
+    flex-direction: column;
+  }
+  .case-filter,
+  .case-grid,
+  .case-form-card {
+    grid-template-columns: 1fr;
+  }
+  .case-form-card label,
+  .case-form-card .case-full {
+    grid-column: 1;
+  }
+  .case-actions {
+    flex-wrap: wrap;
+  }
+}

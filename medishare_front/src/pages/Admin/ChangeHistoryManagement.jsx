@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import api from "../../components/common/api";
+import AdminPagination from "../../components/common/AdminPagination";
 
 const initialFilters = {
   memberKeyword: "", patientId: "", studyKeyword: "", departmentNo: "",
@@ -75,6 +76,11 @@ export default function ChangeHistoryManagement({ isAdmin }) {
         <td><button type="button" className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/admin/change-logs/${history.historyNo}`)}>상세</button></td>
       </tr>) : <tr><td colSpan="9" className="text-center text-muted">조회된 변경 이력이 없습니다.</td></tr>}</tbody>
     </table></div>
-    <div>{Array.from({ length: historyPage.totalPages || 0 }, (_, page) => <button type="button" key={page} className={`btn btn-sm me-1 ${page === historyPage.number ? "btn-primary" : "btn-outline-primary"}`} onClick={() => loadHistories(page).catch((error) => setMessage(error.response?.data?.message || "페이지를 불러오지 못했습니다."))}>{page + 1}</button>)}</div>
+    <AdminPagination
+      page={historyPage.number || 0}
+      totalPages={historyPage.totalPages || 0}
+      totalElements={historyPage.totalElements || 0}
+      onPageChange={(page) => loadHistories(page).catch((error) => setMessage(error.response?.data?.message || "페이지를 불러오지 못했습니다."))}
+    />
   </div>;
 }
