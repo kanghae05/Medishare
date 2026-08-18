@@ -13,7 +13,7 @@ import "./Coop.css";
 // 받은/보낸/전체 같은 "개인용" 탭이 의미가 없다 - 무조건 전체 조회 화면 하나만 본다).
 function CoopSidebarLayout() {
   return (
-    <div className="mt-5">
+    <div className="mb-5">
       <div className="coop-module-header">
         <span className="coop-module-eyebrow">MEDISHARE · CONSULTATION</span>
         <h2 className="coop-page-title">협진함</h2>
