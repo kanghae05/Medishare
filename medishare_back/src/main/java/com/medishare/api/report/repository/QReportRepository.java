@@ -8,4 +8,5 @@ import java.util.List;
 
 public interface QReportRepository extends JpaRepository<Report, Long>, QuerydslPredicateExecutor<Report> {
     List<Report> findByStudyNoOrderByWriteDateDesc(Long studyNo);
+    List<Report> findAllByOrderByWriteDateDesc();
 }
