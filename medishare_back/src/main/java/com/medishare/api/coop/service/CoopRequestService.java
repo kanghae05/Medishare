@@ -23,7 +23,7 @@ public interface CoopRequestService {
                                 List<String> statuses, LocalDate from, LocalDate to);
 
     // 상세 조회 - 열람 처리(4-6) 포함, 진료과 요청이면 거절자 목록도 함께 채워 반환
-    CoopRequestVO view(Long coopRequestId, Long viewerDoctorId);
+    CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId);
 
     // 등록 (4-1) / 재요청(4-1-1, originRequestId가 있으면 이전 요청의 환자·검사·소견서를 복사)
     CoopRequestVO write(CoopRequestVO vo);
@@ -42,4 +42,8 @@ public interface CoopRequestService {
 
     // 안 읽은 개수 (4-7, 폴링용)
     UnreadCountVO unreadCount(Long doctorId, Long deptId);
+
+    // 관리자 전체 조회 - 시스템 전체 협진요청, 요청자/수신자/진료과 선택적 필터
+    List<CoopRequestVO> adminList(Long reqDoctorId, Long recvDoctorId, Long deptId, PageObject pageObject,
+                                  List<String> statuses, LocalDate from, LocalDate to);
 }

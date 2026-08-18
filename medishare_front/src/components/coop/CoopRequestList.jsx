@@ -227,7 +227,9 @@ function CoopRequestList({ mode }) {
                 onClick={() => navigate(`/coop/view?no=${r.coopRequestId}`)}
               >
                 <span className={"coop-row-unread-dot" + (isUnread ? "" : " hidden")} />
-                <span className="coop-ledger-no">{String(idx + 1).padStart(2, "0")}</span>
+                <span className="coop-ledger-no">
+                  {String((page - 1) * (pageObject?.perPageNum || 10) + idx + 1).padStart(2, "0")}
+                </span>
                 <div className="coop-ledger-main">
                   <div className="coop-row-top">
                     <span className={"coop-row-counterpart-primary" + (isUnread ? " unread" : "")}>
