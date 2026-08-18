@@ -34,15 +34,35 @@ public class ReportServiceImpl implements ReportService {
                 .status(vo.getStatus()).member(member).build();
         Report savedReport = qReportRepository.save(report);
         pacsChangeHistoryService.recordReportChange(loginMemberId, null, savedReport, "CREATE", null);
+        if ("FINAL".equalsIgnoreCase(savedReport.getStatus())) {
+            removeDraftsAfterFinalization(savedReport, loginMemberId);
+        }
         return toVO(savedReport);
     }
 
     @Override
-    public ReportVO view(Long no) { return toVO(getReport(no)); }
+    public ReportVO view(Long no, String loginMemberId) {
+        Report report = getReport(no);
+        validateViewAccess(report, loginMemberId);
+        return toVO(report);
+    }
 
     @Override
-    public List<ReportVO> list(Long studyNo) {
-        return qReportRepository.findByStudyNoOrderByWriteDateDesc(studyNo).stream().map(this::toVO).toList();
+    public List<ReportVO> list(Long studyNo, String status, String loginMemberId) {
+        Member loginMember = getMember(loginMemberId);
+        List<Report> reports;
+        if (!isAdmin(loginMember)) {
+            reports = studyNo == null
+                    ? qReportRepository.findByStatusAndMember_NoOrderByWriteDateDesc(status, loginMember.getNo())
+                    : qReportRepository.findByStudyNoAndStatusAndMember_NoOrderByWriteDateDesc(
+                            studyNo, status, loginMember.getNo());
+        } else {
+            reports = studyNo == null
+                    ? qReportRepository.findByStatusOrderByWriteDateDesc(status)
+                    : qReportRepository.findByStudyNoAndStatusOrderByWriteDateDesc(studyNo, status);
+        }
+        return reports
+                .stream().map(this::toVO).toList();
     }
 
     @Override
@@ -56,6 +76,10 @@ public class ReportServiceImpl implements ReportService {
         report.setImpression(vo.getImpression());
         report.setStatus(vo.getStatus());
         pacsChangeHistoryService.recordReportChange(loginMemberId, beforeData, report, "UPDATE", changeReason);
+        if ("FINAL".equalsIgnoreCase(report.getStatus())) {
+            qReportRepository.flush();
+            removeDraftsAfterFinalization(report, loginMemberId);
+        }
         return toVO(report);
     }
 
@@ -73,11 +97,38 @@ public class ReportServiceImpl implements ReportService {
         return qReportRepository.findById(no).orElseThrow(() -> new IllegalArgumentException("Report not found."));
     }
 
-    private void validateOwnerOrAdmin(Report report, String loginMemberId) {
-        Member loginMember = qMemberRepository.findMemberById(loginMemberId)
+    private Member getMember(String loginMemberId) {
+        return qMemberRepository.findMemberById(loginMemberId)
                 .orElseThrow(() -> new IllegalArgumentException("Member not found."));
-        boolean isAdmin = memberRoleAuthorityService.getAuthorities(loginMember.getNo()).contains("ROLE_ADMIN");
-        if (!isAdmin && !report.getMember().getId().equals(loginMemberId)) {
+    }
+
+    private boolean isAdmin(Member member) {
+        return memberRoleAuthorityService.getAuthorities(member.getNo()).contains("ROLE_ADMIN");
+    }
+
+    private void validateViewAccess(Report report, String loginMemberId) {
+        Member loginMember = getMember(loginMemberId);
+        if (!isAdmin(loginMember) && !report.getMember().getNo().equals(loginMember.getNo())) {
+            throw new AccessDeniedException("Only the author or an administrator can view this report.");
+        }
+    }
+
+    private void removeDraftsAfterFinalization(Report finalReport, String loginMemberId) {
+        qReportRepository.findByStudyNoAndStatusAndMember_No(
+                        finalReport.getStudyNo(), "DRAFT", finalReport.getMember().getNo())
+                .stream()
+                .filter((draft) -> !draft.getNo().equals(finalReport.getNo()))
+                .forEach((draft) -> {
+                    String beforeData = pacsChangeHistoryService.snapshot(draft);
+                    pacsChangeHistoryService.recordReportChange(
+                            loginMemberId, beforeData, draft, "DELETE", "최종판독 완료로 임시저장 정리");
+                    qReportRepository.delete(draft);
+                });
+    }
+
+    private void validateOwnerOrAdmin(Report report, String loginMemberId) {
+        Member loginMember = getMember(loginMemberId);
+        if (!isAdmin(loginMember) && !report.getMember().getId().equals(loginMemberId)) {
             throw new AccessDeniedException("Only the author can modify this report.");
         }
     }

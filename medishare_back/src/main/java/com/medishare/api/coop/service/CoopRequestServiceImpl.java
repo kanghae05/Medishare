@@ -20,7 +20,12 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
+import com.medishare.api.member.entity.Member;
 
 @Service
 @RequiredArgsConstructor
@@ -62,7 +67,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         for (CoopRequest c : list) {
             CoopRequestVO vo = toVO(c, doctorId);
             vo.setDirection("received");
-            applyDisplayStatus(vo, c, doctorId);
+            applyDisplayStatus(vo, c, doctorId, deptId);
             result.add(vo);
         }
         return result;
@@ -111,7 +116,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 vo.setDisplayStatus(c.getStatus().name());
                 vo.setCanRespond(false);
             } else {
-                applyDisplayStatus(vo, c, doctorId);
+                applyDisplayStatus(vo, c, doctorId, deptId);
             }
             result.add(vo);
         }
@@ -120,7 +125,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     @Transactional
-    public CoopRequestVO view(Long coopRequestId, Long viewerDoctorId) {
+    public CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId) {
         CoopRequest c = findEntity(coopRequestId);
 
         CoopRequestVO vo = toVO(c, viewerDoctorId);
@@ -130,7 +135,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             vo.setDisplayStatus(c.getStatus().name());
             vo.setCanRespond(false);
         } else {
-            applyDisplayStatus(vo, c, viewerDoctorId);
+            applyDisplayStatus(vo, c, viewerDoctorId, viewerDeptId);
         }
 
         // 재요청이면 이전 요청 내용을 참고용으로 같이 보여준다 (환자/검사/수신대상은 원본과 동일하니 내용만).
@@ -319,6 +324,104 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         return new UnreadCountVO(count);
     }
 
+    @Override
+    public List<CoopRequestVO> adminList(Long reqDoctorId, Long recvDoctorId, Long deptId, PageObject pageObject,
+                                         List<String> statuses, LocalDate from, LocalDate to) {
+        // 관리자 화면은 기본값으로 취소 포함 전체 상태를 다 보여준다 (감사/조회 목적이라 숨길 이유가 없음)
+        List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
+
+        // 수신자 필터로 넘어온 의사의 소속과도 같이 조회해둔다 - 아직 아무도 수락 안 한
+        // 진료과 요청은 recv_doctor_id/accept_doctor_id가 둘 다 비어있어서, 소속과 기준으로도
+        // 같이 매칭해줘야 "이 의사한테 갈 수도 있었던 요청"이 검색에서 안 빠진다.
+        Long recvDoctorDeptId = null;
+        if (recvDoctorId != null) {
+            recvDoctorDeptId = memberRepository.findById(recvDoctorId)
+                    .map(m -> m.getDepartment() != null ? m.getDepartment().getNo() : null)
+                    .orElse(null);
+        }
+
+        long total = coopRequestRepository.findAllForAdminCount(reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId, statusList, from, to);
+        pageObject.setTotalRow(total);
+
+        List<CoopRequest> list = coopRequestRepository.findAllForAdmin(
+                reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId, statusList, from, to,
+                pageObject.getLimit(), pageObject.getPerPageNum());
+
+        // 화면(행마다 DB를 따로 왕복하던 N+1 문제 해결)에 필요한 의사/진료과 이름을
+        // 이 페이지 분량 전체에 걸쳐 한 번씩만 모아서 배치로 가져온다.
+        // 환자/검사 정보는 관리자 목록 화면에 아예 표시하지 않으므로 조회 자체를 생략한다
+        // (원래 toVO()를 그대로 썼을 때는 행마다 필요 없는 그 조회까지 매번 하고 있었다).
+        Set<Long> doctorIds = new HashSet<>();
+        Set<Long> deptIds = new HashSet<>();
+        for (CoopRequest c : list) {
+            doctorIds.add(c.getReqDoctorId());
+            if (c.getRecvDoctorId() != null) doctorIds.add(c.getRecvDoctorId());
+            if (c.getAcceptDoctorId() != null) doctorIds.add(c.getAcceptDoctorId());
+            if (c.getRecvDeptId() != null) deptIds.add(c.getRecvDeptId());
+        }
+        Map<Long, Member> memberMap = doctorIds.isEmpty()
+                ? Map.of()
+                : memberRepository.findAllByIdWithDepartment(doctorIds).stream()
+                .collect(Collectors.toMap(Member::getNo, m -> m));
+        Map<Long, String> deptNameMap = deptIds.isEmpty()
+                ? Map.of()
+                : departmentRepository.findAllById(deptIds).stream()
+                .collect(Collectors.toMap(d -> d.getNo(), d -> d.getDepartmentName()));
+
+        List<CoopRequestVO> result = new ArrayList<>();
+        for (CoopRequest c : list) {
+            CoopRequestVO vo = new CoopRequestVO();
+            vo.setCoopRequestId(c.getCoopRequestId());
+            vo.setReqDoctorId(c.getReqDoctorId());
+            vo.setRecvType(c.getRecvType().name());
+            vo.setRecvDoctorId(c.getRecvDoctorId());
+            vo.setRecvDeptId(c.getRecvDeptId());
+            vo.setAcceptDoctorId(c.getAcceptDoctorId());
+            vo.setPacsStudyId(c.getPacsStudyId());
+            vo.setReqContent(c.getReqContent());
+            vo.setStatus(c.getStatus().name());
+            vo.setDisplayStatus(c.getStatus().name());
+            vo.setCanRespond(false);
+            vo.setReqTime(c.getReqTime() == null ? null : c.getReqTime().format(DATETIME_FMT));
+            vo.setRespTime(c.getRespTime() == null ? null : c.getRespTime().format(DATETIME_FMT));
+            vo.setRejectReason(c.getRejectReason());
+
+            applyNameFromMap(memberMap.get(c.getReqDoctorId()), vo::setReqDoctorName, vo::setReqDoctorMeta);
+            if (c.getRecvDoctorId() != null) {
+                applyNameFromMap(memberMap.get(c.getRecvDoctorId()), vo::setRecvDoctorName, vo::setRecvDoctorMeta);
+            }
+            if (c.getAcceptDoctorId() != null) {
+                applyNameFromMap(memberMap.get(c.getAcceptDoctorId()), vo::setAcceptDoctorName, vo::setAcceptDoctorMeta);
+            }
+            if (c.getRecvDeptId() != null) {
+                vo.setRecvDeptName(deptNameMap.get(c.getRecvDeptId()));
+            }
+
+            result.add(vo);
+        }
+        return result;
+    }
+
+    /** memberMap에서 이미 조회해둔 Member로 이름+메타를 채운다 (DB 재조회 없음) */
+    private void applyNameFromMap(Member m, java.util.function.Consumer<String> nameSetter,
+                                  java.util.function.Consumer<String> metaSetter) {
+        if (m == null) {
+            return;
+        }
+        nameSetter.accept(m.getName());
+        List<String> metaParts = new ArrayList<>();
+        if (m.getDepartment() != null && m.getDepartment().getDepartmentName() != null) {
+            metaParts.add(m.getDepartment().getDepartmentName());
+        }
+        if (m.getSpecialty() != null && !m.getSpecialty().isBlank()) {
+            metaParts.add(m.getSpecialty());
+        }
+        if (m.getPosition() != null && !m.getPosition().isBlank()) {
+            metaParts.add(m.getPosition());
+        }
+        metaSetter.accept(String.join(" · ", metaParts));
+    }
+
     // ------------------------------------------------------------------
     // 내부 헬퍼
     // ------------------------------------------------------------------
@@ -345,8 +448,13 @@ public class CoopRequestServiceImpl implements CoopRequestService {
      * - 본인이 거절했으면 "거절" (전체 상태와 무관하게 본인 화면에는 이렇게 보임)
      * - 그 외에 이미 다른 의사가 수락해버렸으면 "종료" (기회를 놓친 것)
      * - 그 외에는 실제 status 그대로
+     *
+     * viewerDeptId: canRespond를 계산할 때 "이 사람이 실제로 그 진료과 소속인지"까지 확인한다.
+     * 목록 조회(받은 협진함 등)는 애초에 소속과 맞는 사람한테만 그 row가 보여서 문제가 없었지만,
+     * view.do?no=는 번호만 알면 누구나(다른 과 의사, 진료과 없는 관리자 등) 접근 가능해서
+     * 이 체크가 없으면 소속과 무관하게 수락/거절 버튼이 잘못 뜰 수 있었다.
      */
-    private void applyDisplayStatus(CoopRequestVO vo, CoopRequest c, Long viewerDoctorId) {
+    private void applyDisplayStatus(CoopRequestVO vo, CoopRequest c, Long viewerDoctorId, Long viewerDeptId) {
         if (c.getRecvType() == RecvType.지정의사) {
             vo.setDisplayStatus(c.getStatus().name());
             vo.setCanRespond(c.getStatus() == CoopStatus.요청 && viewerDoctorId.equals(c.getRecvDoctorId()));
@@ -369,8 +477,9 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             vo.setCanRespond(false);
             return;
         }
+        boolean isDeptMember = viewerDeptId != null && viewerDeptId.equals(c.getRecvDeptId());
         vo.setDisplayStatus(c.getStatus().name());
-        vo.setCanRespond(c.getStatus() == CoopStatus.요청);
+        vo.setCanRespond(c.getStatus() == CoopStatus.요청 && isDeptMember);
     }
 
     private long resolveDeptDoctorCount(Long deptId) {

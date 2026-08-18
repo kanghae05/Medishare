@@ -12,5 +12,11 @@ import java.util.Optional;
  */
 public interface CoopReportLookupRepository extends JpaRepository<Report, Long> {
 
-    Optional<Report> findFirstByStudyNoOrderByWriteDateDesc(Long studyNo);
+    /**
+     * 검사(study)의 소견서 중, 그 작성자(memberNo)가 쓴 것만 찾는다.
+     * 협진 요청에 소견서를 첨부할 땐 "본인이 작성한 소견서만" 첨부 후보로 보여줘야 해서,
+     * 작성자 조건 없는 위 메서드 대신 이걸 쓴다.
+     * Report.member는 Long이 아니라 Member 연관관계 객체라서, "Member_No"로 그 안의 no를 비교한다.
+     */
+    Optional<Report> findFirstByStudyNoAndMember_NoOrderByWriteDateDesc(Long studyNo, Long memberNo);
 }
