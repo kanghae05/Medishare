@@ -295,13 +295,23 @@ public class CoopRequestController {
                 .toList();
     }
 
-    // 선택한 검사에 소견서가 있는지 확인 (없으면 빈 목록)
+    // 선택한 검사에 "본인이 작성한" 소견서가 있는지 확인 (없으면 빈 목록)
+    // 다른 의사가 쓴 소견서는 첨부 후보로 보여주지 않는다 - 본인 작성분만 활용 가능.
     @GetMapping("/lookup/studies/{studyNo}/report.do")
-    public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo) {
-        return reportRepository.findFirstByStudyNoOrderByWriteDateDesc(studyNo)
+    public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo, Authentication authentication) {
+        Long myDoctorId = currentDoctorId(authentication);
+        return reportRepository.findFirstByStudyNoAndMember_NoOrderByWriteDateDesc(studyNo, myDoctorId)
                 .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
                 .map(List::of)
                 .orElse(List.of());
+    }
+
+    // 협진 요청에 첨부된 소견서 요약 (상세화면에 "첨부 소견서: 제목 (상태)" 형태로 보여주는 용도)
+    @GetMapping("/report/{reportId}.do")
+    public ReportLookupVO reportSummary(@PathVariable Long reportId) {
+        return reportRepository.findById(reportId)
+                .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 소견서입니다."));
     }
 
     // ------------------------------------------------------------------
