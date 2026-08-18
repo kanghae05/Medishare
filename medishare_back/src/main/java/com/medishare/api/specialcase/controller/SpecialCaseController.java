@@ -6,6 +6,8 @@ import com.medishare.api.specialcase.vo.SpecialCaseVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -48,6 +50,14 @@ public class SpecialCaseController {
     @GetMapping("/{id}")
     public SpecialCaseDto.Response detail(@PathVariable Long id) {
         return specialCaseService.detail(id);
+    }
+
+    /** 특이케이스에 연결된 Orthanc Study의 대표 이미지를 반환한다. */
+    @GetMapping(value = "/{id}/preview", produces = MediaType.IMAGE_PNG_VALUE)
+    public ResponseEntity<byte[]> preview(@PathVariable Long id) {
+        return ResponseEntity.ok()
+                .contentType(MediaType.IMAGE_PNG)
+                .body(specialCaseService.preview(id));
     }
 
     /** 로그인 사용자를 작성자로 지정하여 특이케이스를 등록한다. */

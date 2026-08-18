@@ -15,9 +15,12 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 
 /** 특이케이스 조회, 등록, 수정, 삭제 업무 로직을 담당한다. */
@@ -30,6 +33,7 @@ public class SpecialCaseService {
 
     private final SpecialCaseRepository specialCaseRepository;
     private final QMemberRepository memberRepository;
+    private final WebClient orthancWebClient;
 
     /** 필터, 키워드, 정렬 기준을 적용한 페이지 목록을 반환한다. */
     public Page<SpecialCaseDto.Response> list(
@@ -145,6 +149,54 @@ public class SpecialCaseService {
                     "Only the writer can modify this case"
             );
         }
+    }
+
+    /** Study Instance UID로 Orthanc Study를 찾아 첫 번째 인스턴스의 PNG 미리보기를 반환한다. */
+    public byte[] preview(Long id) {
+        SpecialCase specialCase = findActiveCase(id);
+        String studyInstanceUid = specialCase.getPacsLink() == null
+                ? null
+                : specialCase.getPacsLink().getStudyInstanceUid();
+
+        if (studyInstanceUid == null || studyInstanceUid.isBlank()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Study Instance UID not found");
+        }
+
+        List<String> studyIds = orthancWebClient.post()
+                .uri("/tools/find")
+                .bodyValue(Map.of(
+                        "Level", "Study",
+                        "Query", Map.of("StudyInstanceUID", studyInstanceUid)
+                ))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<String>>() {})
+                .block();
+
+        if (studyIds == null || studyIds.isEmpty()) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orthanc study not found");
+        }
+
+        List<Map<String, Object>> instances = orthancWebClient.get()
+                .uri("/studies/{studyId}/instances", studyIds.get(0))
+                .retrieve()
+                .bodyToMono(new ParameterizedTypeReference<List<Map<String, Object>>>() {})
+                .block();
+
+        if (instances == null || instances.isEmpty() || instances.get(0).get("ID") == null) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orthanc instance not found");
+        }
+
+        byte[] image = orthancWebClient.get()
+                .uri("/instances/{instanceId}/preview", instances.get(0).get("ID"))
+                .retrieve()
+                .bodyToMono(byte[].class)
+                .block();
+
+        if (image == null || image.length == 0) {
+            throw new ResponseStatusException(HttpStatus.NOT_FOUND, "Orthanc preview not found");
+        }
+
+        return image;
     }
 
     /** 회원 PK로 작성자 이름을 조회해 API 응답에 포함한다. */

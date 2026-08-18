@@ -1,16 +1,33 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import WatermarkOverlay from "../../components/SpecialCase/WatermarkOverlay";
-import { deleteSpecialCase, getSpecialCase } from "./specialCaseApi";
+import { deleteSpecialCase, getSpecialCase, getSpecialCasePreview } from "./specialCaseApi";
 import "./SpecialCase.css";
 
 export default function SpecialCaseDetail({ currentUser }) {
   const { caseId } = useParams();
   const [item, setItem] = useState(null);
+  const [previewUrl, setPreviewUrl] = useState("");
+  const [previewError, setPreviewError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     getSpecialCase(caseId).then(setItem);
+  }, [caseId]);
+
+  useEffect(() => {
+    let objectUrl;
+
+    getSpecialCasePreview(caseId)
+      .then((blob) => {
+        objectUrl = URL.createObjectURL(blob);
+        setPreviewUrl(objectUrl);
+      })
+      .catch(() => setPreviewError(true));
+
+    return () => {
+      if (objectUrl) URL.revokeObjectURL(objectUrl);
+    };
   }, [caseId]);
 
   if (!item) {
@@ -25,11 +42,6 @@ export default function SpecialCaseDetail({ currentUser }) {
   const mine =
     currentUser?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN") ||
     String(currentUser?.memberId ?? currentUser?.id) === String(item.writerId);
-
-  // PACS DICOM Viewer URL 매핑
-  const viewerUrl = item.studyInstanceUid
-    ? `http://${window.location.hostname}:3000/viewer?StudyInstanceUIDs=${encodeURIComponent(item.studyInstanceUid)}`
-    : null;
 
   // 삭제 처리 함수
   const remove = async () => {
@@ -77,10 +89,12 @@ export default function SpecialCaseDetail({ currentUser }) {
           )}
         </section>
 
-        {/* PACS DICOM Viewer 연동 (중복 워터마크 제거 완료) */}
-        {viewerUrl && (
+        {/* Orthanc 대표 이미지는 백엔드를 경유하므로 외부 PC에서도 localhost 문제없이 표시된다. */}
+        {item.studyInstanceUid && (
           <div className="case-viewer">
-            <iframe title="PACS DICOM Viewer" src={viewerUrl} />
+            {previewUrl && <img className="case-preview" src={previewUrl} alt={`${item.title} 의료영상`} />}
+            {!previewUrl && !previewError && <div className="case-viewer-state">의료영상을 불러오는 중입니다.</div>}
+            {previewError && <div className="case-viewer-state">Orthanc 의료영상을 불러오지 못했습니다.</div>}
           </div>
         )}
 
