@@ -3,3 +3,9 @@
 .report-row:hover { background-color: #f3f8ff; }
 .report-text { white-space: pre-wrap; line-height: 1.7; }
 .report-form textarea { resize: vertical; }
+.report-study-preview { border: 1px solid #d8e0e8; border-radius: 8px; overflow: hidden; }
+.report-study-meta { background: #f6f8fa; display: flex; flex-wrap: wrap; gap: 8px 18px; padding: 12px 16px; }
+.report-study-meta span { color: #5b6773; }
+.report-image-frame { align-items: center; background: #111827; display: flex; justify-content: center; min-height: 260px; }
+.report-image-frame img { display: block; max-height: 480px; max-width: 100%; object-fit: contain; }
+.report-image-frame p { color: #d1d5db; margin: 0; padding: 24px; }

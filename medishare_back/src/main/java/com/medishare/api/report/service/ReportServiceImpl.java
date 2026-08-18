@@ -34,6 +34,9 @@ public class ReportServiceImpl implements ReportService {
                 .status(vo.getStatus()).member(member).build();
         Report savedReport = qReportRepository.save(report);
         pacsChangeHistoryService.recordReportChange(loginMemberId, null, savedReport, "CREATE", null);
+        if ("FINAL".equalsIgnoreCase(savedReport.getStatus())) {
+            removeDraftsAfterFinalization(savedReport, loginMemberId);
+        }
         return toVO(savedReport);
     }
 
@@ -41,8 +44,12 @@ public class ReportServiceImpl implements ReportService {
     public ReportVO view(Long no) { return toVO(getReport(no)); }
 
     @Override
-    public List<ReportVO> list(Long studyNo) {
-        return qReportRepository.findByStudyNoOrderByWriteDateDesc(studyNo).stream().map(this::toVO).toList();
+    public List<ReportVO> list(Long studyNo, String status) {
+        List<Report> reports = studyNo == null
+                ? qReportRepository.findByStatusOrderByWriteDateDesc(status)
+                : qReportRepository.findByStudyNoAndStatusOrderByWriteDateDesc(studyNo, status);
+        return reports
+                .stream().map(this::toVO).toList();
     }
 
     @Override
@@ -56,6 +63,10 @@ public class ReportServiceImpl implements ReportService {
         report.setImpression(vo.getImpression());
         report.setStatus(vo.getStatus());
         pacsChangeHistoryService.recordReportChange(loginMemberId, beforeData, report, "UPDATE", changeReason);
+        if ("FINAL".equalsIgnoreCase(report.getStatus())) {
+            qReportRepository.flush();
+            removeDraftsAfterFinalization(report, loginMemberId);
+        }
         return toVO(report);
     }
 
@@ -71,6 +82,19 @@ public class ReportServiceImpl implements ReportService {
 
     private Report getReport(Long no) {
         return qReportRepository.findById(no).orElseThrow(() -> new IllegalArgumentException("Report not found."));
+    }
+
+    private void removeDraftsAfterFinalization(Report finalReport, String loginMemberId) {
+        qReportRepository.findByStudyNoAndStatusAndMember_No(
+                        finalReport.getStudyNo(), "DRAFT", finalReport.getMember().getNo())
+                .stream()
+                .filter((draft) -> !draft.getNo().equals(finalReport.getNo()))
+                .forEach((draft) -> {
+                    String beforeData = pacsChangeHistoryService.snapshot(draft);
+                    pacsChangeHistoryService.recordReportChange(
+                            loginMemberId, beforeData, draft, "DELETE", "최종판독 완료로 임시저장 정리");
+                    qReportRepository.delete(draft);
+                });
     }
 
     private void validateOwnerOrAdmin(Report report, String loginMemberId) {

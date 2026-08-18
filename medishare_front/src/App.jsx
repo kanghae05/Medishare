@@ -54,13 +54,11 @@ function App() {
             element={<Home />}
           />
 
-
           {/* Member */}
           <Route
             path="/member/*"
             element={<MemberComp />}
           />
-
 
           {/* Report */}
           <Route
@@ -68,9 +66,7 @@ function App() {
             element={<ReportComp />}
           />
 
-
-          {/* PACS
-              비로그인 상태에서는 로그인 화면으로 이동 */}
+          {/* PACS - 비로그인 상태에서는 로그인 화면으로 이동 */}
           <Route
             path="/pacs/*"
             element={
@@ -85,13 +81,11 @@ function App() {
             }
           />
 
-
           {/* Coop */}
           <Route
             path="/coop/*"
             element={<CoopComp />}
           />
-
 
           {/* Notice module routes */}
           <Route
@@ -149,7 +143,6 @@ function App() {
               )
             }
           />
-
 
           {/* Special Case Library module routes */}
           <Route
@@ -210,13 +203,11 @@ function App() {
             }
           />
 
-
           {/* Disease / Doctor */}
           <Route
             path="/d/*"
             element={<DPartComp />}
           />
-
 
           {/* Admin */}
           <Route
@@ -272,7 +263,6 @@ function App() {
               />
             }
           />
-
 
           {/* 404 */}
           <Route

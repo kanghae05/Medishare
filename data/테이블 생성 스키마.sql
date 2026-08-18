@@ -171,30 +171,33 @@ CREATE TABLE pacs_series (
 CREATE TABLE report (
     no BIGINT NOT NULL AUTO_INCREMENT,
 
+    -- PACS 검사: pacs_study.no 참조
     study_no BIGINT NOT NULL,
-    member_id BIGINT NOT NULL,
+
+    -- 작성자: member.no 참조
+    member_no BIGINT NOT NULL,
 
     title VARCHAR(200) NOT NULL,
     findings LONGTEXT NOT NULL,
-    impression LONGTEXT,
+    impression LONGTEXT NULL,
     status VARCHAR(10) NOT NULL DEFAULT 'DRAFT',
 
-    write_date DATETIME,
-    update_date DATETIME,
+    write_date DATETIME NULL,
+    update_date DATETIME NULL,
 
     PRIMARY KEY (no),
 
     INDEX idx_report_study_no (study_no),
-    INDEX idx_report_member_id (member_id),
+    INDEX idx_report_member_no (member_no),
 
     CONSTRAINT fk_report_study
         FOREIGN KEY (study_no)
         REFERENCES pacs_study(no),
 
     CONSTRAINT fk_report_member
-        FOREIGN KEY (member_id)
+        FOREIGN KEY (member_no)
         REFERENCES member(no)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 
 -- ============================================================

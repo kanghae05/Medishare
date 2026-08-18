@@ -3,12 +3,11 @@ import { Link } from "react-router-dom";
 import { getNotices } from "./noticeApi";
 import "./Notice.css";
 
-export default function NoticeList() {
+export default function NoticeList({ isAdmin = false }) {
   const [data, setData] = useState({ content: [], totalPages: 0 });
   const [keyword, setKeyword] = useState("");
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
-  const loggedIn = Boolean(localStorage.getItem("token"));
 
   useEffect(() => {
     getNotices({ keyword, page, size: 10 })
@@ -25,7 +24,7 @@ export default function NoticeList() {
             <h1>공지사항</h1>
             <p>메디쉐어의 새로운 소식과 주요 안내를 확인하세요.</p>
           </div>
-          {loggedIn && (
+          {isAdmin && (
             <Link className="notice-primary" to="/notices/new">
               공지 작성
             </Link>

@@ -44,7 +44,7 @@ function CoopStudyDetailPanel({ pacsStudyId }) {
   if (!detail) return null;
 
   return (
-    <div className="coop-detail-panel">
+    <div className="coop-detail-pane">
       <div className="coop-detail-section">
         <div className="coop-detail-section-title">환자 정보</div>
         <div className="coop-detail-grid">
