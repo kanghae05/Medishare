@@ -135,7 +135,8 @@ public class CoopRequestController {
     @GetMapping("/view.do")
     public CoopRequestVO view(@RequestParam Long no, Authentication authentication) {
         Long doctorId = currentDoctorId(authentication);
-        return coopRequestService.view(no, doctorId);
+        Long deptId = safeCurrentDeptId(authentication);
+        return coopRequestService.view(no, doctorId, deptId);
     }
 
     // 이 협진요청의 채팅 이력 (WebSocket 연결 전에 처음 한 번 불러오는 용도)
@@ -164,6 +165,27 @@ public class CoopRequestController {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         return coopRequestService.unreadCount(doctorId, deptId);
+    }
+
+    // 관리자 전체 조회 (ROLE_ADMIN 전용 - SecurityConfig에서 /coop/admin/** 로 별도 제한)
+    @GetMapping("/admin/all.do")
+    public Map<String, Object> adminAll(@RequestParam(required = false) Long reqDoctorId,
+                                        @RequestParam(required = false) Long recvDoctorId,
+                                        @RequestParam(required = false) Long deptId,
+                                        @RequestParam(required = false) String status,
+                                        @RequestParam(required = false) String from,
+                                        @RequestParam(required = false) String to,
+                                        HttpServletRequest request) throws Exception {
+        PageObject pageObject = PageObject.getInstance(request);
+
+        List<CoopRequestVO> list = coopRequestService.adminList(
+                reqDoctorId, recvDoctorId, deptId, pageObject,
+                parseStatuses(status), parseDate(from), parseDate(to));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("pageObject", pageObject);
+        return result;
     }
 
     // ------------------------------------------------------------------

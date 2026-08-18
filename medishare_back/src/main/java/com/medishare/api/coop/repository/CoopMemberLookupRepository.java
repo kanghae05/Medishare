@@ -35,6 +35,13 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
             "ORDER BY m.name")
     List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
 
+    /**
+     * 여러 명의 이름/진료과를 한 번에 조회 (관리자 목록처럼 한 화면에 의사가 여러 명 나올 때 사용).
+     * LEFT JOIN FETCH로 진료과까지 같이 가져와서, 행마다 따로 진료과를 다시 조회하는 N+1을 막는다.
+     */
+    @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department WHERE m.no IN :ids")
+    List<Member> findAllByIdWithDepartment(@Param("ids") java.util.Collection<Long> ids);
+
     /** ROLE_ADMIN을 가진 회원번호 목록 (member_role + role 테이블 직접 조회) */
     @Query(value = "SELECT mr.member_no FROM member_role mr " +
             "JOIN role r ON mr.role_no = r.no " +

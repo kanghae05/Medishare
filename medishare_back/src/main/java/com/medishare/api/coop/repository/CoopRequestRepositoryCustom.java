@@ -35,4 +35,15 @@ public interface CoopRequestRepositoryCustom {
 
     // 응답 대기 중인 개수 (배지/폴링용) - statuses는 Service에서 (요청)으로 고정해 전달
     long countUnread(Long doctorId, Long deptId, List<CoopStatus> statuses);
+
+    // 관리자 전체 조회 - "나와 관련된 것"이 아니라 시스템 전체를 대상으로,
+    // 요청자/수신자/진료과를 선택적으로 필터링한다 (전부 null이면 전체 다 보임).
+    // recvDoctorId는 지정의사의 recv_doctor_id, 이미 수락된 진료과의 accept_doctor_id 뿐 아니라
+    // recvDoctorDeptId(그 의사의 소속과)로 아직 수락 전인 진료과 요청까지 함께 매칭한다.
+    List<CoopRequest> findAllForAdmin(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
+                                      List<CoopStatus> statuses, LocalDate from, LocalDate to,
+                                      long offset, long limit);
+
+    long findAllForAdminCount(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
+                              List<CoopStatus> statuses, LocalDate from, LocalDate to);
 }
