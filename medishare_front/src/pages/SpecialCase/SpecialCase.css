@@ -323,6 +323,22 @@
   width: 100%;
 }
 
+.case-preview {
+  display: block;
+  height: 100%;
+  object-fit: contain;
+  width: 100%;
+}
+
+.case-viewer-state {
+  align-items: center;
+  color: #647482;
+  display: flex;
+  font-weight: 700;
+  height: 100%;
+  justify-content: center;
+}
+
 .case-actions {
   display: flex;
   gap: 8px;
