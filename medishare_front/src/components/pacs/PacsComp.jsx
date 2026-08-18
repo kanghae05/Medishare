@@ -6,9 +6,7 @@ import NotFoundPage from "../error/NotFoundPage";
 function PacsComp() {
 
   return (
-    <div className="mt-5">
-
-      <h2>PACS System</h2>
+    <div className="mt-4">
 
       <Routes>
 

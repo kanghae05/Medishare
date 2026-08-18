@@ -818,3 +818,147 @@ button
   }
 
 }
+
+/* =========================================================
+   TOP NAV - DEPTH UPGRADE
+   기존 색상/폰트/구조 유지 + 입체감만 추가
+========================================================= */
+
+.medishare-topnav {
+  background:
+    linear-gradient(
+      180deg,
+      rgba(255, 255, 255, 0.055) 0%,
+      rgba(255, 255, 255, 0) 44%
+    ),
+    linear-gradient(
+      90deg,
+      #0d8f89 0%,
+      #159f98 100%
+    );
+
+  border-bottom:
+    1px solid
+    rgba(255, 255, 255, 0.13);
+
+  box-shadow:
+    0 2px 5px
+    rgba(5, 74, 71, 0.08),
+    0 9px 26px
+    rgba(5, 91, 87, 0.16),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.08);
+}
+
+
+/* 로고에 아주 약한 깊이감 */
+
+.topnav-brand {
+  text-shadow:
+    0 1px 2px
+    rgba(0, 77, 73, 0.16);
+}
+
+
+/* 메뉴 hover도 너무 과하지 않게 */
+
+.topnav-link {
+  transition:
+    color 0.18s ease,
+    transform 0.18s ease,
+    text-shadow 0.18s ease;
+}
+
+
+.topnav-link:not(.topnav-brand):hover {
+  transform: translateY(-1px);
+
+  text-shadow:
+    0 2px 8px
+    rgba(0, 76, 72, 0.16);
+}
+
+
+/* 현재 선택된 메뉴 밑줄에 살짝 광택 */
+
+.topnav-link.active::after {
+  box-shadow:
+    0 -1px 7px
+    rgba(255, 255, 255, 0.28);
+}
+
+
+/* 검색 / 사이트맵 버튼 입체감 */
+
+.topnav-icon-button {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.13),
+      rgba(255, 255, 255, 0.055)
+    );
+
+  border:
+    1px solid
+    rgba(255, 255, 255, 0.2);
+
+  box-shadow:
+    0 5px 13px
+    rgba(3, 74, 70, 0.15),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.13);
+
+  backdrop-filter: blur(4px);
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease,
+    box-shadow 0.18s ease;
+}
+
+
+.topnav-icon-button:hover {
+  background:
+    linear-gradient(
+      145deg,
+      rgba(255, 255, 255, 0.22),
+      rgba(255, 255, 255, 0.10)
+    );
+
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 7px 16px
+    rgba(3, 74, 70, 0.19),
+    inset 0 1px 0
+    rgba(255, 255, 255, 0.18);
+}
+
+
+.topnav-icon-button:active {
+  transform: translateY(0);
+
+  box-shadow:
+    0 3px 8px
+    rgba(3, 74, 70, 0.13),
+    inset 0 1px 2px
+    rgba(0, 82, 78, 0.12);
+}
+
+
+/* Logout / 사용자 이름도 hover 때 자연스럽게 */
+
+.topnav-account,
+.topnav-user {
+  transition:
+    color 0.18s ease,
+    text-shadow 0.18s ease;
+}
+
+
+.topnav-account:hover,
+.topnav-user:hover {
+  text-shadow:
+    0 2px 8px
+    rgba(0, 74, 70, 0.18);
+}

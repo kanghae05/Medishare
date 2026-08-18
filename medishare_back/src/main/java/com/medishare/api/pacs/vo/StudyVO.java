@@ -25,7 +25,9 @@ public class StudyVO {
             String studyTime,
             String studyDescription,
             Integer seriesCount,
-            Boolean stable) {
+            Integer instanceCount,
+            Boolean stable
+    ) {
 
         this.no = no;
         this.orthancStudyId = orthancStudyId;
@@ -41,39 +43,61 @@ public class StudyVO {
         this.studyDescription = studyDescription;
 
         this.seriesCount = seriesCount;
+        this.instanceCount = instanceCount;
         this.stable = Boolean.TRUE.equals(stable);
     }
 
-    // pacs_study primary key. Other modules use this value as the foreign key.
+
+    // pacs_study primary key.
+    // 다른 모듈에서 FK로 사용
     private Long no;
+
 
     // Orthanc Study ID
     private String orthancStudyId;
 
+
     // 환자 정보
     private String patientId;
+
     private String patientName;
+
     private String patientSex;
+
     private String patientBirthDate;
+
 
     // Study 정보
     private String studyInstanceUID;
+
     private String accessionNumber;
+
     private String studyDate;
+
     private String studyTime;
+
     private String studyDescription;
+
     private String referringPhysicianName;
+
     private String requestedProcedureDescription;
+
     private String studyID;
+
 
     // 기타
     private String parentPatient;
+
     private boolean stable;
+
 
     // 개수 정보
     private Integer seriesCount = 0;
+
     private Integer instanceCount = 0;
 
+
     // Series 정보
-    private List<SeriesVO> seriesList = new ArrayList<>();
+    private List<SeriesVO> seriesList =
+            new ArrayList<>();
 }

@@ -601,8 +601,27 @@ function Home() {
 
             {searchMessage && (
               <div className="home-search-message">
-                <span>!</span>
-                <p>{searchMessage}</p>
+                <span className="home-search-message-icon">!</span>
+
+                <div className="home-search-message-text">
+                  <strong>
+                    {searchMessage === "검색어를 입력해주세요."
+                      ? "검색어를 입력해주세요"
+                      : "검색 결과가 없습니다"}
+                  </strong>
+
+                  <p>
+                    {searchMessage === "검색어를 입력해주세요."
+                      ? "찾고 싶은 서비스 또는 공지사항의 키워드를 입력해주세요."
+                      : searchMessage}
+                  </p>
+
+                  {searchMessage !== "검색어를 입력해주세요." && (
+                    <small>
+                      다른 검색어를 입력하거나 아래 빠른 검색을 이용해보세요.
+                    </small>
+                  )}
+                </div>
               </div>
             )}
 

@@ -9,16 +9,33 @@ import java.util.List;
 import java.util.Optional;
 
 public interface PacsStudyRepository
-        extends JpaRepository<PacsStudy, Long>, PacsStudyRepositoryCustom {
+        extends JpaRepository<PacsStudy, Long>,
+        PacsStudyRepositoryCustom {
 
-    Optional<PacsStudy> findByOrthancStudyId(String orthancStudyId);
 
-    Optional<PacsStudy> findByStudyInstanceUID(String studyInstanceUID);
+    Optional<PacsStudy> findByOrthancStudyId(
+            String orthancStudyId
+    );
 
-    boolean existsByOrthancStudyId(String orthancStudyId);
 
-    boolean existsByStudyInstanceUID(String studyInstanceUID);
+    Optional<PacsStudy> findByStudyInstanceUID(
+            String studyInstanceUID
+    );
 
+
+    boolean existsByOrthancStudyId(
+            String orthancStudyId
+    );
+
+
+    boolean existsByStudyInstanceUID(
+            String studyInstanceUID
+    );
+
+
+    // =========================================================
+    // PACS Study 목록 조회
+    // =========================================================
     @Query("""
         select new com.medishare.api.pacs.vo.StudyVO(
             s.no,
@@ -32,6 +49,7 @@ public interface PacsStudyRepository
             s.studyTime,
             s.studyDescription,
             s.seriesCount,
+            s.instanceCount,
             s.stable
         )
         from PacsStudy s
