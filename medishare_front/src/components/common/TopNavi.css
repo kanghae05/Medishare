@@ -1,0 +1,820 @@
+:root {
+  --nav-main: #10958f;
+  --nav-main-dark: #087c77;
+  --nav-deep: #08716d;
+}
+
+
+/* =================================
+   TOP NAVIGATION
+================================= */
+
+.medishare-topnav {
+  position: fixed;
+
+  top: 0;
+  left: 0;
+
+  z-index: 5000;
+
+  width: 100%;
+
+  min-height: 58px;
+
+  background:
+    linear-gradient(
+      90deg,
+      #0d8f89 0%,
+      #159f98 100%
+    );
+
+  box-shadow:
+    0 5px 18px
+    rgba(16, 105, 101, 0.12);
+}
+
+
+.medishare-topnav-inner {
+  width: calc(100% - 38px);
+
+  min-height: 58px;
+
+  margin: 0 auto;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: space-between;
+
+  gap: 20px;
+}
+
+
+/* =================================
+   LEFT MENU
+================================= */
+
+.topnav-menu {
+  min-width: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 19px;
+
+  white-space: nowrap;
+}
+
+
+.topnav-link {
+  position: relative;
+
+  padding:
+    19px 0 17px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.76
+    );
+
+  text-decoration: none;
+
+  font-size: 14px;
+
+  font-weight: 500;
+
+  transition:
+    color 0.18s ease;
+}
+
+
+.topnav-link:hover {
+  color: #ffffff;
+}
+
+
+.topnav-link.active {
+  color: #ffffff;
+
+  font-weight: 700;
+}
+
+
+.topnav-link.active::after {
+  content: "";
+
+  position: absolute;
+
+  left: 0;
+  right: 0;
+
+  bottom: 0;
+
+  height: 3px;
+
+  border-radius:
+    3px 3px 0 0;
+
+  background: #ffffff;
+}
+
+
+/* =================================
+   MEDISHARE BRAND
+================================= */
+
+.topnav-brand {
+  margin-right: 8px;
+
+  color: #ffffff;
+
+  font-size: 16px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.4px;
+}
+
+
+.topnav-brand:hover {
+  color: #ffffff;
+}
+
+
+/*
+ MEDISHARE는 메뉴가 아니라
+ 사이트 로고 역할이므로
+ 활성화 밑줄 제거
+*/
+.topnav-brand.active::after {
+  display: none;
+}
+
+
+
+/* =================================
+   RIGHT
+================================= */
+
+.topnav-right {
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  gap: 12px;
+}
+
+
+.topnav-icon-button {
+  width: 34px;
+  height: 34px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.18
+    );
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.06
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease;
+}
+
+
+.topnav-icon-button:hover {
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.16
+    );
+}
+
+
+.topnav-account,
+.topnav-user {
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.85
+    );
+
+  text-decoration: none;
+
+  font-size: 13px;
+}
+
+
+.topnav-account:hover,
+.topnav-user:hover {
+  color: #ffffff;
+}
+
+
+
+/* =================================
+   FULL SCREEN SITEMAP
+================================= */
+
+.sitemap-overlay {
+  position: fixed;
+
+  inset: 0;
+
+  z-index: 9000;
+
+  overflow-y: auto;
+
+  background:
+    linear-gradient(
+      135deg,
+      #087f7a 0%,
+      #10958f 48%,
+      #159f98 100%
+    );
+
+  color: #ffffff;
+
+  animation:
+    sitemapFadeIn
+    0.22s ease;
+}
+
+
+@keyframes sitemapFadeIn {
+  from {
+    opacity: 0;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+
+.sitemap-inner {
+  width:
+    min(
+      1400px,
+      calc(100% - 100px)
+    );
+
+  min-height: 100%;
+
+  margin: 0 auto;
+
+  padding:
+    70px 0 45px;
+}
+
+
+
+/* =================================
+   SITEMAP HEADER
+================================= */
+
+.sitemap-header {
+  display: flex;
+
+  align-items: flex-end;
+
+  justify-content: space-between;
+
+  gap: 30px;
+}
+
+
+.sitemap-header
+> div
+> span {
+  display: block;
+
+  margin-bottom: 10px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.65
+    );
+
+  font-size: 10px;
+
+  font-weight: 800;
+
+  letter-spacing: 2px;
+}
+
+
+.sitemap-header h2 {
+  margin: 0;
+
+  color: #ffffff;
+
+  font-size: 32px;
+
+  font-weight: 800;
+}
+
+
+.sitemap-close {
+  width: 48px;
+  height: 48px;
+
+  padding: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border: 0;
+
+  border-radius: 50%;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.08
+    );
+
+  color: #ffffff;
+
+  cursor: pointer;
+
+  transition:
+    background 0.18s ease,
+    transform 0.18s ease;
+}
+
+
+.sitemap-close:hover {
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.17
+    );
+
+  transform:
+    rotate(4deg);
+}
+
+
+.sitemap-divider {
+  height: 1px;
+
+  margin:
+    25px 0 45px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.2
+    );
+}
+
+
+.sitemap-middle-divider {
+  margin:
+    50px 0;
+}
+
+
+
+/* =================================
+   SITEMAP SECTION
+================================= */
+
+.sitemap-section {
+  display: grid;
+
+  grid-template-columns:
+    210px 1fr;
+
+  gap: 55px;
+}
+
+
+.sitemap-section-title {
+  display: flex;
+
+  gap: 15px;
+}
+
+
+.sitemap-section-title
+> span {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+
+  align-items: center;
+
+  justify-content: center;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.3
+    );
+
+  border-radius: 50%;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.82
+    );
+
+  font-size: 9px;
+}
+
+
+.sitemap-section-title h3 {
+  margin:
+    3px 0 7px;
+
+  color: #ffffff;
+
+  font-size: 18px;
+}
+
+
+.sitemap-section-title p {
+  margin: 0;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.6
+    );
+
+  font-size: 11px;
+
+  line-height: 1.6;
+
+  word-break: keep-all;
+}
+
+
+
+/* =================================
+   MAIN MENU GRID
+================================= */
+
+.sitemap-menu-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+}
+
+
+.sitemap-menu-grid button,
+.sitemap-admin-grid button {
+  position: relative;
+
+  min-height: 130px;
+
+  padding:
+    22px 23px;
+
+  border:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.16
+    );
+
+  border-radius: 14px;
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.07
+    );
+
+  color: #ffffff;
+
+  text-align: left;
+
+  cursor: pointer;
+
+  transition:
+    transform 0.18s ease,
+    background 0.18s ease;
+}
+
+
+.sitemap-menu-grid button:hover,
+.sitemap-admin-grid button:hover {
+  transform:
+    translateY(-3px);
+
+  background:
+    rgba(
+      255,
+      255,
+      255,
+      0.14
+    );
+}
+
+
+.sitemap-menu-grid
+button
+> span,
+.sitemap-admin-grid
+button
+> span {
+  display: block;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.6
+    );
+
+  font-size: 9px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.4px;
+}
+
+
+.sitemap-menu-grid
+button
+> strong,
+.sitemap-admin-grid
+button
+> strong {
+  display: block;
+
+  margin-top: 12px;
+
+  color: #ffffff;
+
+  font-size: 18px;
+
+  font-weight: 700;
+}
+
+
+.sitemap-menu-grid
+button
+> p {
+  max-width: 80%;
+
+  margin:
+    8px 0 0;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.61
+    );
+
+  font-size: 11px;
+
+  line-height: 1.6;
+
+  word-break: keep-all;
+}
+
+
+.sitemap-menu-grid
+button
+> svg,
+.sitemap-admin-grid
+button
+> svg {
+  position: absolute;
+
+  right: 20px;
+
+  bottom: 20px;
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.8
+    );
+}
+
+
+
+/* =================================
+   ADMIN / DOCTOR
+================================= */
+
+.sitemap-admin-grid {
+  display: grid;
+
+  grid-template-columns:
+    repeat(
+      3,
+      minmax(0, 1fr)
+    );
+
+  gap: 12px;
+}
+
+
+.sitemap-admin-grid button {
+  min-height: 95px;
+}
+
+
+
+/* =================================
+   SITEMAP FOOTER
+================================= */
+
+.sitemap-footer {
+  margin-top: 65px;
+
+  padding-top: 27px;
+
+  display: flex;
+
+  justify-content: space-between;
+
+  border-top:
+    1px solid
+    rgba(
+      255,
+      255,
+      255,
+      0.18
+    );
+
+  color:
+    rgba(
+      255,
+      255,
+      255,
+      0.55
+    );
+}
+
+
+.sitemap-footer span {
+  font-size: 12px;
+
+  font-weight: 800;
+
+  letter-spacing: 1.5px;
+}
+
+
+.sitemap-footer p {
+  margin: 0;
+
+  font-size: 10px;
+}
+
+
+
+/* =================================
+   RESPONSIVE
+================================= */
+
+@media (max-width: 1100px) {
+
+  .topnav-menu {
+    gap: 11px;
+  }
+
+
+  .topnav-link {
+    font-size: 12px;
+  }
+
+
+  .topnav-brand {
+    font-size: 14px;
+  }
+
+
+  .sitemap-menu-grid {
+    grid-template-columns:
+      repeat(
+        2,
+        1fr
+      );
+  }
+
+}
+
+
+@media (max-width: 800px) {
+
+  .topnav-menu {
+    overflow-x: auto;
+  }
+
+
+  .topnav-account,
+  .topnav-user {
+    display: none;
+  }
+
+
+  .sitemap-inner {
+    width:
+      calc(
+        100% - 40px
+      );
+
+    padding-top: 40px;
+  }
+
+
+  .sitemap-section {
+    grid-template-columns: 1fr;
+
+    gap: 25px;
+  }
+
+
+  .sitemap-menu-grid,
+  .sitemap-admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+
+  .sitemap-footer {
+    flex-direction: column;
+
+    gap: 8px;
+  }
+
+}
