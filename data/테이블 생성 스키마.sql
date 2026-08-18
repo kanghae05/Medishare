@@ -22,7 +22,7 @@ CREATE TABLE department (
 
 
 -- ============================================================
--- 2. 회원 (의사/관리자 등 전체 계정)
+-- 2. 회원
 -- ============================================================
 CREATE TABLE member (
     no BIGINT NOT NULL AUTO_INCREMENT,
@@ -48,8 +48,9 @@ CREATE TABLE member (
 
 
 -- ============================================================
--- 3. 역할 / 권한
+-- 3. 역할/권한
 -- ============================================================
+-- 역할
 CREATE TABLE role (
     no BIGINT NOT NULL AUTO_INCREMENT,
     role_code VARCHAR(50) NOT NULL,
@@ -61,6 +62,7 @@ CREATE TABLE role (
     UNIQUE KEY uk_role_code (role_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 회원 역할 매핑
 CREATE TABLE member_roles (
     member_no BIGINT NOT NULL,
     role_no BIGINT NOT NULL,
@@ -77,6 +79,7 @@ CREATE TABLE member_roles (
         REFERENCES role(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 권한
 CREATE TABLE permission (
     no BIGINT NOT NULL AUTO_INCREMENT,
     permission_code VARCHAR(100) NOT NULL,
@@ -88,6 +91,7 @@ CREATE TABLE permission (
     UNIQUE KEY uk_permission_code (permission_code)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 역할 권한 매핑
 CREATE TABLE role_permission (
     role_no BIGINT NOT NULL,
     permission_no BIGINT NOT NULL,
@@ -107,6 +111,7 @@ CREATE TABLE role_permission (
 -- ============================================================
 -- 4. PACS
 -- ============================================================
+-- pacs 환자
 CREATE TABLE pacs_patient (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_patient_id VARCHAR(100) NOT NULL,
@@ -120,6 +125,7 @@ CREATE TABLE pacs_patient (
     UNIQUE KEY uk_pacs_patient_orthanc_patient_id (orthanc_patient_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- pacs 검사
 CREATE TABLE pacs_study (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_study_id VARCHAR(100) NOT NULL,
@@ -145,6 +151,7 @@ CREATE TABLE pacs_study (
         REFERENCES pacs_patient(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- pacs 시리즈
 CREATE TABLE pacs_series (
     no BIGINT NOT NULL AUTO_INCREMENT,
     orthanc_series_id VARCHAR(100) NOT NULL,
@@ -258,6 +265,7 @@ CREATE TABLE case_tags (
 -- ============================================================
 -- 7. 의료 데이터 접근/변경 이력
 -- ============================================================
+-- 의료 데이터 접근 이력
 CREATE TABLE data_access_log (
     no BIGINT NOT NULL AUTO_INCREMENT,
     member_no BIGINT NOT NULL,
@@ -281,6 +289,7 @@ CREATE TABLE data_access_log (
         FOREIGN KEY (study_no) REFERENCES pacs_study(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 의료 데이터 변경 이력
 CREATE TABLE data_change_history (
     no BIGINT NOT NULL AUTO_INCREMENT,
     member_no BIGINT NOT NULL,
@@ -344,6 +353,7 @@ CREATE TABLE coop_request (
     FOREIGN KEY (origin_request_id) REFERENCES coop_request(coop_request_id)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 진료과 협진 요청 거절
 CREATE TABLE coop_request_dept_reject (
     id                BIGINT AUTO_INCREMENT PRIMARY KEY,
     coop_request_id   BIGINT NOT NULL,
@@ -359,7 +369,7 @@ CREATE TABLE coop_request_dept_reject (
 
 
 -- ============================================================
--- 9. 의사 일정
+-- 9. 의료진 일정
 -- ============================================================
 CREATE TABLE IF NOT EXISTS doctor_schedules (
     schedule_id BIGINT AUTO_INCREMENT PRIMARY KEY COMMENT '일정 ID',
@@ -376,12 +386,18 @@ CREATE TABLE IF NOT EXISTS doctor_schedules (
     INDEX idx_schedule_doctor (doctor_id),
     INDEX idx_schedule_date (schedule_date),
     INDEX idx_schedule_doctor_date (doctor_id, schedule_date),
-    INDEX idx_schedule_type (schedule_type)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    INDEX idx_schedule_type (schedule_type),
+
+    CONSTRAINT fk_doctor_schedules_doctor
+        FOREIGN KEY (doctor_id)
+        REFERENCES member (no)
+        ON DELETE RESTRICT
+        ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 -- ============================================================
--- 10. 협진 채팅 테이블
+-- 10. 협진 채팅
 -- ============================================================
 CREATE TABLE coop_message (
     coop_message_id BIGINT AUTO_INCREMENT PRIMARY KEY,
