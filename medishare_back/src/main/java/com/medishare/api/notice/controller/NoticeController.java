@@ -3,6 +3,7 @@ package com.medishare.api.notice.controller;
 import com.medishare.api.notice.dto.NoticeDto;
 import com.medishare.api.notice.service.NoticeService;
 import com.medishare.api.notice.vo.NoticeVO;
+import com.medishare.api.member.entity.Member;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
@@ -80,28 +81,13 @@ public class NoticeController {
         }
 
         Object principal = authentication.getPrincipal();
-
-        try {
-            Object id = principal.getClass().getMethod("getId").invoke(principal);
-
-            if (id instanceof Number number) {
-                return number.longValue();
-            }
-
-            return Long.parseLong(String.valueOf(id));
-        } catch (ReflectiveOperationException | NumberFormatException ignored) {
-            return parseAuthenticationName(authentication);
+        if (principal instanceof Member member && member.getNo() != null) {
+            return member.getNo();
         }
-    }
 
-    private long parseAuthenticationName(Authentication authentication) {
-        try {
-            return Long.parseLong(authentication.getName());
-        } catch (NumberFormatException exception) {
-            throw new ResponseStatusException(
-                    HttpStatus.UNAUTHORIZED,
-                    "Authenticated principal has no numeric user id"
-            );
-        }
+        throw new ResponseStatusException(
+                HttpStatus.UNAUTHORIZED,
+                "Authenticated principal has no member number"
+        );
     }
 }

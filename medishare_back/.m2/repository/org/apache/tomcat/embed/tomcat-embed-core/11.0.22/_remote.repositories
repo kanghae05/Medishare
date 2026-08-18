@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Wed Jun 17 16:31:02 KST 2026
+tomcat-embed-core-11.0.22-sources.jar>central=
+tomcat-embed-core-11.0.22.jar>central=
+tomcat-embed-core-11.0.22.pom>central=

@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Thu Jul 02 14:47:25 KST 2026
+hamcrest-core-3.0.jar>central=
+hamcrest-core-3.0.pom>central=
+hamcrest-core-3.0-sources.jar>central=

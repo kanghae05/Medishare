@@ -1,0 +1,5 @@
+#NOTE: This is a Maven Resolver internal implementation file, its format can be changed without prior notice.
+#Mon Jun 08 19:59:39 KST 2026
+spring-boot-starter-validation-3.5.14.jar>central=
+spring-boot-starter-validation-3.5.14-sources.jar>central=
+spring-boot-starter-validation-3.5.14.pom>central=
