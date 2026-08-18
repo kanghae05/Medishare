@@ -28,8 +28,9 @@ public class ReportController {
     }
 
     @GetMapping("/list.do")
-    public List<ReportVO> list(@RequestParam Long studyNo) {
-        return reportService.list(studyNo);
+    public List<ReportVO> list(@RequestParam(required = false) Long studyNo,
+                                @RequestParam(defaultValue = "FINAL") String status) {
+        return reportService.list(studyNo, status);
     }
 
     @PutMapping("/update.do/{no}")
