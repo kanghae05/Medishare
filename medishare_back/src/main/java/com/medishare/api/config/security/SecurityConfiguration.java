@@ -63,13 +63,15 @@ public class SecurityConfiguration {
                             .requestMatchers("/pacs/roles/**", "/pacs/permissions/**").hasRole("ADMIN")
                             .requestMatchers("/api/admin/**").hasRole("ADMIN")
                             .requestMatchers("/pacs/**").permitAll()
-                            .requestMatchers("/coop/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/coop/admin/**").hasRole("ADMIN")
                             .requestMatchers("/ws/coop/**").permitAll()
+                            .requestMatchers("/coop/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/api/schedules/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/api/statistics/**").hasAnyRole("USER", "ADMIN")
                             // 공지사항 목록/상세는 회원가입 및 로그인 없이 조회할 수 있다.
                             // 작성/수정/삭제(POST/PUT/DELETE)는 아래 인증 규칙을 그대로 적용한다.
                             .requestMatchers(HttpMethod.GET, "/api/notices", "/api/notices/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers(HttpMethod.GET, "/api/reports").hasAnyRole("USER", "ADMIN")
                             // 특이케이스 목록/상세 조회 공개 설정
                             .requestMatchers(HttpMethod.GET, "/api/special-cases", "/api/special-cases/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers(HttpMethod.POST, "/api/special-cases").hasAnyRole("USER", "ADMIN")

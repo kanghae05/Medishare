@@ -135,7 +135,8 @@ public class CoopRequestController {
     @GetMapping("/view.do")
     public CoopRequestVO view(@RequestParam Long no, Authentication authentication) {
         Long doctorId = currentDoctorId(authentication);
-        return coopRequestService.view(no, doctorId);
+        Long deptId = safeCurrentDeptId(authentication);
+        return coopRequestService.view(no, doctorId, deptId);
     }
 
     // 이 협진요청의 채팅 이력 (WebSocket 연결 전에 처음 한 번 불러오는 용도)
@@ -164,6 +165,27 @@ public class CoopRequestController {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         return coopRequestService.unreadCount(doctorId, deptId);
+    }
+
+    // 관리자 전체 조회 (ROLE_ADMIN 전용 - SecurityConfig에서 /coop/admin/** 로 별도 제한)
+    @GetMapping("/admin/all.do")
+    public Map<String, Object> adminAll(@RequestParam(required = false) Long reqDoctorId,
+                                        @RequestParam(required = false) Long recvDoctorId,
+                                        @RequestParam(required = false) Long deptId,
+                                        @RequestParam(required = false) String status,
+                                        @RequestParam(required = false) String from,
+                                        @RequestParam(required = false) String to,
+                                        HttpServletRequest request) throws Exception {
+        PageObject pageObject = PageObject.getInstance(request);
+
+        List<CoopRequestVO> list = coopRequestService.adminList(
+                reqDoctorId, recvDoctorId, deptId, pageObject,
+                parseStatuses(status), parseDate(from), parseDate(to));
+
+        Map<String, Object> result = new HashMap<>();
+        result.put("list", list);
+        result.put("pageObject", pageObject);
+        return result;
     }
 
     // ------------------------------------------------------------------
@@ -273,13 +295,23 @@ public class CoopRequestController {
                 .toList();
     }
 
-    // 선택한 검사에 소견서가 있는지 확인 (없으면 빈 목록)
+    // 선택한 검사에 "본인이 작성한" 소견서가 있는지 확인 (없으면 빈 목록)
+    // 다른 의사가 쓴 소견서는 첨부 후보로 보여주지 않는다 - 본인 작성분만 활용 가능.
     @GetMapping("/lookup/studies/{studyNo}/report.do")
-    public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo) {
-        return reportRepository.findFirstByStudyNoOrderByWriteDateDesc(studyNo)
+    public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo, Authentication authentication) {
+        Long myDoctorId = currentDoctorId(authentication);
+        return reportRepository.findFirstByStudyNoAndMember_NoOrderByWriteDateDesc(studyNo, myDoctorId)
                 .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
                 .map(List::of)
                 .orElse(List.of());
+    }
+
+    // 협진 요청에 첨부된 소견서 요약 (상세화면에 "첨부 소견서: 제목 (상태)" 형태로 보여주는 용도)
+    @GetMapping("/report/{reportId}.do")
+    public ReportLookupVO reportSummary(@PathVariable Long reportId) {
+        return reportRepository.findById(reportId)
+                .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
+                .orElseThrow(() -> new RuntimeException("존재하지 않는 소견서입니다."));
     }
 
     // ------------------------------------------------------------------

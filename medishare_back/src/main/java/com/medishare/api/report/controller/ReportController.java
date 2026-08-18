@@ -23,13 +23,15 @@ public class ReportController {
     }
 
     @GetMapping("/view.do/{no}")
-    public ReportVO view(@PathVariable Long no) {
-        return reportService.view(no);
+    public ReportVO view(@PathVariable Long no, @AuthenticationPrincipal Member member) {
+        return reportService.view(no, member.getId());
     }
 
     @GetMapping("/list.do")
-    public List<ReportVO> list(@RequestParam Long studyNo) {
-        return reportService.list(studyNo);
+    public List<ReportVO> list(@RequestParam(required = false) Long studyNo,
+                                @RequestParam(defaultValue = "FINAL") String status,
+                                @AuthenticationPrincipal Member member) {
+        return reportService.list(studyNo, status, member.getId());
     }
 
     @PutMapping("/update.do/{no}")

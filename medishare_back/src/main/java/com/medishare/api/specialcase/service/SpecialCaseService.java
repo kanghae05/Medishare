@@ -1,5 +1,6 @@
 package com.medishare.api.specialcase.service;
 
+import com.medishare.api.member.repository.QMemberRepository;
 import com.medishare.api.specialcase.dto.SpecialCaseDto;
 import com.medishare.api.specialcase.entity.CasePacsLink;
 import com.medishare.api.specialcase.entity.SpecialCase;
@@ -28,6 +29,7 @@ public class SpecialCaseService {
     private static final int MAX_PAGE_SIZE = 100;
 
     private final SpecialCaseRepository specialCaseRepository;
+    private final QMemberRepository memberRepository;
 
     /** 필터, 키워드, 정렬 기준을 적용한 페이지 목록을 반환한다. */
     public Page<SpecialCaseDto.Response> list(
@@ -46,7 +48,7 @@ public class SpecialCaseService {
                 emptyToNull(bodyPart),
                 emptyToNull(keyword),
                 pageable
-        ).map(SpecialCaseDto.Response::from);
+        ).map(this::toResponse);
     }
 
     /** 활성 케이스를 조회하고 조회수를 1 증가시킨다. */
@@ -55,7 +57,7 @@ public class SpecialCaseService {
         SpecialCase specialCase = findActiveCase(id);
         specialCase.increaseViews();
 
-        return SpecialCaseDto.Response.from(specialCase);
+        return toResponse(specialCase);
     }
 
     /** 개인정보를 비식별화한 뒤 케이스, PACS 링크, 태그를 함께 저장한다. */
@@ -68,7 +70,7 @@ public class SpecialCaseService {
         replacePacsLinkAndTags(specialCase, vo);
 
         SpecialCase savedCase = specialCaseRepository.save(specialCase);
-        return SpecialCaseDto.Response.from(savedCase);
+        return toResponse(savedCase);
     }
 
     /** 작성자를 확인한 뒤 본문, PACS 링크, 태그를 갱신한다. */
@@ -87,7 +89,7 @@ public class SpecialCaseService {
         specialCase.update(vo, safeFindings, safeImpression);
         replacePacsLinkAndTags(specialCase, vo);
 
-        return SpecialCaseDto.Response.from(specialCase);
+        return toResponse(specialCase);
     }
 
     /** 실제 행을 삭제하지 않고 is_deleted 값만 변경한다. */
@@ -143,6 +145,15 @@ public class SpecialCaseService {
                     "Only the writer can modify this case"
             );
         }
+    }
+
+    /** 회원 PK로 작성자 이름을 조회해 API 응답에 포함한다. */
+    private SpecialCaseDto.Response toResponse(SpecialCase specialCase) {
+        String writerName = memberRepository.findById(specialCase.getWriterId())
+                .map(member -> member.getName())
+                .orElse("알 수 없는 사용자");
+
+        return SpecialCaseDto.Response.from(specialCase, writerName);
     }
 
     /** 빈 검색 조건을 null로 통일하여 Repository의 동적 조건을 비활성화한다. */

@@ -85,10 +85,25 @@ WHERE m.login_id LIKE 'doctor%';
 
 
 -- 소견서 임시 데이터
-INSERT INTO report (study_no, member_id, title, findings, impression, status, write_date, update_date) VALUES
-(4, 1, '두부 CT 판독 소견', '두개 내 급성 출혈 소견 없음. 뇌실질 내 이상 신호 없음.', '특이 소견 없음.', 'FINAL', NOW(), NOW()),
-(6, 4, '복부 및 골반 CT 판독 소견', '간, 비장, 신장 크기 정상. 우하복부에 경도의 지방 침윤 소견.', '경도의 장간막 지방 침윤, 임상 상관 요망.', 'DRAFT', NOW(), NOW());
-
+INSERT INTO report (no, study_no, member_no, title, findings, impression, status, write_date, update_date) VALUES
+(1, 4, 1, '저선량 흉부 CT 판독 소견 (폐암 선별검사)',
+    '양측 폐야에 결절성 병변 관찰되지 않음. 종격동 및 폐문부 림프절 비대 소견 없음.',
+    '특이 소견 없음. 정기 검진 권고.', 'FINAL', NOW(), NOW()),
+(2, 5, 1, '흉부 CT 혈관조영(CTA) 판독 소견',
+    '주폐동맥 및 양측 분지 폐동맥에 급성 혈전색전증 소견 없음. 폐실질 관류 이상 없음.',
+    '폐색전증 소견 없음.', 'FINAL', NOW(), NOW()),
+(3, 6, 1, '흉부 CT 판독 소견',
+    '우상엽에 약 8mm 크기의 결절성 병변 관찰됨. 종격동 림프절 경도 비대 소견.',
+    '우상엽 결절, 추적 관찰 또는 조직검사 고려 요망.', 'DRAFT', NOW(), NOW()),
+(4, 7, 1, '흉부 CT(고해상도) 판독 소견',
+    '양측 폐야에 간질성 폐질환 시사하는 망상형 음영 및 견인성 기관지확장 소견 관찰됨. UIP 양상에 부합.',
+    '간질성 폐질환(UIP 양상) 소견.', 'FINAL', NOW(), NOW()),
+(5, 9, 1, '흉부 CT 판독 소견 (기흉 평가)',
+    '우측 흉막강 내 소량의 기흉 소견 관찰됨. 폐허탈 정도는 경미함.',
+    '우측 경도 기흉.', 'FINAL', NOW(), NOW()),
+(6, 11, 1, '흉부 CT 판독 소견 (종격동 병변)',
+    '전종격동에 경계가 명확한 연부조직 종괴 관찰됨, 크기 약 3.2cm. 흉선종 의심.',
+    '전종격동 종괴, 흉선종 의심 - 추가 평가 요망.', 'DRAFT', NOW(), NOW());
 
 -- 환자: 이름, 성별, 생년월일
 UPDATE pacs_patient SET patient_name = '오지훈', patient_sex = 'M', patient_birth_date = '19850312' WHERE no = 8;
@@ -113,3 +128,44 @@ UPDATE pacs_series SET series_description = 'Chest CT Pleural Series' WHERE no =
 UPDATE pacs_series SET series_description = 'Chest CT Mediastinal Series' WHERE no = 8;
 UPDATE pacs_series SET series_description = 'Chest CT Interstitial Pattern' WHERE no = 9;
 UPDATE pacs_series SET series_description = 'Chest CT Airway Series' WHERE no = 10;
+
+
+-- 협진 요청 데이터
+INSERT INTO coop_request (coop_request_id, req_doctor_id, recv_type, recv_doctor_id, recv_dept_id,
+accept_doctor_id, pacs_study_id, report_id, origin_request_id, req_content, status, reject_reason,
+req_time, resp_time) VALUES
+(1, 6, '지정의사', 1, NULL, 1, 4, 1, NULL, '저선량 흉부 CT 선별검사 결과 폐결절 유무 확인 부탁드립니다.',
+'수락', NULL, '2026-08-01 09:00:00', '2026-08-01 10:00:00'),
+(2, 7, '지정의사', 1, NULL, NULL, 5, NULL, NULL, '폐색전증 의심 환자로 CTA 소견 확인 부탁드립니다.', '거절',
+'영상 화질 문제로 재촬영이 필요할 것 같습니다.', '2026-08-02 09:00:00', '2026-08-02 11:00:00'),
+(3, 8, '진료과', NULL, 1, 1, 6, NULL, NULL, '종격동 림프절 비대 소견 판독 부탁드립니다.', '수락', NULL,
+'2026-08-03 09:00:00', '2026-08-03 13:00:00'),
+(4, 9, '지정의사', 1, NULL, NULL, 7, NULL, NULL, '간질성 폐질환 의심 소견 확인 부탁드립니다.', '거절',
+'이미 호흡기내과에서 동일 건으로 협진 진행 중입니다.', '2026-08-04 09:00:00', '2026-08-04 15:00:00'),
+(5, 10, '진료과', NULL, 1, NULL, 8, NULL, NULL, '수술 전 흉부 CT 소견 확인 부탁드립니다.', '요청', NULL,
+'2026-08-05 09:00:00', NULL),
+(6, 11, '지정의사', 18, NULL, 18, 9, NULL, NULL, '외상 후 기흉 소견 있어 응급의학과 협진 요청드립니다.',
+'수락', NULL, '2026-08-06 09:00:00', '2026-08-06 09:30:00'),
+(7, 15, '진료과', NULL, 1, NULL, 10, NULL, NULL, '소아 환자 늑막삼출 흉부 CT 소견 확인 부탁드립니다.',
+'만료', NULL, '2026-08-07 09:00:00', NULL),
+(8, 1, '지정의사', 14, NULL, 14, 11, 6, NULL, '종격동 병변 소견상 외과적 평가 필요해 보여 협진 요청드립니다.',
+'수락', NULL, '2026-08-08 09:00:00', '2026-08-08 14:00:00'),
+(9, 16, '지정의사', 1, NULL, NULL, 12, NULL, NULL,
+'임신 중 호흡곤란으로 촬영한 흉부 CT 소견 확인 부탁드립니다.', '요청', NULL, '2026-08-09 09:00:00', NULL),
+(10, 19, '진료과', NULL, 1, 1, 13, NULL, NULL,
+'만성 기침 환자 기관지확장증 의심되어 흉부 CT 판독 확인 부탁드립니다.', '수락', NULL,
+'2026-08-10 09:00:00', '2026-08-10 10:00:00'),
+(11, 17, '지정의사', 1, NULL, NULL, 4, NULL, NULL, '촬영 오류로 재협진 필요할 것 같아 요청드립니다.',
+'취소', NULL, '2026-08-11 09:00:00', NULL),
+(12, 7, '지정의사', 1, NULL, NULL, 5, 2, 2,
+ '폐동맥 CT 혈관조영 재촬영본입니다. 폐색전증 소견 확인 부탁드립니다.', '요청', NULL,
+ '2026-08-12 09:00:00',NULL),
+(13, 18, '진료과', NULL, 1, NULL, 6, NULL, NULL, '기존 판독 소견 재확인 부탁드립니다.', '거절',
+'진료과 소속 의사 전원 거절 (개별 사유는 거절기록 참조)', '2026-08-13 09:00:00', '2026-08-13 16:00:00'),
+(14, 20, '진료과', NULL, 1, NULL, 7, NULL, NULL,
+ '고해상도 흉부 CT 소견 재확인 부탁드립니다.', '요청', NULL, '2026-08-14 09:00:00', NULL),
+(15, 6, '지정의사', 2, NULL, NULL, 8, NULL, NULL, '수술 전 평가 흉부 CT 소견 확인 부탁드립니다.',
+'만료', NULL, '2026-08-15 09:00:00', NULL),
+(16, 9, '지정의사', 3, NULL, 3, 9, NULL, NULL,
+'복부 침범 여부 확인을 위해 흉부-복부 경계 CT 소견 확인 부탁드립니다.', '수락', NULL,
+'2026-08-16 09:00:00', '2026-08-16 11:00:00');

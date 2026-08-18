@@ -17,6 +17,7 @@ public final class SpecialCaseDto {
     public record Response(
             Long caseId,
             Long writerId,
+            String writerName,
             String title,
             String modality,
             String bodyPart,
@@ -32,12 +33,13 @@ public final class SpecialCaseDto {
             String patientIdMasked,
             List<String> tags
     ) {
-        public static Response from(SpecialCase specialCase) {
+        public static Response from(SpecialCase specialCase, String writerName) {
             CasePacsLink pacsLink = specialCase.getPacsLink();
 
             return new Response(
                     specialCase.getId(),
                     specialCase.getWriterId(),
+                    writerName,
                     specialCase.getTitle(),
                     specialCase.getModality(),
                     specialCase.getBodyPart(),

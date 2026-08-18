@@ -31,7 +31,7 @@ public class Report {
 
     // member.id 외래키
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
+    @JoinColumn(name = "member_no", nullable = false)
     private Member member;
 
     @Column(nullable = false, length = 200)
