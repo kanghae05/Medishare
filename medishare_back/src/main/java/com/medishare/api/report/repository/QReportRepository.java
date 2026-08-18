@@ -11,4 +11,5 @@ public interface QReportRepository extends JpaRepository<Report, Long>, Querydsl
     List<Report> findByStudyNoOrderByWriteDateDesc(Long studyNo);
     List<Report> findByStudyNoAndStatusOrderByWriteDateDesc(Long studyNo, String status);
     List<Report> findByStudyNoAndStatusAndMember_No(Long studyNo, String status, Long memberNo);
+    List<Report> findAllByOrderByWriteDateDesc();
 }

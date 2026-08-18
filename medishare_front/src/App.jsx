@@ -47,10 +47,10 @@ function App() {
           <Route path="/pacs/*" element={<PacsComp />} />
           <Route path="/coop/*" element={<CoopComp />} />
           {/* Notice module routes */}
-          <Route path="/notices" element={token ? <NoticeList /> : <Navigate to="/" replace />} />
-          <Route path="/notices/new" element={token ? <NoticeForm /> : <Navigate to="/" replace />} />
+          <Route path="/notices" element={token ? <NoticeList isAdmin={isAdmin} /> : <Navigate to="/" replace />} />
+          <Route path="/notices/new" element={token && isAdmin ? <NoticeForm /> : <Navigate to="/notices" replace />} />
           <Route path="/notices/:noticeId" element={token ? <NoticeDetail isAdmin={isAdmin} /> : <Navigate to="/" replace />} />
-          <Route path="/notices/:noticeId/edit" element={token ? <NoticeForm /> : <Navigate to="/" replace />} />
+          <Route path="/notices/:noticeId/edit" element={token && isAdmin ? <NoticeForm /> : <Navigate to="/notices" replace />} />
           {/* Special Case Library module routes */}
           <Route path="/special-cases" element={token ? <SpecialCaseList /> : <Navigate to="/" replace />} />
           <Route path="/special-cases/new" element={token ? <SpecialCaseCreate /> : <Navigate to="/" replace />} />

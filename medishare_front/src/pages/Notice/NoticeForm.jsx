@@ -7,6 +7,7 @@ export default function NoticeForm() {
   const { noticeId } = useParams();
   const navigate = useNavigate();
   const [form, setForm] = useState({ title: "", content: "", pinned: false });
+  const [error, setError] = useState("");
 
   useEffect(() => {
     if (noticeId) getNotice(noticeId).then(setForm);
@@ -19,8 +20,13 @@ export default function NoticeForm() {
 
   const submit = async (event) => {
     event.preventDefault();
-    const saved = await saveNotice(noticeId, form);
-    navigate(`/notices/${saved.noticeId}`);
+    setError("");
+    try {
+      const saved = await saveNotice(noticeId, form);
+      navigate(`/notices/${saved.noticeId}`);
+    } catch (requestError) {
+      setError(requestError.response?.data?.message || "공지사항을 저장하지 못했습니다.");
+    }
   };
 
   return (
@@ -33,6 +39,7 @@ export default function NoticeForm() {
           </div>
         </header>
         <form className="notice-form-card" onSubmit={submit}>
+          {error && <div className="notice-state" role="alert">{error}</div>}
           <label><span>제목</span><input required name="title" value={form.title} onChange={change} placeholder="제목을 입력하세요" /></label>
           <label><span>내용</span><textarea required rows="14" name="content" value={form.content} onChange={change} placeholder="공지 내용을 입력하세요" /></label>
           <label className="notice-check"><input type="checkbox" name="pinned" checked={form.pinned} onChange={change} /><span>목록 상단에 중요 공지로 고정</span></label>
