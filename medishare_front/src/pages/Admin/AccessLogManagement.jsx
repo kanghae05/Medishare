@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { Navigate, useNavigate } from "react-router-dom";
 import api from "../../components/common/api";
+import AdminPagination from "../../components/common/AdminPagination";
 
 const initialFilters = {
   memberKeyword: "", patientId: "", studyKeyword: "", departmentNo: "",
@@ -77,6 +78,11 @@ export default function AccessLogManagement({ isAdmin }) {
         <td><button type="button" className="btn btn-sm btn-outline-primary" onClick={() => navigate(`/admin/access-logs/${log.logNo}`)}>상세</button></td>
       </tr>) : <tr><td colSpan="10" className="text-center text-muted">조회된 접근 이력이 없습니다.</td></tr>}</tbody>
     </table></div>
-    <div>{Array.from({ length: logPage.totalPages || 0 }, (_, page) => <button type="button" key={page} className={`btn btn-sm me-1 ${page === logPage.number ? "btn-primary" : "btn-outline-primary"}`} onClick={() => loadLogs(page).catch((error) => setMessage(error.response?.data?.message || "페이지를 불러오지 못했습니다."))}>{page + 1}</button>)}</div>
+    <AdminPagination
+      page={logPage.number || 0}
+      totalPages={logPage.totalPages || 0}
+      totalElements={logPage.totalElements || 0}
+      onPageChange={(page) => loadLogs(page).catch((error) => setMessage(error.response?.data?.message || "페이지를 불러오지 못했습니다."))}
+    />
   </div>;
 }
