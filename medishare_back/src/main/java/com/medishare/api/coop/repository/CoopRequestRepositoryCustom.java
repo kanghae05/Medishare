@@ -14,24 +14,24 @@ public interface CoopRequestRepositoryCustom {
 
     // 받은 협진함 (지정의사로 나에게 온 것 OR 진료과로 내 소속과에 온 것)
     List<CoopRequest> findReceived(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                   LocalDate from, LocalDate to,
-                                   long offset, long limit);
+                                    LocalDate from, LocalDate to,
+                                    long offset, long limit);
 
     long findReceivedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                           LocalDate from, LocalDate to);
+                            LocalDate from, LocalDate to);
 
     // 보낸 협진함
     List<CoopRequest> findSent(Long doctorId, List<CoopStatus> statuses,
-                               LocalDate from, LocalDate to, long offset, long limit);
+                                LocalDate from, LocalDate to, long offset, long limit);
 
     long findSentCount(Long doctorId, List<CoopStatus> statuses, LocalDate from, LocalDate to);
 
     // 전체 협진 내역 (받은 것 + 보낸 것)
     List<CoopRequest> findAllRelated(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                     LocalDate from, LocalDate to, long offset, long limit);
+                                      LocalDate from, LocalDate to, long offset, long limit);
 
     long findAllRelatedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                             LocalDate from, LocalDate to);
+                              LocalDate from, LocalDate to);
 
     // 응답 대기 중인 개수 (배지/폴링용) - statuses는 Service에서 (요청)으로 고정해 전달
     long countUnread(Long doctorId, Long deptId, List<CoopStatus> statuses);
@@ -41,9 +41,9 @@ public interface CoopRequestRepositoryCustom {
     // recvDoctorId는 지정의사의 recv_doctor_id, 이미 수락된 진료과의 accept_doctor_id 뿐 아니라
     // recvDoctorDeptId(그 의사의 소속과)로 아직 수락 전인 진료과 요청까지 함께 매칭한다.
     List<CoopRequest> findAllForAdmin(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                                      List<CoopStatus> statuses, LocalDate from, LocalDate to,
-                                      long offset, long limit);
+                                       List<CoopStatus> statuses, LocalDate from, LocalDate to,
+                                       long offset, long limit);
 
     long findAllForAdminCount(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                              List<CoopStatus> statuses, LocalDate from, LocalDate to);
+                               List<CoopStatus> statuses, LocalDate from, LocalDate to);
 }

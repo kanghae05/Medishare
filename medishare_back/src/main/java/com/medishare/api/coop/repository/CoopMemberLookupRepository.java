@@ -27,12 +27,12 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
      * member_roles/role 테이블을 네이티브 SQL로 직접 조회하면 안전하게 되니까).
      */
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department " +
-            "WHERE m.status = 'ACTIVE' " +
-            "AND m.no <> :excludeNo " +
-            "AND (m.name LIKE CONCAT('%', :q, '%') " +
-            "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
-            "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
-            "ORDER BY m.name")
+           "WHERE m.status = 'ACTIVE' " +
+           "AND m.no <> :excludeNo " +
+           "AND (m.name LIKE CONCAT('%', :q, '%') " +
+           "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
+           "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
+           "ORDER BY m.name")
     List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
 
     /**
@@ -44,7 +44,7 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
 
     /** ROLE_ADMIN을 가진 회원번호 목록 (member_roles + role 테이블 직접 조회) */
     @Query(value = "SELECT mr.member_no FROM member_roles mr " +
-            "JOIN role r ON mr.role_no = r.no " +
-            "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
+                    "JOIN role r ON mr.role_no = r.no " +
+                    "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
     List<Long> findAdminMemberIds();
 }

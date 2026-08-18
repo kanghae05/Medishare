@@ -11,19 +11,19 @@ public interface CoopRequestService {
 
     // 받은 협진함 (acceptMode=1)
     List<CoopRequestVO> receivedList(Long doctorId, Long deptId, PageObject pageObject,
-                                     List<String> statuses,
-                                     LocalDate from, LocalDate to);
+                                      List<String> statuses,
+                                      LocalDate from, LocalDate to);
 
     // 보낸 협진함 (acceptMode=2)
     List<CoopRequestVO> sentList(Long doctorId, PageObject pageObject,
-                                 List<String> statuses, LocalDate from, LocalDate to);
+                                  List<String> statuses, LocalDate from, LocalDate to);
 
     // 전체 협진 내역 (acceptMode=3)
     List<CoopRequestVO> allList(Long doctorId, Long deptId, PageObject pageObject,
-                                List<String> statuses, LocalDate from, LocalDate to);
+                                 List<String> statuses, LocalDate from, LocalDate to);
 
     // 상세 조회 - 열람 처리(4-6) 포함, 진료과 요청이면 거절자 목록도 함께 채워 반환
-    CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId);
+    CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId, boolean isAdmin);
 
     // 등록 (4-1) / 재요청(4-1-1, originRequestId가 있으면 이전 요청의 환자·검사·소견서를 복사)
     CoopRequestVO write(CoopRequestVO vo);
@@ -45,5 +45,5 @@ public interface CoopRequestService {
 
     // 관리자 전체 조회 - 시스템 전체 협진요청, 요청자/수신자/진료과 선택적 필터
     List<CoopRequestVO> adminList(Long reqDoctorId, Long recvDoctorId, Long deptId, PageObject pageObject,
-                                  List<String> statuses, LocalDate from, LocalDate to);
+                                   List<String> statuses, LocalDate from, LocalDate to);
 }

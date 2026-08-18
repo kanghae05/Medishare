@@ -24,6 +24,7 @@ function CoopRequestView() {
   const navigate = useNavigate();
 
   const [vo, setVo] = useState(null);
+  const [reportSummary, setReportSummary] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [actionError, setActionError] = useState(null);
@@ -56,6 +57,32 @@ function CoopRequestView() {
   };
 
   useEffect(load, [no]);
+
+  // 첨부된 소견서가 있으면 제목/상태를 같이 보여준다 (재요청 등으로 첨부됐을 때 확인할 방법이 없었음)
+  useEffect(() => {
+    let ignore = false;
+
+    if (!vo?.reportId) {
+      queueMicrotask(() => {
+        if (!ignore) setReportSummary(null);
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
+    api
+      .get(`/coop/report/${vo.reportId}.do`)
+      .then((res) => {
+        if (!ignore) setReportSummary(res.data);
+      })
+      .catch(() => {
+        if (!ignore) setReportSummary(null);
+      });
+    return () => {
+      ignore = true;
+    };
+  }, [vo?.reportId]);
 
   const runAction = (promise) => {
     setProcessing(true);
@@ -103,7 +130,7 @@ function CoopRequestView() {
   const canChat = vo.status === "수락" && (isSent || vo.viewerIsAcceptDoctor);
 
   return (
-    <div className="coop-page mb-5">
+    <div className="coop-page">
       <div className="coop-header">
         <h3 className="coop-title">협진 요청 상세</h3>
         <span className={"coop-pill status-" + (vo.displayStatus || vo.status)}>
@@ -153,6 +180,18 @@ function CoopRequestView() {
             <span className="coop-view-label">요청 내용</span>
             <span className="coop-view-value">{vo.reqContent}</span>
           </div>
+          {reportSummary && (
+            <div className="coop-view-span2">
+              <span className="coop-view-label">첨부 소견서</span>
+              <span className="coop-view-value">
+                {reportSummary.title}
+                <span style={{ color: "var(--coop-faint)" }}>
+                  {" "}
+                  ({reportSummary.status === "FINAL" ? "최종 확정" : reportSummary.status === "DRAFT" ? "작성 중" : reportSummary.status})
+                </span>
+              </span>
+            </div>
+          )}
           {vo.originRequestId && vo.originReqContent && (
             <div className="coop-view-span2">
               <span className="coop-view-label">이전 요청 내용</span>
@@ -174,7 +213,7 @@ function CoopRequestView() {
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
       {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
-      {isSent && vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
+      {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
           <div className="coop-quote-label">진료과 개인별 거절 내역</div>
           {vo.deptRejections.map((r, i) => (
