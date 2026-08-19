@@ -4,11 +4,10 @@
 
 /* 1. 레이아웃 및 메인 컨테이너 */
 .case-shell {
-  background: #f4f7fa;
+  background: transparent;
   color: #172331;
-  margin: -8px -12px 32px;
-  min-height: calc(100vh - 96px);
-  padding: 32px 24px;
+  margin: 0 0 32px;
+  padding: 24px 0 60px;
 }
 
 .case-page {
@@ -394,7 +393,7 @@
 
 @media (max-width: 600px) {
   .case-shell {
-    padding: 24px 14px;
+    padding: 20px 0 40px;
   }
   .case-page-head {
     align-items: stretch;
