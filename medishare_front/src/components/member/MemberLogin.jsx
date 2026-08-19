@@ -31,7 +31,7 @@ function MemberLogin(){
 
     // Spring Boot로 백엔드 처리 APi 호출해서 데이터 전달
     try {
-      const response = await axios.post("http://localhost/member/login.do",data);
+      const response = await axios.post("http://10.15.21.45:8080/member/login.do", data);
       console.log(response.data); // 서버에서 보낸 데이터를 출력하자.
 
       // react 어디서나 접근 가능한 곳에 저장해야한다.

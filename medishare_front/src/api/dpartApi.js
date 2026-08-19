@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const dpartApi = axios.create({
-  baseURL: "http://localhost",
+  baseURL: "http://10.15.21.45:8080",
 });
 
 dpartApi.interceptors.request.use((config) => {

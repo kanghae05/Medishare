@@ -9,7 +9,7 @@ function MemberWrite() {
 
   useEffect(() => {
     document.getElementById("id")?.focus();
-    axios.get("http://localhost/member/departments.do")
+    axios.get("http://10.15.21.45:8080/member/departments.do")
       .then((response) => setDepartments(response.data))
       .catch(() => alert("진료과 목록을 불러오지 못했습니다."));
   }, []);
@@ -24,10 +24,11 @@ function MemberWrite() {
       document.getElementById("pw")?.focus();
       return;
     }
-    const { pw2, ...data } = form;
+    const data = { ...form };
+    delete data.pw2;
     data.departmentNo = Number(data.departmentNo);
     try {
-      const response = await axios.post("http://localhost/member/write.do", data);
+      const response = await axios.post("http://10.15.21.45:8080/member/write.do", data);
       if (response.data.success) {
         alert("회원가입이 완료되었습니다.");
         navigate("/member/login");
