@@ -8,19 +8,19 @@ import lombok.NoArgsConstructor;
 
 import java.time.LocalDateTime;
 
-/*
-    진료과 단위 협진요청에 대한 의사 개인별 거절 기록 (coop_request_dept_reject)
-    - coop_request.status는 건드리지 않고, 이 테이블에만 개인별로 쌓인다.
-    - (coop_request_id, doctor_id) UNIQUE로 중복 거절을 막는다.
-*/
+/**
+ * 진료과 단위 협진요청에 대한 의사 개인별 거절 기록 (coop_request_dept_reject)
+ * - coop_request.status는 건드리지 않고, 이 테이블에만 개인별로 쌓인다.
+ * - (coop_request_id, doctor_id) UNIQUE로 중복 거절을 막는다.
+ */
 @Entity
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Table(
-        name = "coop_request_dept_reject",
-        uniqueConstraints = @UniqueConstraint(columnNames = {"coop_request_id", "doctor_id"})
+    name = "coop_request_dept_reject",
+    uniqueConstraints = @UniqueConstraint(columnNames = {"coop_request_id", "doctor_id"})
 )
 public class CoopRequestDeptReject {
 

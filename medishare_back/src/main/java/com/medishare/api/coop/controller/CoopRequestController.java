@@ -74,10 +74,10 @@ public class CoopRequestController {
     // 받은 협진함 (4-5-1)
     @GetMapping("/received.do")
     public Map<String, Object> received(@RequestParam(required = false) String status,
-                                        @RequestParam(required = false) String from,
-                                        @RequestParam(required = false) String to,
-                                        HttpServletRequest request,
-                                        Authentication authentication) throws Exception {
+                                         @RequestParam(required = false) String from,
+                                         @RequestParam(required = false) String to,
+                                         HttpServletRequest request,
+                                         Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
@@ -95,10 +95,10 @@ public class CoopRequestController {
     // 보낸 협진함 (4-5-2)
     @GetMapping("/sent.do")
     public Map<String, Object> sent(@RequestParam(required = false) String status,
-                                    @RequestParam(required = false) String from,
-                                    @RequestParam(required = false) String to,
-                                    HttpServletRequest request,
-                                    Authentication authentication) throws Exception {
+                                     @RequestParam(required = false) String from,
+                                     @RequestParam(required = false) String to,
+                                     HttpServletRequest request,
+                                     Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
 
@@ -114,10 +114,10 @@ public class CoopRequestController {
     // 전체 협진 내역 (4-5-3)
     @GetMapping("/all.do")
     public Map<String, Object> all(@RequestParam(required = false) String status,
-                                   @RequestParam(required = false) String from,
-                                   @RequestParam(required = false) String to,
-                                   HttpServletRequest request,
-                                   Authentication authentication) throws Exception {
+                                    @RequestParam(required = false) String from,
+                                    @RequestParam(required = false) String to,
+                                    HttpServletRequest request,
+                                    Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
@@ -136,7 +136,10 @@ public class CoopRequestController {
     public CoopRequestVO view(@RequestParam Long no, Authentication authentication) {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
-        return coopRequestService.view(no, doctorId, deptId);
+        // 로그인 시점에 이미 확정된 권한 정보라, DB를 다시 조회할 필요 없이 여기서 바로 확인 가능하다.
+        boolean isAdmin = authentication.getAuthorities().stream()
+                .anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"));
+        return coopRequestService.view(no, doctorId, deptId, isAdmin);
     }
 
     // 이 협진요청의 채팅 이력 (WebSocket 연결 전에 처음 한 번 불러오는 용도)
@@ -170,12 +173,12 @@ public class CoopRequestController {
     // 관리자 전체 조회 (ROLE_ADMIN 전용 - SecurityConfig에서 /coop/admin/** 로 별도 제한)
     @GetMapping("/admin/all.do")
     public Map<String, Object> adminAll(@RequestParam(required = false) Long reqDoctorId,
-                                        @RequestParam(required = false) Long recvDoctorId,
-                                        @RequestParam(required = false) Long deptId,
-                                        @RequestParam(required = false) String status,
-                                        @RequestParam(required = false) String from,
-                                        @RequestParam(required = false) String to,
-                                        HttpServletRequest request) throws Exception {
+                                         @RequestParam(required = false) Long recvDoctorId,
+                                         @RequestParam(required = false) Long deptId,
+                                         @RequestParam(required = false) String status,
+                                         @RequestParam(required = false) String from,
+                                         @RequestParam(required = false) String to,
+                                         HttpServletRequest request) throws Exception {
         PageObject pageObject = PageObject.getInstance(request);
 
         List<CoopRequestVO> list = coopRequestService.adminList(
@@ -248,7 +251,7 @@ public class CoopRequestController {
     // 받는 의사 자동완성 - 이름/세부전공/진료과명 중 하나라도 검색어 포함, 본인은 제외
     @GetMapping("/lookup/doctors.do")
     public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q,
-                                              Authentication authentication) {
+                                               Authentication authentication) {
         Long myDoctorId = currentDoctorId(authentication);
         List<Long> adminIds = memberRepository.findAdminMemberIds();
         return memberRepository.searchDoctors(q, myDoctorId).stream()
@@ -364,11 +367,11 @@ public class CoopRequestController {
             return null;
         }
         try {
-            java.time.LocalDate birth = java.time.LocalDate.of(
+            LocalDate birth = LocalDate.of(
                     Integer.parseInt(birthDateRaw.substring(0, 4)),
                     Integer.parseInt(birthDateRaw.substring(4, 6)),
                     Integer.parseInt(birthDateRaw.substring(6, 8)));
-            return java.time.Period.between(birth, java.time.LocalDate.now()).getYears();
+            return java.time.Period.between(birth, LocalDate.now()).getYears();
         } catch (Exception e) {
             return null;
         }

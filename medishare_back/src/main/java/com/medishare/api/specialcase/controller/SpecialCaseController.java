@@ -80,11 +80,16 @@ public class SpecialCaseController {
         return specialCaseService.update(id, getActorId(authentication), vo);
     }
 
-    /** 작성자 본인의 특이케이스를 Soft Delete 처리한다. */
+    /** 작성자 본인 또는 관리자의 요청으로 특이케이스를 Soft Delete 처리한다. */
     @DeleteMapping("/{id}")
     @ResponseStatus(HttpStatus.NO_CONTENT)
     public void delete(@PathVariable Long id, Authentication authentication) {
-        specialCaseService.delete(id, getActorId(authentication));
+        specialCaseService.delete(id, getActorId(authentication), isAdmin(authentication));
+    }
+
+    private boolean isAdmin(Authentication authentication) {
+        return authentication != null && authentication.getAuthorities().stream()
+                .anyMatch(authority -> "ROLE_ADMIN".equals(authority.getAuthority()));
     }
 
     /**

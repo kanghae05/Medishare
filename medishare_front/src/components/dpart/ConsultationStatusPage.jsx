@@ -1,7 +1,6 @@
 import { useCallback, useEffect, useState } from "react";
 import { getDoctorConsultationStatistics } from "../../api/statisticsApi";
-import LoadingState from "./LoadingState";
-import StatCard from "./StatCard";
+import EmptyState from "./EmptyState";
 import { extractErrorMessage, getCurrentUser, todayString } from "./dpartUtils";
 
 const emptyStats = {
@@ -21,6 +20,8 @@ const statusCards = [
   ["completedCount", "완료", "gray"],
   ["canceledCount", "취소", "red"],
 ];
+
+const statusRows = statusCards.slice(1);
 
 function ConsultationStatusPage() {
   const [stats, setStats] = useState(emptyStats);
@@ -70,60 +71,82 @@ function ConsultationStatusPage() {
   };
 
   const total = stats.totalCount || 0;
+  const periodLabel = startDate || endDate
+    ? `${startDate || "전체"} ~ ${endDate || "전체"}`
+    : "전체 기간";
 
   return (
-    <section className="dpart-page dpart-work-page">
-      <div className="dpart-page-head">
+    <section className="dpart-page dpart-work-page consultation-status-page">
+      <div className="dpart-page-head consultation-status-head">
         <div>
+          <span className="dpart-eyebrow">MEDISHARE · CONSULTATION</span>
           <h1>협진 현황</h1>
-          <p>요청부터 완료까지 협진 상태를 기간별로 확인합니다.</p>
+          <p>현재 참여 중인 협진 요청과 진행 상태를 확인할 수 있습니다.</p>
+        </div>
+
+        <div className="consultation-filter-box" aria-label="협진 현황 기간 필터">
+          <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+          <span>~</span>
+          <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+          <button type="button" className="dpart-secondary" onClick={resetDates}>초기화</button>
+          <button type="button" className="dpart-secondary" onClick={setToday}>오늘</button>
         </div>
       </div>
 
-      <div className="dpart-filter-band compact">
-        <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
-        <span>~</span>
-        <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
-        <button type="button" className="dpart-secondary" onClick={resetDates}>초기화</button>
-        <button type="button" className="dpart-secondary" onClick={setToday}>오늘</button>
-      </div>
-
-      {error && <div className="dpart-alert error">{error}</div>}
       {loading ? (
-        <LoadingState />
+        <div className="dpart-state">협진 정보를 불러오는 중입니다.</div>
+      ) : error ? (
+        <div className="dpart-alert error">{error}</div>
       ) : (
         <>
-          <div className="dpart-stat-grid wide">
+          <div className="consultation-summary-strip" aria-label="협진 상태 요약">
             {statusCards.map(([key, label, tone]) => (
-              <StatCard key={key} label={label} value={stats[key]} tone={tone} />
+              <div className={`consultation-summary-item tone-${tone}`} key={key}>
+                <span>{label}</span>
+                <strong>{Number(stats[key] || 0).toLocaleString()}</strong>
+              </div>
             ))}
           </div>
 
-          <div className="dpart-panel dpart-work-panel">
-            <div className="dpart-section-head">
+          <div className="dpart-panel dpart-work-panel consultation-list-panel">
+            <div className="dpart-section-head consultation-list-head">
               <div>
-                <h2>상태 분포</h2>
-                <p>전체 협진 대비 상태별 비율입니다.</p>
+                <h2>전체 협진 이력</h2>
+                <p>{periodLabel} 기준 상태별 협진 현황입니다.</p>
               </div>
             </div>
-            <div className="dpart-status-list">
-              {statusCards.slice(1).map(([key, label, tone]) => {
-                const value = stats[key] || 0;
-                const width = total > 0 ? Math.round((value / total) * 100) : 0;
-                return (
-                  <div className="dpart-status-row" key={key}>
-                    <div>
-                      <strong>{label}</strong>
-                      <span>{value.toLocaleString()}건</span>
+
+            {total === 0 ? (
+              <EmptyState message="등록된 협진 이력이 없습니다." />
+            ) : (
+              <div className="consultation-status-table" role="table" aria-label="협진 상태 목록">
+                <div className="consultation-status-table-head" role="row">
+                  <span>NO</span>
+                  <span>협진 내용</span>
+                  <span>상태</span>
+                  <span>현황</span>
+                </div>
+
+                {statusRows.map(([key, label, tone], index) => {
+                  const value = stats[key] || 0;
+                  const width = total > 0 ? Math.round((value / total) * 100) : 0;
+                  return (
+                    <div className="consultation-status-table-row" role="row" key={key}>
+                      <span className="consultation-row-no">{String(index + 1).padStart(2, "0")}</span>
+                      <div className="consultation-row-main">
+                        <strong>{label} 상태 협진</strong>
+                        <span>현재 조건에서 {value.toLocaleString()}건이 집계되었습니다.</span>
+                      </div>
+                      <span className={`consultation-status-badge tone-${tone}`}>{label}</span>
+                      <div className="consultation-row-meta">
+                        <strong>{width}%</strong>
+                        <span>{value.toLocaleString()}건</span>
+                      </div>
                     </div>
-                    <div className="dpart-bar-track">
-                      <div className={`dpart-bar-fill tone-${tone}`} style={{ width: `${width}%` }} />
-                    </div>
-                    <b>{width}%</b>
-                  </div>
-                );
-              })}
-            </div>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </>
       )}

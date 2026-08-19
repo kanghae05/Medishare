@@ -38,10 +38,9 @@ export default function SpecialCaseDetail({ currentUser }) {
     );
   }
 
-  // 작성자 본인 또는 관리자 권한 확인
-  const mine =
-    currentUser?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN") ||
-    String(currentUser?.memberId ?? currentUser?.id) === String(item.writerId);
+  const isAdmin = currentUser?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN") ?? false;
+  const isOwner = String(currentUser?.memberId ?? currentUser?.id) === String(item.writerId);
+  const canDelete = isOwner || isAdmin;
 
   // 삭제 처리 함수
   const remove = async () => {
@@ -103,12 +102,12 @@ export default function SpecialCaseDetail({ currentUser }) {
           <Link className="case-secondary" to="/special-cases">
             목록
           </Link>
-          {mine && (
+          {isOwner && (
             <Link className="case-secondary" to={`/special-cases/${caseId}/edit`}>
               수정
             </Link>
           )}
-          {mine && (
+          {canDelete && (
             <button className="case-danger" onClick={remove}>
               삭제
             </button>

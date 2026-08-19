@@ -52,8 +52,8 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> receivedList(Long doctorId, Long deptId, PageObject pageObject,
-                                            List<String> statuses,
-                                            LocalDate from, LocalDate to) {
+                                             List<String> statuses,
+                                             LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, DEFAULT_RECEIVED_STATUSES);
 
         long total = coopRequestRepository.findReceivedCount(doctorId, deptId, statusList, from, to);
@@ -75,7 +75,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> sentList(Long doctorId, PageObject pageObject,
-                                        List<String> statuses, LocalDate from, LocalDate to) {
+                                         List<String> statuses, LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
         long total = coopRequestRepository.findSentCount(doctorId, statusList, from, to);
@@ -98,7 +98,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> allList(Long doctorId, Long deptId, PageObject pageObject,
-                                       List<String> statuses, LocalDate from, LocalDate to) {
+                                        List<String> statuses, LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
         long total = coopRequestRepository.findAllRelatedCount(doctorId, deptId, statusList, from, to);
@@ -125,7 +125,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     @Transactional
-    public CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId) {
+    public CoopRequestVO view(Long coopRequestId, Long viewerDoctorId, Long viewerDeptId, boolean isAdmin) {
         CoopRequest c = findEntity(coopRequestId);
 
         CoopRequestVO vo = toVO(c, viewerDoctorId);
@@ -146,10 +146,11 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             });
         }
 
-        // 진료과 요청의 개인별 거절 상세(누가/왜)는 요청자(보낸 사람)한테만 보여준다.
+        // 진료과 요청의 개인별 거절 상세(누가/왜)는 요청자(보낸 사람) 또는 관리자한테만 보여준다.
         // 같은 과 동료들끼리는 서로의 거절 사유를 볼 필요가 없고, 오히려 솔직하게
         // 사유를 적기 부담스러워질 수 있어서 지정의사 요청처럼(=상세 없이) 보이게 한다.
-        if (isSent && c.getRecvType() == RecvType.진료과) {
+        // 관리자는 감사/조회 목적이라 이 프라이버시 고려 대상이 아니라서 예외로 둔다.
+        if ((isSent || isAdmin) && c.getRecvType() == RecvType.진료과) {
             List<CoopRequestDeptRejectVO> rejections = new ArrayList<>();
             for (CoopRequestDeptReject r : deptRejectRepository.findByCoopRequestIdOrderByRejectedAtAsc(coopRequestId)) {
                 CoopRequestDeptRejectVO rv = new CoopRequestDeptRejectVO();
@@ -203,7 +204,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
     }
 
     private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId,
-                                Long pacsStudyId, String reqContent) {
+                                 Long pacsStudyId, String reqContent) {
         if (recvType == RecvType.지정의사) {
             if (recvDoctorId == null) {
                 throw new RuntimeException("지정의사 요청은 수신 의사를 선택해야 합니다.");
@@ -326,7 +327,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> adminList(Long reqDoctorId, Long recvDoctorId, Long deptId, PageObject pageObject,
-                                         List<String> statuses, LocalDate from, LocalDate to) {
+                                          List<String> statuses, LocalDate from, LocalDate to) {
         // 관리자 화면은 기본값으로 취소 포함 전체 상태를 다 보여준다 (감사/조회 목적이라 숨길 이유가 없음)
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
@@ -362,11 +363,11 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         Map<Long, Member> memberMap = doctorIds.isEmpty()
                 ? Map.of()
                 : memberRepository.findAllByIdWithDepartment(doctorIds).stream()
-                .collect(Collectors.toMap(Member::getNo, m -> m));
+                        .collect(Collectors.toMap(Member::getNo, m -> m));
         Map<Long, String> deptNameMap = deptIds.isEmpty()
                 ? Map.of()
                 : departmentRepository.findAllById(deptIds).stream()
-                .collect(Collectors.toMap(d -> d.getNo(), d -> d.getDepartmentName()));
+                        .collect(Collectors.toMap(d -> d.getNo(), d -> d.getDepartmentName()));
 
         List<CoopRequestVO> result = new ArrayList<>();
         for (CoopRequest c : list) {
@@ -404,7 +405,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     /** memberMap에서 이미 조회해둔 Member로 이름+메타를 채운다 (DB 재조회 없음) */
     private void applyNameFromMap(Member m, java.util.function.Consumer<String> nameSetter,
-                                  java.util.function.Consumer<String> metaSetter) {
+                                   java.util.function.Consumer<String> metaSetter) {
         if (m == null) {
             return;
         }
@@ -539,8 +540,8 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     /** 요청자/수신자/수락자 이름 - 조회자와 무관하게 항상 실제 이름+메타를 채운다. */
     private void applyRealDoctorName(Long doctorId,
-                                     java.util.function.Consumer<String> nameSetter,
-                                     java.util.function.Consumer<String> metaSetter) {
+                                      java.util.function.Consumer<String> nameSetter,
+                                      java.util.function.Consumer<String> metaSetter) {
         memberRepository.findById(doctorId).ifPresent(m -> {
             nameSetter.accept(m.getName());
             List<String> metaParts = new ArrayList<>();

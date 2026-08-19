@@ -98,17 +98,6 @@ function BrandMark() {
    SERVICE ICON
 ========================================================= */
 
-function StatisticsIcon() {
-  return (
-    <IconBase size={38}>
-      <path d="M4 19V5" />
-      <path d="M4 19h16" />
-      <path d="m7 15 3.5-4 3 2.5L19 7" />
-    </IconBase>
-  );
-}
-
-
 function PacsIcon() {
   return (
     <IconBase size={38}>
@@ -232,9 +221,6 @@ function BellRingIcon() {
 
 function getServiceIcon(title) {
   switch (title) {
-    case "질환별 통계":
-      return <StatisticsIcon />;
-
     case "PACS":
       return <PacsIcon />;
 
@@ -310,23 +296,6 @@ function Home() {
 
 
   const services = [
-    {
-      number: "01",
-      title: "질환별 통계",
-      english: "DISEASE STATISTICS",
-      description:
-        "질환별 판독 및 협진 데이터를 기간별로 확인합니다.",
-      path: "/d/statistics",
-      keywords: [
-        "질환",
-        "질환별",
-        "통계",
-        "데이터",
-        "판독",
-        "협진",
-      ],
-    },
-
     {
       number: "02",
       title: "PACS",

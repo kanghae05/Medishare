@@ -20,8 +20,8 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findReceived(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                          LocalDate from, LocalDate to,
-                                          long offset, long limit) {
+                                           LocalDate from, LocalDate to,
+                                           long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(receivedCondition(doctorId, deptId),
                         statusIn(statuses),
@@ -34,7 +34,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findReceivedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                  LocalDate from, LocalDate to) {
+                                   LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(receivedCondition(doctorId, deptId),
@@ -46,7 +46,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findSent(Long doctorId, List<CoopStatus> statuses,
-                                      LocalDate from, LocalDate to, long offset, long limit) {
+                                       LocalDate from, LocalDate to, long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(c.reqDoctorId.eq(doctorId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -68,7 +68,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findAllRelated(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                            LocalDate from, LocalDate to, long offset, long limit) {
+                                             LocalDate from, LocalDate to, long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(allRelatedCondition(doctorId, deptId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -80,7 +80,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findAllRelatedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                    LocalDate from, LocalDate to) {
+                                     LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(allRelatedCondition(doctorId, deptId),
@@ -100,8 +100,8 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findAllForAdmin(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                                             List<CoopStatus> statuses, LocalDate from, LocalDate to,
-                                             long offset, long limit) {
+                                              List<CoopStatus> statuses, LocalDate from, LocalDate to,
+                                              long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(adminCondition(reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -113,7 +113,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findAllForAdminCount(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                                     List<CoopStatus> statuses, LocalDate from, LocalDate to) {
+                                      List<CoopStatus> statuses, LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(adminCondition(reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId),

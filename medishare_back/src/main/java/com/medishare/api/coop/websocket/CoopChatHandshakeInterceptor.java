@@ -33,7 +33,7 @@ public class CoopChatHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public boolean beforeHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                                   WebSocketHandler wsHandler, Map<String, Object> attributes) {
+                                    WebSocketHandler wsHandler, Map<String, Object> attributes) {
         URI uri = request.getURI();
 
         // 1) URL 경로에서 coopRequestId 추출 (/ws/coop/123 형태)
@@ -70,7 +70,7 @@ public class CoopChatHandshakeInterceptor implements HandshakeInterceptor {
 
     @Override
     public void afterHandshake(ServerHttpRequest request, ServerHttpResponse response,
-                               WebSocketHandler wsHandler, Exception exception) {
+                                WebSocketHandler wsHandler, Exception exception) {
         // 별도 처리 없음
     }
 }
