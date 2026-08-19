@@ -1694,8 +1694,10 @@ function PacsList() {
                 loading
                 || uploading
               }
+              title="새로고침"
+              aria-label="새로고침"
             >
-              새로고침
+              ↻
             </button>
 
 
