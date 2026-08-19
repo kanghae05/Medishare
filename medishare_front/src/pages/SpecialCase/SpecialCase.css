@@ -197,9 +197,9 @@
 .case-card {
   background: #fff;
   border: 1px solid #dce4ea;
+  border-top: 3px solid #10958f;
   border-radius: 8px;
   color: #172331;
-  overflow: hidden;
   text-decoration: none;
   transition: box-shadow 0.15s, transform 0.15s;
 }
@@ -210,27 +210,11 @@
   transform: translateY(-2px);
 }
 
-.case-thumbnail {
-  align-items: center;
-  background: #e8f1f2;
-  color: #0f766e;
-  display: flex;
-  font-size: 12px;
-  font-weight: 800;
-  height: 150px;
-  justify-content: center;
-  letter-spacing: 0.08em;
-  overflow: hidden;
-}
-
-.case-thumbnail img {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
-}
-
 .case-card-body {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  padding: 20px;
 }
 
 .case-card-body h2 {
@@ -252,6 +236,7 @@
 
 .case-card-body small {
   color: #647482;
+  margin-top: auto;
 }
 
 .case-pagination {

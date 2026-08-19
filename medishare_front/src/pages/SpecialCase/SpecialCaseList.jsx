@@ -49,7 +49,6 @@ export default function SpecialCaseList() {
           <div className="case-grid">
             {data.content.map((item) => (
               <Link className="case-card" to={`/special-cases/${item.caseId}`} key={item.caseId}>
-                <div className="case-thumbnail">{item.thumbnailUrl ? <img src={item.thumbnailUrl} alt="" /> : <span>MEDICAL CASE</span>}</div>
                 <div className="case-card-body"><div className="case-badges"><span>{item.modality}</span><span>{item.bodyPart}</span></div><h2>{item.title}</h2><p>{item.findings}</p><small>조회 {item.views ?? 0}</small></div>
               </Link>
             ))}
