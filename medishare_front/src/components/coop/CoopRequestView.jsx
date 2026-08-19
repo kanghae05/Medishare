@@ -130,7 +130,7 @@ function CoopRequestView() {
   const canChat = vo.status === "수락" && (isSent || vo.viewerIsAcceptDoctor);
 
   return (
-    <div className="coop-page">
+    <div className="coop-page mb-5">
       <div className="coop-header">
         <h3 className="coop-title">협진 요청 상세</h3>
         <span className={"coop-pill status-" + (vo.displayStatus || vo.status)}>
