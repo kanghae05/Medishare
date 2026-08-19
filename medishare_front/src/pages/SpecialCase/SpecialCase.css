@@ -4,11 +4,10 @@
 
 /* 1. 레이아웃 및 메인 컨테이너 */
 .case-shell {
-  background: #f4f7fa;
+  background: transparent;
   color: #172331;
-  margin: -8px -12px 32px;
-  min-height: calc(100vh - 96px);
-  padding: 32px 24px;
+  margin: 0 0 32px;
+  padding: 24px 0 60px;
 }
 
 .case-page {
@@ -197,9 +196,9 @@
 .case-card {
   background: #fff;
   border: 1px solid #dce4ea;
+  border-top: 3px solid #10958f;
   border-radius: 8px;
   color: #172331;
-  overflow: hidden;
   text-decoration: none;
   transition: box-shadow 0.15s, transform 0.15s;
 }
@@ -210,27 +209,11 @@
   transform: translateY(-2px);
 }
 
-.case-thumbnail {
-  align-items: center;
-  background: #e8f1f2;
-  color: #0f766e;
-  display: flex;
-  font-size: 12px;
-  font-weight: 800;
-  height: 150px;
-  justify-content: center;
-  letter-spacing: 0.08em;
-  overflow: hidden;
-}
-
-.case-thumbnail img {
-  height: 100%;
-  object-fit: cover;
-  width: 100%;
-}
-
 .case-card-body {
-  padding: 16px;
+  display: flex;
+  flex-direction: column;
+  min-height: 190px;
+  padding: 20px;
 }
 
 .case-card-body h2 {
@@ -252,6 +235,7 @@
 
 .case-card-body small {
   color: #647482;
+  margin-top: auto;
 }
 
 .case-pagination {
@@ -312,9 +296,37 @@
 
 .case-viewer {
   aspect-ratio: 16 / 9;
-  margin-top: 14px;
   overflow: hidden;
   position: relative;
+}
+
+.case-pacs-section {
+  margin-top: 14px;
+}
+
+.case-pacs-head {
+  align-items: center;
+  background: #fff;
+  border: 1px solid #dce4ea;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  display: flex;
+  justify-content: space-between;
+  padding: 14px 16px;
+}
+
+.case-pacs-head div {
+  display: grid;
+  gap: 3px;
+}
+
+.case-pacs-head span {
+  color: #647482;
+  font-size: 13px;
+}
+
+.case-pacs-section .case-viewer {
+  border-radius: 0 0 8px 8px;
 }
 
 .case-viewer iframe {
@@ -381,7 +393,7 @@
 
 @media (max-width: 600px) {
   .case-shell {
-    padding: 24px 14px;
+    padding: 20px 0 40px;
   }
   .case-page-head {
     align-items: stretch;

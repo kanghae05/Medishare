@@ -199,7 +199,7 @@ function CoopRequestList({ mode }) {
             <span className="coop-ledger-no">NO</span>
             <span>요청 내용</span>
             <span className="coop-ledger-col-status">상태</span>
-            <span className="coop-ledger-col-time">시각</span>
+            <span className="coop-ledger-col-time">요청일시</span>
           </div>
           {list.map((r, idx) => {
             const isIncoming = mode === "all" ? r.direction === "received" : mode === "received";
