@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 import api from "../common/api";
 
 export default function ReportSelectModal({ open, onClose, onSelect }) {
@@ -18,8 +19,13 @@ export default function ReportSelectModal({ open, onClose, onSelect }) {
 
   if (!open) return null;
 
-  return (
-    <div className="modal d-block" style={{ background: "#0008" }} role="dialog" aria-modal="true">
+  return createPortal(
+    <div
+      className="modal d-block report-select-modal"
+      style={{ background: "rgba(0, 0, 0, 0.53)", zIndex: 10000 }}
+      role="dialog"
+      aria-modal="true"
+    >
       <div className="modal-dialog modal-lg modal-dialog-scrollable">
         <div className="modal-content">
           <div className="modal-header">
@@ -46,6 +52,7 @@ export default function ReportSelectModal({ open, onClose, onSelect }) {
           </div>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

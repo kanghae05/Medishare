@@ -175,6 +175,16 @@
   margin-top: 0;
 }
 
+.report-select-modal {
+  background: rgba(0, 0, 0, 0.53);
+  z-index: 10000;
+}
+
+.report-select-modal .modal-dialog {
+  margin-bottom: 1.75rem;
+  margin-top: 1.75rem;
+}
+
 
 /* 4. 카드 리스트 그리드 및 상태 카드 */
 .case-state {
