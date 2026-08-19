@@ -32,7 +32,7 @@ function MemberLogin(){
     // Spring Boot로 백엔드 처리 APi 호출해서 데이터 전달
     try {
       const response = await axios.post(
-        `http://${window.location.hostname}:8080/member/login.do`,
+        `http://${window.location.hostname}/member/login.do`,
         data
       );
 
