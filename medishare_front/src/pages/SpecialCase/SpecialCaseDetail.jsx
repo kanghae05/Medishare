@@ -1,33 +1,16 @@
 import { useEffect, useState } from "react";
 import { Link, useNavigate, useParams } from "react-router-dom";
 import WatermarkOverlay from "../../components/SpecialCase/WatermarkOverlay";
-import { deleteSpecialCase, getSpecialCase, getSpecialCasePreview } from "./specialCaseApi";
+import { deleteSpecialCase, getSpecialCase } from "./specialCaseApi";
 import "./SpecialCase.css";
 
 export default function SpecialCaseDetail({ currentUser }) {
   const { caseId } = useParams();
   const [item, setItem] = useState(null);
-  const [previewUrl, setPreviewUrl] = useState("");
-  const [previewError, setPreviewError] = useState(false);
   const navigate = useNavigate();
 
   useEffect(() => {
     getSpecialCase(caseId).then(setItem);
-  }, [caseId]);
-
-  useEffect(() => {
-    let objectUrl;
-
-    getSpecialCasePreview(caseId)
-      .then((blob) => {
-        objectUrl = URL.createObjectURL(blob);
-        setPreviewUrl(objectUrl);
-      })
-      .catch(() => setPreviewError(true));
-
-    return () => {
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
-    };
   }, [caseId]);
 
   if (!item) {
@@ -41,6 +24,9 @@ export default function SpecialCaseDetail({ currentUser }) {
   const isAdmin = currentUser?.roles?.some((role) => role === "ADMIN" || role === "ROLE_ADMIN") ?? false;
   const isOwner = String(currentUser?.memberId ?? currentUser?.id) === String(item.writerId);
   const canDelete = isOwner || isAdmin;
+  const viewerUrl = item.studyInstanceUid
+    ? `http://${window.location.hostname}:3000/viewer?StudyInstanceUIDs=${encodeURIComponent(item.studyInstanceUid)}`
+    : "";
 
   // 삭제 처리 함수
   const remove = async () => {
@@ -88,13 +74,21 @@ export default function SpecialCaseDetail({ currentUser }) {
           )}
         </section>
 
-        {/* Orthanc 대표 이미지는 백엔드를 경유하므로 외부 PC에서도 localhost 문제없이 표시된다. */}
-        {item.studyInstanceUid && (
-          <div className="case-viewer">
-            {previewUrl && <img className="case-preview" src={previewUrl} alt={`${item.title} 의료영상`} />}
-            {!previewUrl && !previewError && <div className="case-viewer-state">의료영상을 불러오는 중입니다.</div>}
-            {previewError && <div className="case-viewer-state">Orthanc 의료영상을 불러오지 못했습니다.</div>}
-          </div>
+        {viewerUrl && (
+          <section className="case-pacs-section">
+            <div className="case-pacs-head">
+              <div>
+                <strong>PACS DICOM 영상</strong>
+                <span>연결된 검사를 OHIF Viewer로 표시합니다.</span>
+              </div>
+              <a className="case-secondary" href={viewerUrl} target="_blank" rel="noreferrer">
+                새 창에서 보기
+              </a>
+            </div>
+            <div className="case-viewer">
+              <iframe src={viewerUrl} title={`${item.title} PACS DICOM Viewer`} allowFullScreen />
+            </div>
+          </section>
         )}
 
         {/* 하단 버튼 영역 (목록, 수정, 삭제) */}
