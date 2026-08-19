@@ -12,4 +12,5 @@ public class CoopMessageVO {
     private String content;
     private String sentAt;       // "yyyy-MM-dd HH:mm:ss"
     private boolean mine;        // 이 메시지를 받는(조회하는) 사람이 보낸 것인지 - 말풍선 좌/우 배치용
+    private boolean read;        // 상대방이 읽었는지 - 내가 보낸 메시지(mine=true)에만 화면에 표시한다
 }

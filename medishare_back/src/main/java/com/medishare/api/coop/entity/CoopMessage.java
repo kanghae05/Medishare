@@ -11,6 +11,7 @@ import java.time.LocalDateTime;
  */
 @Entity
 @Getter
+@Setter
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
@@ -33,6 +34,12 @@ public class CoopMessage {
 
     @Column(nullable = false)
     private LocalDateTime sentAt;
+
+    // 상대방이 이 메시지를 읽었는지. 채팅방엔 항상 딱 두 사람(요청자/수락자)뿐이라
+    // "상대방이 읽었나"가 애매할 일이 없다 - coop_request의 is_read를 없앴던 이유(다중 수신자)와는 다른 상황.
+    @Builder.Default
+    @Column(name = "is_read", nullable = false)
+    private boolean read = false;
 
     @PrePersist
     protected void onCreate() {

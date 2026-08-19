@@ -9,6 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 public interface CoopRequestRepository extends JpaRepository<CoopRequest, Long>, CoopRequestRepositoryCustom {
 
@@ -85,4 +86,14 @@ public interface CoopRequestRepository extends JpaRepository<CoopRequest, Long>,
                                     @Param("doctorId") Long doctorId,
                                     @Param("from") LocalDateTime from,
                                     @Param("to") LocalDateTime to);
+
+    /**
+     * "대화함" 목록용 - 내가 참여 중인 채팅방(수락된 협진요청, 요청자 또는 수락자로 참여한 것) 전체.
+     * 채팅 자체가 "수락된 것 + 요청자/수락자 둘 뿐"이라는 규칙(CoopMessageService.isParticipant)과 동일하게 맞춘다.
+     */
+    @Query("SELECT c FROM CoopRequest c " +
+            "WHERE c.status = com.medishare.api.coop.entity.CoopStatus.수락 " +
+            "AND (c.reqDoctorId = :doctorId OR c.acceptDoctorId = :doctorId) " +
+            "ORDER BY c.respTime DESC")
+    List<CoopRequest> findMyChatRooms(@Param("doctorId") Long doctorId);
 }

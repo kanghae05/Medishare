@@ -3,7 +3,8 @@ import api from "../common/api";
 import "./Coop.css";
 
 // 협진요청 건별 실시간 채팅. WebSocket 연결 전에 REST로 이력을 먼저 불러온다.
-function CoopChatPanel({ coopRequestId }) {
+// large=true면 대화방 전용 화면처럼 메시지 영역을 크게 보여준다 (상세화면에 곁들일 땐 기본 크기).
+function CoopChatPanel({ coopRequestId, large = false }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
@@ -76,7 +77,7 @@ function CoopChatPanel({ coopRequestId }) {
 
       {loadError && <div className="coop-empty">{loadError}</div>}
 
-      <div className="coop-chat-messages">
+      <div className={"coop-chat-messages" + (large ? " coop-chat-messages-large" : "")}>
         {messages.length === 0 && !loadError && (
           <div className="coop-chat-empty">아직 대화가 없습니다. 첫 메시지를 보내보세요.</div>
         )}
@@ -84,7 +85,10 @@ function CoopChatPanel({ coopRequestId }) {
           <div key={m.coopMessageId ?? i} className={"coop-chat-bubble-row" + (m.mine ? " mine" : "")}>
             {!m.mine && <div className="coop-chat-sender">{m.senderName || `의사 #${m.senderDoctorId}`}</div>}
             <div className="coop-chat-bubble">{m.content}</div>
-            <div className="coop-chat-time">{m.sentAt ? m.sentAt.slice(5, 16) : ""}</div>
+            <div className="coop-chat-time">
+              {m.mine && <span className="coop-chat-read">{m.read ? "읽음" : "안읽음"}</span>}
+              {m.sentAt ? m.sentAt.slice(5, 16) : ""}
+            </div>
           </div>
         ))}
         <div ref={bottomRef} />
