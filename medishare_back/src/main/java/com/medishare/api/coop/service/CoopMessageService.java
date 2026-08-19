@@ -1,12 +1,13 @@
 package com.medishare.api.coop.service;
 
+import com.medishare.api.coop.vo.ChatRoomVO;
 import com.medishare.api.coop.vo.CoopMessageVO;
 
 import java.util.List;
 
 public interface CoopMessageService {
 
-    /** 이 협진요청의 채팅 이력 (오래된 순) */
+    /** 이 협진요청의 채팅 이력 (오래된 순). 호출 시 상대방이 보낸 메시지를 전부 읽음 처리한다. */
     List<CoopMessageVO> history(Long coopRequestId, Long viewerId);
 
     /** 메시지 저장 후, 화면에 바로 붙일 수 있는 형태로 반환 (WebSocket 브로드캐스트에 사용) */
@@ -18,4 +19,10 @@ public interface CoopMessageService {
      * deptId는 소속 진료과가 없는 계정일 수 있어 null 허용.
      */
     boolean isParticipant(Long coopRequestId, Long doctorId, Long deptId);
+
+    /** "대화함" 목록 - 내가 참여 중인 채팅방 전체, 방마다 마지막 메시지 + 안읽은 개수 포함 */
+    List<ChatRoomVO> myChatRooms(Long doctorId);
+
+    /** 사이드바 배지용 - 내 모든 채팅방을 통틀어 안읽은 메시지 총개수 */
+    long myTotalUnreadCount(Long doctorId);
 }

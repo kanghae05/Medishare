@@ -130,7 +130,7 @@ function CoopRequestView() {
   const canChat = vo.status === "수락" && (isSent || vo.viewerIsAcceptDoctor);
 
   return (
-    <div className="coop-page mb-5">
+    <div className="coop-page">
       <div className="coop-header">
         <h3 className="coop-title">협진 요청 상세</h3>
         <span className={"coop-pill status-" + (vo.displayStatus || vo.status)}>
@@ -180,18 +180,6 @@ function CoopRequestView() {
             <span className="coop-view-label">요청 내용</span>
             <span className="coop-view-value">{vo.reqContent}</span>
           </div>
-          {reportSummary && (
-            <div className="coop-view-span2">
-              <span className="coop-view-label">첨부 소견서</span>
-              <span className="coop-view-value">
-                {reportSummary.title}
-                <span style={{ color: "var(--coop-faint)" }}>
-                  {" "}
-                  ({reportSummary.status === "FINAL" ? "최종 확정" : reportSummary.status === "DRAFT" ? "작성 중" : reportSummary.status})
-                </span>
-              </span>
-            </div>
-          )}
           {vo.originRequestId && vo.originReqContent && (
             <div className="coop-view-span2">
               <span className="coop-view-label">이전 요청 내용</span>
@@ -211,6 +199,33 @@ function CoopRequestView() {
       </div>
 
       {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
+
+      {reportSummary && (
+        <div className="coop-detail-panel">
+          <div className="coop-detail-section-title">
+            첨부 소견서
+            <span style={{ float: "right", fontWeight: 400, color: "var(--coop-faint)" }}>
+              {reportSummary.status === "FINAL" ? "최종 확정" : reportSummary.status === "DRAFT" ? "작성 중" : reportSummary.status}
+            </span>
+          </div>
+          <div className="coop-detail-section">
+            <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{reportSummary.title}</div>
+            {reportSummary.findings && (
+              <div style={{ marginBottom: 10 }}>
+                <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>소견 (Findings)</div>
+                <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.findings}</div>
+              </div>
+            )}
+            {reportSummary.impression && (
+              <div>
+                <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>판정 (Impression)</div>
+                <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.impression}</div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
       {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
       {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (

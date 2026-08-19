@@ -11,6 +11,7 @@ import com.medishare.api.coop.repository.CoopReportLookupRepository;
 import com.medishare.api.coop.service.CoopMessageService;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
+import com.medishare.api.coop.vo.ChatRoomVO;
 import com.medishare.api.coop.vo.CoopMessageVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.DepartmentLookupVO;
@@ -74,10 +75,10 @@ public class CoopRequestController {
     // 받은 협진함 (4-5-1)
     @GetMapping("/received.do")
     public Map<String, Object> received(@RequestParam(required = false) String status,
-                                         @RequestParam(required = false) String from,
-                                         @RequestParam(required = false) String to,
-                                         HttpServletRequest request,
-                                         Authentication authentication) throws Exception {
+                                        @RequestParam(required = false) String from,
+                                        @RequestParam(required = false) String to,
+                                        HttpServletRequest request,
+                                        Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
@@ -95,10 +96,10 @@ public class CoopRequestController {
     // 보낸 협진함 (4-5-2)
     @GetMapping("/sent.do")
     public Map<String, Object> sent(@RequestParam(required = false) String status,
-                                     @RequestParam(required = false) String from,
-                                     @RequestParam(required = false) String to,
-                                     HttpServletRequest request,
-                                     Authentication authentication) throws Exception {
+                                    @RequestParam(required = false) String from,
+                                    @RequestParam(required = false) String to,
+                                    HttpServletRequest request,
+                                    Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
 
@@ -114,10 +115,10 @@ public class CoopRequestController {
     // 전체 협진 내역 (4-5-3)
     @GetMapping("/all.do")
     public Map<String, Object> all(@RequestParam(required = false) String status,
-                                    @RequestParam(required = false) String from,
-                                    @RequestParam(required = false) String to,
-                                    HttpServletRequest request,
-                                    Authentication authentication) throws Exception {
+                                   @RequestParam(required = false) String from,
+                                   @RequestParam(required = false) String to,
+                                   HttpServletRequest request,
+                                   Authentication authentication) throws Exception {
         Long doctorId = currentDoctorId(authentication);
         Long deptId = safeCurrentDeptId(authentication);
         PageObject pageObject = PageObject.getInstance(request);
@@ -153,6 +154,20 @@ public class CoopRequestController {
         return coopMessageService.history(coopRequestId, doctorId);
     }
 
+    // 대화함 - 내가 참여 중인 채팅방 목록 (마지막 메시지 + 안읽은 개수 포함)
+    @GetMapping("/chats.do")
+    public List<ChatRoomVO> myChats(Authentication authentication) {
+        Long doctorId = currentDoctorId(authentication);
+        return coopMessageService.myChatRooms(doctorId);
+    }
+
+    // 사이드바 "대화함" 탭 배지용 - 내 채팅방 전체의 안읽은 메시지 총개수
+    @GetMapping("/chats/unreadCount.do")
+    public Map<String, Object> chatsUnreadCount(Authentication authentication) {
+        Long doctorId = currentDoctorId(authentication);
+        return Map.of("unreadCount", coopMessageService.myTotalUnreadCount(doctorId));
+    }
+
     /** 진료과 미배정 계정도 (그 사람이 당사자인 채팅 자체는) 조회할 수 있도록, deptId 없으면 null로 처리 */
     private Long safeCurrentDeptId(Authentication authentication) {
         try {
@@ -173,12 +188,12 @@ public class CoopRequestController {
     // 관리자 전체 조회 (ROLE_ADMIN 전용 - SecurityConfig에서 /coop/admin/** 로 별도 제한)
     @GetMapping("/admin/all.do")
     public Map<String, Object> adminAll(@RequestParam(required = false) Long reqDoctorId,
-                                         @RequestParam(required = false) Long recvDoctorId,
-                                         @RequestParam(required = false) Long deptId,
-                                         @RequestParam(required = false) String status,
-                                         @RequestParam(required = false) String from,
-                                         @RequestParam(required = false) String to,
-                                         HttpServletRequest request) throws Exception {
+                                        @RequestParam(required = false) Long recvDoctorId,
+                                        @RequestParam(required = false) Long deptId,
+                                        @RequestParam(required = false) String status,
+                                        @RequestParam(required = false) String from,
+                                        @RequestParam(required = false) String to,
+                                        HttpServletRequest request) throws Exception {
         PageObject pageObject = PageObject.getInstance(request);
 
         List<CoopRequestVO> list = coopRequestService.adminList(
@@ -251,7 +266,7 @@ public class CoopRequestController {
     // 받는 의사 자동완성 - 이름/세부전공/진료과명 중 하나라도 검색어 포함, 본인은 제외
     @GetMapping("/lookup/doctors.do")
     public List<DoctorLookupVO> lookupDoctors(@RequestParam(defaultValue = "") String q,
-                                               Authentication authentication) {
+                                              Authentication authentication) {
         Long myDoctorId = currentDoctorId(authentication);
         List<Long> adminIds = memberRepository.findAdminMemberIds();
         return memberRepository.searchDoctors(q, myDoctorId).stream()
@@ -300,20 +315,35 @@ public class CoopRequestController {
 
     // 선택한 검사에 "본인이 작성한" 소견서가 있는지 확인 (없으면 빈 목록)
     // 다른 의사가 쓴 소견서는 첨부 후보로 보여주지 않는다 - 본인 작성분만 활용 가능.
+    // 여기서는 첨부할지 말지 고르는 용도라 제목/상태만 필요, 내용까지는 안 채운다.
     @GetMapping("/lookup/studies/{studyNo}/report.do")
     public List<ReportLookupVO> lookupReportByStudy(@PathVariable Long studyNo, Authentication authentication) {
         Long myDoctorId = currentDoctorId(authentication);
         return reportRepository.findFirstByStudyNoAndMember_NoOrderByWriteDateDesc(studyNo, myDoctorId)
-                .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
+                .map(r -> {
+                    ReportLookupVO vo = new ReportLookupVO();
+                    vo.setNo(r.getNo());
+                    vo.setTitle(r.getTitle());
+                    vo.setStatus(r.getStatus());
+                    return vo;
+                })
                 .map(List::of)
                 .orElse(List.of());
     }
 
-    // 협진 요청에 첨부된 소견서 요약 (상세화면에 "첨부 소견서: 제목 (상태)" 형태로 보여주는 용도)
+    // 협진 요청에 첨부된 소견서 - 상세화면에 내용(소견/판정)까지 그대로 보여주는 용도
     @GetMapping("/report/{reportId}.do")
     public ReportLookupVO reportSummary(@PathVariable Long reportId) {
         return reportRepository.findById(reportId)
-                .map(r -> new ReportLookupVO(r.getNo(), r.getTitle(), r.getStatus()))
+                .map(r -> {
+                    ReportLookupVO vo = new ReportLookupVO();
+                    vo.setNo(r.getNo());
+                    vo.setTitle(r.getTitle());
+                    vo.setStatus(r.getStatus());
+                    vo.setFindings(r.getFindings());
+                    vo.setImpression(r.getImpression());
+                    return vo;
+                })
                 .orElseThrow(() -> new RuntimeException("존재하지 않는 소견서입니다."));
     }
 
@@ -367,11 +397,11 @@ public class CoopRequestController {
             return null;
         }
         try {
-            LocalDate birth = LocalDate.of(
+            java.time.LocalDate birth = java.time.LocalDate.of(
                     Integer.parseInt(birthDateRaw.substring(0, 4)),
                     Integer.parseInt(birthDateRaw.substring(4, 6)),
                     Integer.parseInt(birthDateRaw.substring(6, 8)));
-            return java.time.Period.between(birth, LocalDate.now()).getYears();
+            return java.time.Period.between(birth, java.time.LocalDate.now()).getYears();
         } catch (Exception e) {
             return null;
         }

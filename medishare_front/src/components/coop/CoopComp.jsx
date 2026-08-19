@@ -5,6 +5,8 @@ import CoopRequestList from "./CoopRequestList";
 import CoopRequestWriteForm from "./CoopRequestWriteForm";
 import CoopRequestView from "./CoopRequestView";
 import CoopAdminList from "./CoopAdminList";
+import CoopChatList from "./CoopChatList";
+import CoopChatRoom from "./CoopChatRoom";
 import { isAdmin } from "./coopAuth";
 import "./Coop.css";
 
@@ -52,6 +54,8 @@ function CoopComp() {
         <Route path="all" element={<CoopRequestList mode="all" />} />
         <Route path="write" element={<CoopRequestWriteForm />} />
         <Route path="view" element={<CoopRequestView />} />
+        <Route path="chats" element={<CoopChatList />} />
+        <Route path="chat" element={<CoopChatRoom />} />
       </Route>
       <Route index element={<Navigate to="/coop/received" replace />} />
       {/* 일반 계정은 관리자 화면에 못 들어간다 (백엔드도 /coop/admin/** 를 ROLE_ADMIN으로 막아뒀지만,

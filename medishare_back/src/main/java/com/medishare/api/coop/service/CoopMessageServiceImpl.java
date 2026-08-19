@@ -6,6 +6,7 @@ import com.medishare.api.coop.entity.CoopStatus;
 import com.medishare.api.coop.repository.CoopMemberLookupRepository;
 import com.medishare.api.coop.repository.CoopMessageRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
+import com.medishare.api.coop.vo.ChatRoomVO;
 import com.medishare.api.coop.vo.CoopMessageVO;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -25,7 +26,10 @@ public class CoopMessageServiceImpl implements CoopMessageService {
     private final CoopMemberLookupRepository memberRepository;
 
     @Override
+    @Transactional
     public List<CoopMessageVO> history(Long coopRequestId, Long viewerId) {
+        // 채팅방을 여는 시점 = "내가 이 방을 읽었다"는 뜻이라, 상대방이 보낸 메시지를 전부 읽음 처리한다.
+        coopMessageRepository.markAsRead(coopRequestId, viewerId);
         return coopMessageRepository.findByCoopRequestIdOrderBySentAtAsc(coopRequestId).stream()
                 .map(m -> toVO(m, viewerId))
                 .toList();
@@ -63,6 +67,54 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         return doctorId.equals(c.getReqDoctorId()) || doctorId.equals(c.getAcceptDoctorId());
     }
 
+    @Override
+    public List<ChatRoomVO> myChatRooms(Long doctorId) {
+        List<CoopRequest> rooms = coopRequestRepository.findMyChatRooms(doctorId);
+        List<ChatRoomVO> result = new java.util.ArrayList<>();
+
+        for (CoopRequest c : rooms) {
+            ChatRoomVO vo = new ChatRoomVO();
+            vo.setCoopRequestId(c.getCoopRequestId());
+
+            // 상대방 = 나 아닌 쪽 (요청자 또는 수락자)
+            Long counterpartId = c.getReqDoctorId().equals(doctorId) ? c.getAcceptDoctorId() : c.getReqDoctorId();
+            memberRepository.findById(counterpartId).ifPresent(m -> {
+                vo.setCounterpartName(m.getName());
+                List<String> metaParts = new java.util.ArrayList<>();
+                if (m.getDepartment() != null && m.getDepartment().getDepartmentName() != null) {
+                    metaParts.add(m.getDepartment().getDepartmentName());
+                }
+                if (m.getSpecialty() != null && !m.getSpecialty().isBlank()) {
+                    metaParts.add(m.getSpecialty());
+                }
+                if (m.getPosition() != null && !m.getPosition().isBlank()) {
+                    metaParts.add(m.getPosition());
+                }
+                vo.setCounterpartMeta(String.join(" · ", metaParts));
+            });
+
+            coopMessageRepository.findFirstByCoopRequestIdOrderBySentAtDesc(c.getCoopRequestId())
+                    .ifPresent(last -> {
+                        vo.setLastMessage(last.getContent());
+                        vo.setLastMessageTime(last.getSentAt() == null ? null : last.getSentAt().format(DATETIME_FMT));
+                    });
+
+            vo.setUnreadCount(coopMessageRepository.countByCoopRequestIdAndSenderDoctorIdNotAndReadFalse(
+                    c.getCoopRequestId(), doctorId));
+
+            result.add(vo);
+        }
+        return result;
+    }
+
+    @Override
+    public long myTotalUnreadCount(Long doctorId) {
+        return coopRequestRepository.findMyChatRooms(doctorId).stream()
+                .mapToLong(c -> coopMessageRepository.countByCoopRequestIdAndSenderDoctorIdNotAndReadFalse(
+                        c.getCoopRequestId(), doctorId))
+                .sum();
+    }
+
     private CoopMessageVO toVO(CoopMessage m, Long viewerId) {
         CoopMessageVO vo = new CoopMessageVO();
         vo.setCoopMessageId(m.getCoopMessageId());
@@ -71,6 +123,7 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         vo.setContent(m.getContent());
         vo.setSentAt(m.getSentAt() == null ? null : m.getSentAt().format(DATETIME_FMT));
         vo.setMine(m.getSenderDoctorId().equals(viewerId));
+        vo.setRead(m.isRead());
         memberRepository.findById(m.getSenderDoctorId())
                 .ifPresent(mem -> vo.setSenderName(mem.getName()));
         return vo;

@@ -4,11 +4,16 @@ import api from "../common/api";
 
 function CoopSidebar() {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
   useEffect(() => {
     api
       .get("/coop/unreadCount.do")
       .then((res) => setUnreadCount(res.data.unreadCount || 0))
+      .catch(() => {});
+    api
+      .get("/coop/chats/unreadCount.do")
+      .then((res) => setChatUnreadCount(res.data.unreadCount || 0))
       .catch(() => {});
   }, []);
 
@@ -29,6 +34,10 @@ function CoopSidebar() {
         </NavLink>
         <NavLink to="/coop/all" className={linkClass}>
           <span className="coop-tab-label">전체 협진 내역</span>
+        </NavLink>
+        <NavLink to="/coop/chats" className={linkClass}>
+          <span className="coop-tab-label">대화함</span>
+          {chatUnreadCount > 0 && <span className="count-badge">{chatUnreadCount}</span>}
         </NavLink>
       </nav>
     </aside>

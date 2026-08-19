@@ -405,6 +405,7 @@ CREATE TABLE coop_message (
     sender_doctor_id BIGINT NOT NULL,
     content TEXT NOT NULL,
     sent_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    is_read TINYINT(1) NOT NULL DEFAULT 0,
     FOREIGN KEY (coop_request_id) REFERENCES coop_request(coop_request_id),
     FOREIGN KEY (sender_doctor_id) REFERENCES member(no)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
