@@ -1,6 +1,10 @@
 package com.medishare.api.specialcase.service;
 
 import com.medishare.api.member.repository.QMemberRepository;
+import com.medishare.api.pacs.entity.PacsStudy;
+import com.medishare.api.pacs.repository.PacsStudyRepository;
+import com.medishare.api.report.entity.Report;
+import com.medishare.api.report.repository.QReportRepository;
 import com.medishare.api.specialcase.dto.SpecialCaseDto;
 import com.medishare.api.specialcase.entity.CasePacsLink;
 import com.medishare.api.specialcase.entity.SpecialCase;
@@ -33,6 +37,8 @@ public class SpecialCaseService {
 
     private final SpecialCaseRepository specialCaseRepository;
     private final QMemberRepository memberRepository;
+    private final QReportRepository reportRepository;
+    private final PacsStudyRepository studyRepository;
     private final WebClient orthancWebClient;
 
     /** 필터, 키워드, 정렬 기준을 적용한 페이지 목록을 반환한다. */
@@ -67,6 +73,7 @@ public class SpecialCaseService {
     /** 개인정보를 비식별화한 뒤 케이스, PACS 링크, 태그를 함께 저장한다. */
     @Transactional
     public SpecialCaseDto.Response create(Long writerId, SpecialCaseVO vo) {
+        validateOwnedReport(writerId, vo);
         String safeFindings = DeidentificationUtil.scrub(vo.getFindings(), vo.getPatientName());
         String safeImpression = DeidentificationUtil.scrub(vo.getImpression(), vo.getPatientName());
 
@@ -96,14 +103,14 @@ public class SpecialCaseService {
         return toResponse(specialCase);
     }
 
-    /** 실제 행을 삭제하지 않고 is_deleted 값만 변경한다. */
+    /** 케이스와 cascade로 연결된 PACS 링크 및 태그를 DB에서 실제 삭제한다. */
     @Transactional
     public void delete(Long id, Long actorId, boolean isAdmin) {
         SpecialCase specialCase = findActiveCase(id);
         if (!isAdmin) {
             validateOwner(specialCase, actorId);
         }
-        specialCase.delete();
+        specialCaseRepository.delete(specialCase);
     }
 
     private Pageable createPageable(int page, int size, String sortField) {
@@ -150,6 +157,30 @@ public class SpecialCaseService {
                     HttpStatus.FORBIDDEN,
                     "Only the writer can modify this case"
             );
+        }
+    }
+
+    private void validateOwnedReport(Long writerId, SpecialCaseVO vo) {
+        if (vo.getReportId() == null) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "A report must be selected");
+        }
+
+        Report report = reportRepository.findById(vo.getReportId())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Report not found"));
+
+        if (report.getMember() == null || !Objects.equals(report.getMember().getNo(), writerId)) {
+            throw new ResponseStatusException(HttpStatus.FORBIDDEN, "Only your own report can be registered");
+        }
+
+        PacsStudy study = studyRepository.findById(report.getStudyNo())
+                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "PACS study not found"));
+
+        if (!Objects.equals(study.getStudyInstanceUID(), vo.getStudyInstanceUid())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "The selected report and PACS study do not match");
+        }
+
+        if (specialCaseRepository.existsActiveByStudyInstanceUid(study.getStudyInstanceUID())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "This report is already registered as a special case");
         }
     }
 

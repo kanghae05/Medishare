@@ -12,12 +12,21 @@ export default function SpecialCaseList() {
   const [query, setQuery] = useState({ page: 0, size: 12, sort: "createdAt", modality: "", bodyPart: "", keyword: "" });
   const [data, setData] = useState({ content: [], totalPages: 0 });
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
   const loggedIn = Boolean(localStorage.getItem("token"));
 
   useEffect(() => {
+    setError("");
     getSpecialCases(query)
       .then(setData)
-      .catch(() => setData({ content: [], totalPages: 0 }))
+      .catch((requestError) => {
+        setData({ content: [], totalPages: 0 });
+        setError(
+          requestError.response?.status === 401
+            ? "로그인 세션이 만료되었습니다. 다시 로그인해 주세요."
+            : requestError.response?.data?.message || "특이케이스 목록을 불러오지 못했습니다."
+        );
+      })
       .finally(() => setLoading(false));
   }, [query]);
 
@@ -45,7 +54,7 @@ export default function SpecialCaseList() {
           <select aria-label="정렬 기준" value={query.sort} onChange={(event) => setFilter("sort", event.target.value)}><option value="createdAt">최신순</option><option value="views">조회순</option></select>
         </div>
 
-        {loading ? <div className="case-state">특이케이스를 불러오는 중입니다.</div> : data.content.length === 0 ? <div className="case-state">등록된 특이케이스가 없습니다.</div> : (
+        {loading ? <div className="case-state">특이케이스를 불러오는 중입니다.</div> : error ? <div className="case-state case-state-error">{error}</div> : data.content.length === 0 ? <div className="case-state">등록된 특이케이스가 없습니다.</div> : (
           <div className="case-grid">
             {data.content.map((item) => (
               <Link className="case-card" to={`/special-cases/${item.caseId}`} key={item.caseId}>

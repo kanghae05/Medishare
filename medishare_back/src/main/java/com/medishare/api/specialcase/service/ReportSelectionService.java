@@ -6,6 +6,7 @@ import com.medishare.api.pacs.repository.PacsStudyRepository;
 import com.medishare.api.report.entity.Report;
 import com.medishare.api.report.repository.QReportRepository;
 import com.medishare.api.specialcase.dto.ReportSelectionDto;
+import com.medishare.api.specialcase.repository.SpecialCaseRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -20,10 +21,13 @@ public class ReportSelectionService {
 
     private final QReportRepository reportRepository;
     private final PacsStudyRepository studyRepository;
+    private final SpecialCaseRepository specialCaseRepository;
 
-    public List<ReportSelectionDto> list() {
-        return reportRepository.findAllByOrderByWriteDateDesc().stream()
+    public List<ReportSelectionDto> list(Long memberNo) {
+        return reportRepository.findByMember_NoOrderByWriteDateDesc(memberNo).stream()
                 .map(this::toDto)
+                .filter(dto -> dto.studyInstanceUid() != null)
+                .filter(dto -> !specialCaseRepository.existsActiveByStudyInstanceUid(dto.studyInstanceUid()))
                 .toList();
     }
 

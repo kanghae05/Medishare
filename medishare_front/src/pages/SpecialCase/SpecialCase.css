@@ -187,6 +187,11 @@
   text-align: center;
 }
 
+.case-state-error {
+  border-color: #efc3c0;
+  color: #a43d37;
+}
+
 .case-grid {
   display: grid;
   gap: 14px;

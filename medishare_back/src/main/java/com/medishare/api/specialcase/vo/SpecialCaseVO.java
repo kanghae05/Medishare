@@ -16,6 +16,8 @@ import java.util.List;
 @AllArgsConstructor
 public class SpecialCaseVO {
 
+    private Long reportId;
+
     private String title;
 
     private String modality;

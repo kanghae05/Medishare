@@ -58,4 +58,13 @@ public interface SpecialCaseRepository extends JpaRepository<SpecialCase, Long> 
     @EntityGraph(attributePaths = {"pacsLink", "tags"})
     @Query("select c from SpecialCase c where c.id = :id and c.deleted = false")
     Optional<SpecialCase> findActiveDetail(@Param("id") Long id);
+
+    /** 동일 PACS Study로 이미 등록된 활성 특이케이스가 있는지 확인한다. */
+    @Query("""
+            select case when count(c) > 0 then true else false end
+            from SpecialCase c
+            join c.pacsLink p
+            where c.deleted = false and p.studyInstanceUid = :studyInstanceUid
+            """)
+    boolean existsActiveByStudyInstanceUid(@Param("studyInstanceUid") String studyInstanceUid);
 }

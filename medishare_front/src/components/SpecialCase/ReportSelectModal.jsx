@@ -29,7 +29,7 @@ export default function ReportSelectModal({ open, onClose, onSelect }) {
           <div className="modal-body">
             {error && <div className="alert alert-danger">{error}</div>}
             {loading ? <div className="text-center py-4">판독소견서를 불러오는 중입니다.</div> : reports.length === 0 ? (
-              <div className="text-center text-muted py-4">등록된 판독소견서가 없습니다.</div>
+              <div className="text-center text-muted py-4">등록 가능한 내 판독소견서가 없습니다.</div>
             ) : (
               <div className="list-group">
                 {reports.map((report) => (

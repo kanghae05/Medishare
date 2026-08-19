@@ -4,7 +4,7 @@ import ReportSelectModal from "../../components/SpecialCase/ReportSelectModal";
 import { getSpecialCase, saveSpecialCase } from "./specialCaseApi";
 import "./SpecialCase.css";
 
-const EMPTY_FORM = { title: "", modality: "", bodyPart: "", diseaseCode: "", findings: "", impression: "", thumbnailUrl: "", studyInstanceUid: "", seriesInstanceUid: "", patientName: "", patientId: "", tags: "" };
+const EMPTY_FORM = { reportId: null, title: "", modality: "", bodyPart: "", diseaseCode: "", findings: "", impression: "", thumbnailUrl: "", studyInstanceUid: "", seriesInstanceUid: "", patientName: "", patientId: "", tags: "" };
 
 export default function SpecialCaseCreate() {
   const { caseId } = useParams();
@@ -20,6 +20,7 @@ export default function SpecialCaseCreate() {
     setSelectedReportId(report.reportId);
     setForm((current) => ({
       ...current,
+      reportId: report.reportId,
       title: current.title || report.title || "",
       ...Object.fromEntries(["studyInstanceUid", "seriesInstanceUid", "findings", "impression", "modality", "bodyPart", "patientName", "patientId"].map((key) => [key, report[key] ?? current[key]])),
     }));
