@@ -329,18 +329,6 @@ function TopNavi() {
               )}
 
 
-            {/* 공통 통계 */}
-
-            {isLoggedIn && (
-              <NavLink
-                to="/d/statistics"
-                className="topnav-link"
-              >
-                질환별 통계
-              </NavLink>
-            )}
-
-
             {/* 공통 PACS */}
 
             {isMedicalUser && (
@@ -621,38 +609,6 @@ function TopNavi() {
 
 
                 <div className="sitemap-menu-grid">
-
-
-                  {/* 질환별 통계 */}
-
-                  <button
-                    type="button"
-                    onClick={() =>
-                      moveMenu(
-                        "/d/statistics"
-                      )
-                    }
-                  >
-
-                    <span>
-                      STATISTICS
-                    </span>
-
-
-                    <strong>
-                      질환별 통계
-                    </strong>
-
-
-                    <p>
-                      질환별 판독 및 협진 데이터를 조회합니다.
-                    </p>
-
-
-                    <ArrowIcon />
-
-                  </button>
-
 
 
                   {/* PACS */}

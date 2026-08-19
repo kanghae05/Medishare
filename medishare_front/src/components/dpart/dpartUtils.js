@@ -74,11 +74,6 @@ export const canAccessConsultationManagement = () => {
   return user.isAuthenticated && user.isDoctor;
 };
 
-export const canAccessDiseaseStatistics = () => {
-  const user = getCurrentUser();
-  return user.isAuthenticated;
-};
-
 export const currentUser = getCurrentUser();
 
 export const scheduleTypeLabels = {
