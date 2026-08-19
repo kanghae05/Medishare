@@ -297,7 +297,7 @@ function Home() {
 
   const services = [
     {
-      number: "02",
+      number: "01",
       title: "PACS",
       english: "MEDICAL IMAGE",
       description:
@@ -314,7 +314,7 @@ function Home() {
     },
 
     {
-      number: "03",
+      number: "02",
       title: "공지사항",
       english: "NOTICE",
       description:
@@ -330,7 +330,7 @@ function Home() {
     },
 
     {
-      number: "04",
+      number: "03",
       title: "특이케이스",
       english: "SPECIAL CASE",
       description:
@@ -345,7 +345,7 @@ function Home() {
     },
 
     {
-      number: "05",
+      number: "04",
       title: "판독소견",
       english: "REPORT",
       description:
@@ -360,7 +360,7 @@ function Home() {
     },
 
     {
-      number: "06",
+      number: "05",
       title: "협진",
       english: "CONSULTATION",
       description:
