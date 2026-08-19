@@ -98,9 +98,11 @@ public class SpecialCaseService {
 
     /** 실제 행을 삭제하지 않고 is_deleted 값만 변경한다. */
     @Transactional
-    public void delete(Long id, Long actorId) {
+    public void delete(Long id, Long actorId, boolean isAdmin) {
         SpecialCase specialCase = findActiveCase(id);
-        validateOwner(specialCase, actorId);
+        if (!isAdmin) {
+            validateOwner(specialCase, actorId);
+        }
         specialCase.delete();
     }
 
