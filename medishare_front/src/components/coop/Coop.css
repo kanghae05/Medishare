@@ -728,19 +728,22 @@
 .coop-toast-close:hover { color: var(--coop-ink); }
 
 /* ---------- 탑네비 협진 메뉴 배지 (CoopNavBadge) ---------- */
+/* 탑네비 링크(<a>) 안에 들어가서 파란 글자+밑줄을 물려받는 걸 막기 위해 !important로 확실히 덮어쓴다.
+   (탑네비 자체 CSS 로드 순서나 우선순위를 컨트롤할 수 없는 외부 파일이라 방어적으로 처리) */
 .coop-nav-badge {
-  display: inline-flex;
+  display: inline-flex !important;
   align-items: center;
   justify-content: center;
   min-width: 16px;
   height: 16px;
   padding: 0 4px;
   margin-left: 5px;
-  border-radius: 999px;
-  background: #e0433a;
-  color: #fff;
-  font-size: 10.5px;
-  font-weight: 700;
-  line-height: 1;
+  border-radius: 999px !important;
+  background: #e0433a !important;
+  color: #fff !important;
+  font-size: 10.5px !important;
+  font-weight: 700 !important;
+  line-height: 16px !important;
+  text-decoration: none !important;
   vertical-align: middle;
 }
