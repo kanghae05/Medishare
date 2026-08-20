@@ -25,6 +25,7 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
   const [loadedCount, setLoadedCount] = useState(0);
 
   const framesRef = useRef([]); // 인덱스별 object URL. 아직 안 받아온 자리는 null.
+  const frameRef = useRef(null); // 이미지 프레임 DOM - 네이티브 휠 이벤트를 non-passive로 직접 붙이기 위함
   const indexRef = useRef(0); // 이펙트 콜백 안에서 "지금 보고 있는 인덱스"를 최신값으로 참조하기 위함
 
   // 1) 검사에 속한 시리즈 목록 조회 - 검사 하나에 시리즈가 여러 개일 수 있다.
@@ -163,6 +164,23 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
     };
   }, [index, seriesNo]);
 
+  // 이미지 위에서 휠 굴릴 때 페이지 자체가 스크롤되지 않게 막아야 하는데,
+  // React의 onWheel prop은 기본적으로 passive 리스너라 그 안에서 preventDefault()를 불러도 씹힌다
+  // (React 17부터 성능 때문에 이렇게 바뀜). 그래서 네이티브 이벤트를 { passive: false }로 직접 붙인다.
+  useEffect(() => {
+    const el = frameRef.current;
+    if (!el || !totalCount) return;
+    const handleWheel = (e) => {
+      e.preventDefault();
+      setIndex((i) => {
+        const next = i + (e.deltaY > 0 ? 1 : -1);
+        return Math.min(totalCount - 1, Math.max(0, next));
+      });
+    };
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [totalCount]);
+
   if (seriesList === null) {
     return <div className="coop-image-viewer-empty">이미지 정보 확인 중...</div>;
   }
@@ -209,11 +227,25 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
         <div className="coop-image-viewer-empty">이 시리즈에는 표시할 이미지가 없습니다.</div>
       ) : (
         <>
-          <div className="coop-image-viewer-frame">
+          <div
+            className="coop-image-viewer-frame"
+            ref={frameRef}
+            tabIndex={0}
+            onKeyDown={(e) => {
+              if (e.key === "ArrowRight" || e.key === "ArrowDown") {
+                e.preventDefault();
+                setIndex((i) => Math.min(totalCount - 1, i + 1));
+              } else if (e.key === "ArrowLeft" || e.key === "ArrowUp") {
+                e.preventDefault();
+                setIndex((i) => Math.max(0, i - 1));
+              }
+            }}
+          >
             {imageUrl && (
               <img src={imageUrl} alt={`검사 이미지 ${index + 1}/${totalCount}`} className="coop-image-viewer-img" />
             )}
           </div>
+          <div className="coop-image-viewer-hint">마우스 휠 또는 방향키로 한 장씩 넘길 수 있어요</div>
 
           <div className="coop-image-viewer-controls">
             <button

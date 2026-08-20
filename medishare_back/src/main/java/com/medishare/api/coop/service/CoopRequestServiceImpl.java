@@ -12,6 +12,7 @@ import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
+import com.medishare.api.coop.websocket.CoopNotificationWebSocketHandler;
 import com.medishare.api.util.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
+    private final CoopNotificationWebSocketHandler notificationHandler;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopMemberLookupRepository memberRepository;
     private final CoopDepartmentLookupRepository departmentRepository;
@@ -200,7 +202,31 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 .status(CoopStatus.요청)
                 .build();
 
-        return toVO(coopRequestRepository.save(entity), vo.getReqDoctorId());
+        CoopRequest saved = coopRequestRepository.save(entity);
+        notifyNewRequest(saved);
+        return toVO(saved, vo.getReqDoctorId());
+    }
+
+    /** 새 협진요청이 왔다는 걸, 받는 사람(들)한테 실시간 토스트로 알린다. */
+    private void notifyNewRequest(CoopRequest c) {
+        String reqDoctorName = memberRepository.findById(c.getReqDoctorId())
+                .map(Member::getName).orElse("의사");
+        String message = c.getReqContent();
+        if (message != null && message.length() > 40) {
+            message = message.substring(0, 40) + "...";
+        }
+        String linkUrl = "/coop/view?no=" + c.getCoopRequestId();
+
+        if (c.getRecvType() == RecvType.지정의사) {
+            notificationHandler.notify(c.getRecvDoctorId(), "coop_request",
+                    reqDoctorName + "님의 협진 요청", message, linkUrl);
+        } else {
+            // 진료과 요청 - 소속 의사 전원한테 (누가 먼저 확인하고 수락할지 모르니까)
+            for (Member m : memberRepository.findByDepartment_NoAndStatus(c.getRecvDeptId(), "ACTIVE")) {
+                notificationHandler.notify(m.getNo(), "coop_request",
+                        reqDoctorName + "님의 협진 요청", message, linkUrl);
+            }
+        }
     }
 
     private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId,

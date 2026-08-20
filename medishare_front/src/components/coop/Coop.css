@@ -416,7 +416,9 @@
   font-size: 11px;
   color: var(--coop-faint);
 }
-.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: ns-resize; outline: none; }
+.coop-image-viewer-frame:focus { box-shadow: 0 0 0 2px var(--coop-accent); }
+.coop-image-viewer-hint { font-size: 11px; color: var(--coop-faint); margin-top: 6px; text-align: center; }
 .coop-image-viewer-img { max-width: 100%; max-height: 480px; display: block; }
 .coop-image-viewer-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .coop-image-viewer-slider { flex: 1; accent-color: var(--coop-accent); }
@@ -679,3 +681,51 @@
   color: var(--coop-faint);
   margin-left: 8px;
 }
+
+/* ---------- 카카오톡 스타일 실시간 토스트 알림 ---------- */
+.coop-toast-stack {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+}
+.coop-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--coop-card);
+  border: 1px solid var(--coop-line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(27,39,48,0.16);
+  cursor: pointer;
+  animation: coop-toast-in 0.2s ease-out;
+}
+@keyframes coop-toast-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.coop-toast-icon { font-size: 20px; line-height: 1; margin-top: 2px; }
+.coop-toast-body { flex: 1; min-width: 0; }
+.coop-toast-title { font-size: 13px; font-weight: 700; color: var(--coop-ink); margin-bottom: 2px; }
+.coop-toast-message {
+  font-size: 12.5px;
+  color: var(--coop-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coop-toast-close {
+  background: none;
+  border: none;
+  color: var(--coop-faint);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.coop-toast-close:hover { color: var(--coop-ink); }

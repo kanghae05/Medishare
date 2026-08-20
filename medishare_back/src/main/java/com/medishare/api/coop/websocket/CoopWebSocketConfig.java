@@ -15,12 +15,18 @@ public class CoopWebSocketConfig implements WebSocketConfigurer {
 
     private final CoopChatWebSocketHandler coopChatWebSocketHandler;
     private final CoopChatHandshakeInterceptor coopChatHandshakeInterceptor;
+    private final CoopNotificationWebSocketHandler coopNotificationWebSocketHandler;
+    private final CoopNotifyHandshakeInterceptor coopNotifyHandshakeInterceptor;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry registry) {
         registry.addHandler(coopChatWebSocketHandler, "/ws/coop/{coopRequestId}")
                 .addInterceptors(coopChatHandshakeInterceptor)
                 // TODO: 실제 배포 시엔 프론트 도메인만 명시하는 게 안전하다. 지금은 개발 편의상 전체 허용.
+                .setAllowedOriginPatterns("*");
+
+        registry.addHandler(coopNotificationWebSocketHandler, "/ws/coop-notify")
+                .addInterceptors(coopNotifyHandshakeInterceptor)
                 .setAllowedOriginPatterns("*");
     }
 

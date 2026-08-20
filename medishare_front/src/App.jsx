@@ -19,6 +19,7 @@ import AccessLogManagement from "./pages/Admin/AccessLogManagement";
 import AccessLogDetail from "./pages/Admin/AccessLogDetail";
 import ChangeHistoryManagement from "./pages/Admin/ChangeHistoryManagement";
 import ChangeHistoryDetail from "./pages/Admin/ChangeHistoryDetail";
+import CoopNotificationCenter from "./components/coop/CoopNotificationCenter";
 
 function App() {
   const token = localStorage.getItem("token");
@@ -40,7 +41,8 @@ function App() {
     <>
       {/* 맨 위에 메뉴 컴포넌트 : /src/components/common/TopNavi.jsx */}
       <TopNavi />
-
+      <CoopNotificationCenter />
+      
       <div
         className="container"
         style={{ paddingTop: "8rem" }}

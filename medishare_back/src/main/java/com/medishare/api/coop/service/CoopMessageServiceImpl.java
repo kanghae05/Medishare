@@ -9,6 +9,7 @@ import com.medishare.api.coop.repository.CoopRequestRepository;
 import com.medishare.api.coop.vo.ChatRoomVO;
 import com.medishare.api.coop.vo.CoopMessageVO;
 import com.medishare.api.coop.websocket.CoopChatWebSocketHandler;
+import com.medishare.api.coop.websocket.CoopNotificationWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -26,6 +27,7 @@ public class CoopMessageServiceImpl implements CoopMessageService {
     private final CoopRequestRepository coopRequestRepository;
     private final CoopMemberLookupRepository memberRepository;
     private final CoopChatWebSocketHandler webSocketHandler;
+    private final CoopNotificationWebSocketHandler notificationHandler;
 
     @Override
     @Transactional
@@ -64,6 +66,21 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         CoopMessageVO vo = toVO(saved, senderId);
         // 저장 즉시 그 방에 접속 중인 모든 세션한테 실시간으로 전파한다 (호출 경로 무관하게 여기서 한 번에 처리).
         webSocketHandler.broadcast(coopRequestId, vo);
+
+        // 상대방이 지금 이 방을 안 보고 있으면(=이미 화면에 실시간으로 뜨는 게 아니면) 토스트 알림도 쏜다.
+        coopRequestRepository.findById(coopRequestId).ifPresent(c -> {
+            Long recipientId = c.getReqDoctorId().equals(senderId) ? c.getAcceptDoctorId() : c.getReqDoctorId();
+            if (recipientId != null && !webSocketHandler.hasOpenSession(coopRequestId, recipientId)) {
+                String preview = "IMAGE".equals(type) ? "그림을 보냈습니다." : content.trim();
+                if (preview.length() > 40) {
+                    preview = preview.substring(0, 40) + "...";
+                }
+                notificationHandler.notify(recipientId, "chat_message",
+                        vo.getSenderName() == null ? "새 메시지" : vo.getSenderName(),
+                        preview, "/coop/chat?no=" + coopRequestId);
+            }
+        });
+
         return vo;
     }
 

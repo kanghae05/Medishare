@@ -91,6 +91,20 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
         }
     }
 
+    /** doctorId가 지금 이 채팅방(coopRequestId)에 접속해 있는지 - 토스트 알림 중복을 피하기 위한 용도 */
+    public boolean hasOpenSession(Long coopRequestId, Long doctorId) {
+        CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
+        if (room == null) {
+            return false;
+        }
+        for (WebSocketSession s : room) {
+            if (s.isOpen() && doctorId.equals(s.getAttributes().get("doctorId"))) {
+                return true;
+            }
+        }
+        return false;
+    }
+
     /** 저장된 메시지를 그 방(coopRequestId)에 접속한 모든 세션에게 전송한다. 세션마다 mine을 다시 계산해서 보낸다. */
     public void broadcast(Long coopRequestId, CoopMessageVO saved) {
         CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
