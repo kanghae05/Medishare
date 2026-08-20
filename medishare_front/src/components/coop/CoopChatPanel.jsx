@@ -89,7 +89,11 @@ function CoopChatPanel({ coopRequestId, large = false }) {
         {messages.map((m, i) => (
           <div key={m.coopMessageId ?? i} className={"coop-chat-bubble-row" + (m.mine ? " mine" : "")}>
             {!m.mine && <div className="coop-chat-sender">{m.senderName || `의사 #${m.senderDoctorId}`}</div>}
-            <div className="coop-chat-bubble">{m.content}</div>
+            {m.messageType === "IMAGE" ? (
+              <img src={m.content} alt="첨부 이미지" className="coop-chat-image" />
+            ) : (
+              <div className="coop-chat-bubble">{m.content}</div>
+            )}
             <div className="coop-chat-time">
               {m.mine && <span className="coop-chat-read">{m.read ? "읽음" : "안읽음"}</span>}
               {m.sentAt ? m.sentAt.slice(5, 16) : ""}

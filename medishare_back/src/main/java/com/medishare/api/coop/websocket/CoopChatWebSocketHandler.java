@@ -62,16 +62,16 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
         Long coopRequestId = (Long) session.getAttributes().get("coopRequestId");
         Long senderId = (Long) session.getAttributes().get("doctorId");
 
-        // 프론트에서 { "content": "..." } 형태로 보낸다.
+        // 프론트에서 { "content": "..." } 형태로 보낸다. (텍스트 전송은 항상 messageType="TEXT")
         Map<String, String> payload = objectMapper.readValue(message.getPayload(), Map.class);
         String content = payload.get("content");
 
-        CoopMessageVO saved = coopMessageService.send(coopRequestId, senderId, content);
-        broadcast(coopRequestId, saved);
+        // send()가 저장 + 브로드캐스트까지 알아서 처리한다.
+        coopMessageService.send(coopRequestId, senderId, content, "TEXT");
     }
 
     /** 저장된 메시지를 그 방(coopRequestId)에 접속한 모든 세션에게 전송한다. 세션마다 mine을 다시 계산해서 보낸다. */
-    private void broadcast(Long coopRequestId, CoopMessageVO saved) throws IOException {
+    public void broadcast(Long coopRequestId, CoopMessageVO saved) {
         CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
         if (room == null) {
             return;
@@ -88,7 +88,12 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
             copy.setSentAt(saved.getSentAt());
             copy.setMine(saved.getSenderDoctorId().equals(viewerId));
             copy.setRead(saved.isRead());
-            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(copy)));
+            copy.setMessageType(saved.getMessageType());
+            try {
+                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(copy)));
+            } catch (IOException e) {
+                // 세션 하나 실패해도 나머지 세션한테는 계속 보낸다
+            }
         }
     }
 

@@ -559,6 +559,13 @@
   border-color: var(--coop-accent);
   color: var(--coop-accent-deep);
 }
+.coop-chat-image {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--coop-line);
+  display: block;
+}
 .coop-chat-time {
   font-family: var(--coop-font-mono);
   font-size: 10.5px;

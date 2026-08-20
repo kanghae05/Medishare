@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import api from "../common/api";
+import CoopImageAnnotator from "./CoopImageAnnotator";
 import "./Coop.css";
 
 // <img src="...">는 커스텀 인증 헤더(X-AUTH-TOKEN)를 못 실어 보내므로,
 // axios로 이미지를 blob으로 받아서 브라우저 메모리 URL로 변환해 사용한다.
-function CoopStudyImageViewer({ pacsStudyId }) {
+// coopRequestId가 주어지면(=채팅이 가능한 화면이면) "그리기" 버튼을 같이 보여준다.
+function CoopStudyImageViewer({ pacsStudyId, coopRequestId }) {
+  const [annotating, setAnnotating] = useState(false);
   const [seriesList, setSeriesList] = useState(null); // null = 아직 확인 전
   const [seriesNo, setSeriesNo] = useState(null);
   const [seriesInfoError, setSeriesInfoError] = useState(null);
@@ -153,8 +156,21 @@ function CoopStudyImageViewer({ pacsStudyId }) {
             <span className="coop-image-viewer-count">
               {index + 1} / {totalCount}
             </span>
+            {coopRequestId && imageUrl && (
+              <button type="button" className="btn-coop-apply" onClick={() => setAnnotating(true)}>
+                그리기
+              </button>
+            )}
           </div>
         </>
+      )}
+
+      {annotating && (
+        <CoopImageAnnotator
+          coopRequestId={coopRequestId}
+          imageUrl={imageUrl}
+          onClose={() => setAnnotating(false)}
+        />
       )}
     </div>
   );
