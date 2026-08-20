@@ -927,7 +927,7 @@ function PacsList() {
           type: "success",
           title: "DICOM 등록 완료",
           message:
-            `총 ${successCount}개의 DICOM 영상 업로드와 PACS 목록 반영이 완료되었습니다.`,
+            `전체 ${selectedFiles.length}개 · 성공 ${successCount}개 · 실패 ${failedCount}개 · PACS 목록 반영 완료`,
           onConfirm: () => {
             showRecentStudies(
               uploadedStudyIds
@@ -941,7 +941,7 @@ function PacsList() {
           type: "error",
           title: "일부 파일 업로드 완료",
           message:
-            `총 ${selectedFiles.length}개 중 ${successCount}개 성공, ${failedCount}개 실패했습니다. 성공한 영상은 PACS 목록에 반영되었습니다.`,
+            `전체 ${selectedFiles.length}개 · 성공 ${successCount}개 · 실패 ${failedCount}개 · 성공한 영상은 PACS 목록에 반영되었습니다.`,
           onConfirm: () => {
             showRecentStudies(
               uploadedStudyIds
@@ -1025,6 +1025,10 @@ function PacsList() {
         response.data?.savedCount ?? 0;
 
 
+      const updatedCount =
+        response.data?.updatedCount ?? 0;
+
+
       const skippedCount =
         response.data?.skippedCount ?? 0;
 
@@ -1046,7 +1050,8 @@ function PacsList() {
 
         message:
           `전체 ${totalCount}건 · `
-          + `저장/갱신 ${savedCount}건 · `
+          + `신규 저장 ${savedCount}건 · `
+          + `기존 갱신 ${updatedCount}건 · `
           + `건너뜀 ${skippedCount}건 · `
           + `실패 ${failedCount}건`
       });
