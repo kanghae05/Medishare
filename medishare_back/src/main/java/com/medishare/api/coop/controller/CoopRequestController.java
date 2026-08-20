@@ -26,6 +26,7 @@ import com.medishare.api.coop.vo.UnreadCountVO;
 import com.medishare.api.util.page.PageObject;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -41,6 +42,10 @@ import java.util.Map;
 @RequestMapping("/coop")
 @RequiredArgsConstructor
 public class CoopRequestController {
+
+    // 의사/환자 자동완성 검색 결과 최대 개수. 지금은 데이터가 적어서 티가 안 나지만,
+    // 데이터가 늘어나면 검색어에 걸리는 게 수백 건씩 나올 수 있어서 제한을 둔다.
+    private static final int SEARCH_RESULT_LIMIT = 10;
 
     private final CoopRequestService coopRequestService;
     private final CoopMessageService coopMessageService;
@@ -288,7 +293,9 @@ public class CoopRequestController {
                                               Authentication authentication) {
         Long myDoctorId = currentDoctorId(authentication);
         List<Long> adminIds = memberRepository.findAdminMemberIds();
-        return memberRepository.searchDoctors(q, myDoctorId).stream()
+        // 관리자 필터링 때문에 실제 노출되는 개수가 SEARCH_RESULT_LIMIT보다 살짝 적을 수 있는데,
+        // 관리자 계정 수가 워낙 적어서 자동완성 목적상 크게 문제되지 않는다.
+        return memberRepository.searchDoctors(q, myDoctorId, PageRequest.of(0, SEARCH_RESULT_LIMIT)).stream()
                 .filter(m -> !adminIds.contains(m.getNo()))
                 .map(m -> new DoctorLookupVO(
                         m.getNo(),
@@ -312,7 +319,7 @@ public class CoopRequestController {
     @GetMapping("/lookup/patients.do")
     public List<PatientLookupVO> lookupPatients(@RequestParam(defaultValue = "") String q) {
         if (q.isBlank()) return List.of();
-        return patientRepository.searchByName(q).stream()
+        return patientRepository.searchByName(q, PageRequest.of(0, SEARCH_RESULT_LIMIT)).stream()
                 .map(p -> new PatientLookupVO(p.getNo(), p.getPatientName(), p.getPatientSex(), p.getPatientBirthDate()))
                 .toList();
     }

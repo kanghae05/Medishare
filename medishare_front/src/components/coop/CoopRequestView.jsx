@@ -231,7 +231,10 @@ function CoopRequestView() {
           <div className="coop-quote-label">진료과 개인별 거절 내역</div>
           {vo.deptRejections.map((r, i) => (
             <div key={i} className="coop-dept-reject-item">
-              <span className="coop-dept-reject-doctor">{r.doctorName || `의사 #${r.doctorId}`}</span>
+              <span className="coop-dept-reject-doctor">
+                {r.doctorName || `의사 #${r.doctorId}`}
+                {r.doctorMeta && <span className="coop-doctor-meta"> ({r.doctorMeta})</span>}
+              </span>
               <span className="coop-dept-reject-reason">"{r.rejectReason}"</span>
               <span className="coop-dept-reject-time">{r.rejectedAt}</span>
             </div>

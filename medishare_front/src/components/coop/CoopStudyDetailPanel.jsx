@@ -18,11 +18,12 @@ function formatSex(sex) {
   return sex || "-";
 }
 
-// 협진 상세화면의 환자/검사 상세 정보 패널. 기술 정보(Orthanc/DICOM ID)는 평소엔 접어둔다.
+// 협진 상세화면의 환자/검사 상세 정보 패널. 참고용 정보라 기본적으로 접어두고,
+// 필요할 때만 펼쳐본다 (요청 내용·소견서·영상처럼 항상 바로 봐야 하는 정보가 아니라서).
 function CoopStudyDetailPanel({ pacsStudyId }) {
   const [detail, setDetail] = useState(null);
   const [error, setError] = useState(null);
-  const [showTechInfo, setShowTechInfo] = useState(false);
+  const [open, setOpen] = useState(false);
 
   useEffect(() => {
     if (!pacsStudyId) return;
@@ -44,40 +45,37 @@ function CoopStudyDetailPanel({ pacsStudyId }) {
   if (!detail) return null;
 
   return (
-    <div className="coop-detail-pane">
-      <div className="coop-detail-section">
-        <div className="coop-detail-section-title">환자 정보</div>
-        <div className="coop-detail-grid">
-          <div><span className="coop-detail-label">환자번호</span>{detail.patientIdText || `#${detail.patientNo}`}</div>
-          <div><span className="coop-detail-label">성별</span>{formatSex(detail.patientSex)}</div>
-          <div><span className="coop-detail-label">이름</span>{detail.patientName || "-"}</div>
-          <div><span className="coop-detail-label">나이</span>{detail.age != null ? `만 ${detail.age}세` : "-"}</div>
-        </div>
-      </div>
-
-      <div className="coop-detail-section">
-        <div className="coop-detail-section-title">검사 정보</div>
-        <div className="coop-detail-grid">
-          <div><span className="coop-detail-label">접수번호</span>{detail.accessionNumber || "-"}</div>
-          <div><span className="coop-detail-label">촬영일시</span>{formatDate(detail.studyDate)} {formatTime(detail.studyTime)}</div>
-          <div><span className="coop-detail-label">촬영종류</span>{detail.modality || "-"}</div>
-          <div><span className="coop-detail-label">영상 수</span>{detail.instanceCount != null ? `${detail.instanceCount}장` : "-"}</div>
-          <div><span className="coop-detail-label">의뢰의사</span>{detail.referringPhysicianName || "-"}</div>
-          <div className="coop-detail-span2"><span className="coop-detail-label">검사설명</span>{detail.studyDescription || "-"}</div>
-          <div className="coop-detail-span2"><span className="coop-detail-label">요청사유</span>{detail.requestedProcedureDescription || "-"}</div>
-          <div className="coop-detail-span2"><span className="coop-detail-label">시리즈설명</span>{detail.seriesDescription || "-"}</div>
-        </div>
-      </div>
-
-      <button type="button" className="coop-detail-tech-toggle" onClick={() => setShowTechInfo((v) => !v)}>
-        기술 정보 {showTechInfo ? "숨기기 ▲" : "보기 ▾"}
+    <div className="coop-detail-panel">
+      <button type="button" className="coop-detail-panel-toggle" onClick={() => setOpen((v) => !v)}>
+        환자 · 검사 정보 {open ? "숨기기 ▲" : "보기 ▾"}
       </button>
-      {showTechInfo && (
-        <div className="coop-detail-tech-box">
-          <div><span className="coop-detail-label">Orthanc Study ID</span>{detail.orthancStudyId || "-"}</div>
-          <div><span className="coop-detail-label">Study Instance UID</span>{detail.studyInstanceUid || "-"}</div>
-          <div><span className="coop-detail-label">Orthanc Patient ID</span>{detail.orthancPatientId || "-"}</div>
-        </div>
+
+      {open && (
+        <>
+          <div className="coop-detail-section">
+            <div className="coop-detail-section-title">환자 정보</div>
+            <div className="coop-detail-grid">
+              <div><span className="coop-detail-label">이름</span>{detail.patientName || "-"}</div>
+              <div><span className="coop-detail-label">환자번호</span>{detail.patientIdText || `#${detail.patientNo}`}</div>
+              <div><span className="coop-detail-label">성별</span>{formatSex(detail.patientSex)}</div>
+              <div><span className="coop-detail-label">나이</span>{detail.age != null ? `만 ${detail.age}세` : "-"}</div>
+            </div>
+          </div>
+
+          <div className="coop-detail-section">
+            <div className="coop-detail-section-title">검사 정보</div>
+            <div className="coop-detail-grid">
+              <div><span className="coop-detail-label">접수번호</span>{detail.accessionNumber || "-"}</div>
+              <div><span className="coop-detail-label">촬영일시</span>{formatDate(detail.studyDate)} {formatTime(detail.studyTime)}</div>
+              <div><span className="coop-detail-label">촬영종류</span>{detail.modality || "-"}</div>
+              <div><span className="coop-detail-label">영상 수</span>{detail.instanceCount != null ? `${detail.instanceCount}장` : "-"}</div>
+              <div><span className="coop-detail-label">의뢰의사</span>{detail.referringPhysicianName || "-"}</div>
+              <div className="coop-detail-span2"><span className="coop-detail-label">검사설명</span>{detail.studyDescription || "-"}</div>
+              <div className="coop-detail-span2"><span className="coop-detail-label">요청사유</span>{detail.requestedProcedureDescription || "-"}</div>
+              <div className="coop-detail-span2"><span className="coop-detail-label">시리즈설명</span>{detail.seriesDescription || "-"}</div>
+            </div>
+          </div>
+        </>
       )}
     </div>
   );

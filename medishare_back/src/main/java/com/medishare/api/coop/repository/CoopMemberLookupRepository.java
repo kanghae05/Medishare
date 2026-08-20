@@ -1,6 +1,7 @@
 package com.medishare.api.coop.repository;
 
 import com.medishare.api.member.entity.Member;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -36,7 +37,7 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
             "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
             "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
             "ORDER BY m.name")
-    List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
+    List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo, Pageable pageable);
 
     /**
      * 여러 명의 이름/진료과를 한 번에 조회 (관리자 목록처럼 한 화면에 의사가 여러 명 나올 때 사용).

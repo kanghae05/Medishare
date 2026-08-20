@@ -7,6 +7,7 @@ import lombok.Data;
 public class CoopRequestDeptRejectVO {
     private Long doctorId;
     private String doctorName;
+    private String doctorMeta; // 진료과 · 세부전공 · 직급
     private String rejectReason;
     private String rejectedAt;
 }

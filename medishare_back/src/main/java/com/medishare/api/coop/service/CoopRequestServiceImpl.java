@@ -157,7 +157,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
             for (CoopRequestDeptReject r : deptRejectRepository.findByCoopRequestIdOrderByRejectedAtAsc(coopRequestId)) {
                 CoopRequestDeptRejectVO rv = new CoopRequestDeptRejectVO();
                 rv.setDoctorId(r.getDoctorId());
-                // TODO(3번 연동): rv.setDoctorName(...)
+                applyRealDoctorName(r.getDoctorId(), rv::setDoctorName, rv::setDoctorMeta);
                 rv.setRejectReason(r.getRejectReason());
                 rv.setRejectedAt(r.getRejectedAt() == null ? null : r.getRejectedAt().format(DATETIME_FMT));
                 rejections.add(rv);
