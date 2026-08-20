@@ -8,6 +8,7 @@ import com.medishare.api.coop.repository.CoopMessageRepository;
 import com.medishare.api.coop.repository.CoopRequestRepository;
 import com.medishare.api.coop.vo.ChatRoomVO;
 import com.medishare.api.coop.vo.CoopMessageVO;
+import com.medishare.api.coop.websocket.CoopChatWebSocketHandler;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,12 +25,17 @@ public class CoopMessageServiceImpl implements CoopMessageService {
     private final CoopMessageRepository coopMessageRepository;
     private final CoopRequestRepository coopRequestRepository;
     private final CoopMemberLookupRepository memberRepository;
+    private final CoopChatWebSocketHandler webSocketHandler;
 
     @Override
     @Transactional
     public List<CoopMessageVO> history(Long coopRequestId, Long viewerId) {
         // 채팅방을 여는 시점 = "내가 이 방을 읽었다"는 뜻이라, 상대방이 보낸 메시지를 전부 읽음 처리한다.
-        coopMessageRepository.markAsRead(coopRequestId, viewerId);
+        int updated = coopMessageRepository.markAsRead(coopRequestId, viewerId);
+        if (updated > 0) {
+            // 실제로 새로 읽음 처리된 게 있을 때만 상대방한테 실시간으로 알려준다.
+            webSocketHandler.broadcastReadEvent(coopRequestId, viewerId);
+        }
         return coopMessageRepository.findByCoopRequestIdOrderBySentAtAsc(coopRequestId).stream()
                 .map(m -> toVO(m, viewerId))
                 .toList();

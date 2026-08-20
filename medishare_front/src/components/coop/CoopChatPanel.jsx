@@ -43,6 +43,11 @@ function CoopChatPanel({ coopRequestId, large = false }) {
     ws.onerror = () => setConnected(false);
     ws.onmessage = (event) => {
       const msg = JSON.parse(event.data);
+      if (msg.type === "read") {
+        // 상대방이 방금 이 방을 열어서, 내가 보낸 메시지들을 다 읽었다는 실시간 알림.
+        setMessages((prev) => prev.map((m) => (m.mine ? { ...m, read: true } : m)));
+        return;
+      }
       setMessages((prev) => [...prev, msg]);
     };
 
