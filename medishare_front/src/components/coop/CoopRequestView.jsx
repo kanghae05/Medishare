@@ -289,7 +289,9 @@ function CoopRequestView() {
         )}
       </div>
 
-      {canChat && chatOpen && <CoopChatPanel coopRequestId={vo.coopRequestId} />}
+      {canChat && chatOpen && (
+        <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} />
+      )}
 
       {modal === "reject" && (
         <CoopReasonModal

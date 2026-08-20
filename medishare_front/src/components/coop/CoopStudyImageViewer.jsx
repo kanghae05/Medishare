@@ -6,7 +6,8 @@ import "./Coop.css";
 // <img src="...">는 커스텀 인증 헤더(X-AUTH-TOKEN)를 못 실어 보내므로,
 // axios로 이미지를 blob으로 받아서 브라우저 메모리 URL로 변환해 사용한다.
 // coopRequestId가 주어지면(=채팅이 가능한 화면이면) "그리기" 버튼을 같이 보여준다.
-function CoopStudyImageViewer({ pacsStudyId, coopRequestId }) {
+// onImageSent: 그림 전송 성공 시 호출 - 채팅창에서 인라인으로 띄웠을 때 자동으로 접는 용도.
+function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
   const [annotating, setAnnotating] = useState(false);
   const [seriesList, setSeriesList] = useState(null); // null = 아직 확인 전
   const [seriesNo, setSeriesNo] = useState(null);
@@ -170,6 +171,7 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId }) {
           coopRequestId={coopRequestId}
           imageUrl={imageUrl}
           onClose={() => setAnnotating(false)}
+          onSent={onImageSent}
         />
       )}
     </div>

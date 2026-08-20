@@ -69,7 +69,21 @@ function CoopImageAnnotator({ coopRequestId, imageUrl, onClose, onSent }) {
   const handleSend = () => {
     setSending(true);
     setError(null);
-    const dataUrl = canvasRef.current.toDataURL("image/png");
+
+    // 너무 큰 원본 그대로 보내면 무겁다 - 가로 900px 넘으면 줄여서, PNG 대신 JPEG로 압축해서 보낸다.
+    const source = canvasRef.current;
+    const maxWidth = 900;
+    let out = source;
+    if (source.width > maxWidth) {
+      const scale = maxWidth / source.width;
+      const resized = document.createElement("canvas");
+      resized.width = maxWidth;
+      resized.height = Math.round(source.height * scale);
+      resized.getContext("2d").drawImage(source, 0, 0, resized.width, resized.height);
+      out = resized;
+    }
+    const dataUrl = out.toDataURL("image/jpeg", 0.85);
+
     api
       .post(`/coop/${coopRequestId}/messages/image.do`, { imageDataUrl: dataUrl })
       .then(() => {

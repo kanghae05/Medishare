@@ -59,7 +59,7 @@ function CoopChatRoom() {
         </button>
       </div>
 
-      <CoopChatPanel coopRequestId={vo.coopRequestId} large />
+      <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} large />
 
       <button
         type="button"
