@@ -46,9 +46,9 @@ function CoopChatRoom() {
 
   if (!vo) return null;
 
-  const counterpartName = vo.direction === "sent" || vo.reqDoctorId
-    ? (vo.acceptDoctorName || vo.reqDoctorName)
-    : vo.reqDoctorName;
+  // 내가 수락자면 상대방은 요청자, 내가 요청자면 상대방은 수락자.
+  // vo.reqDoctorId는 항상 값이 있어서 이걸로 분기하면 안 됨(예전 버그) - viewerIsAcceptDoctor로 정확히 판단한다.
+  const counterpartName = vo.viewerIsAcceptDoctor ? vo.reqDoctorName : vo.acceptDoctorName;
 
   return (
     <div className="coop-page">

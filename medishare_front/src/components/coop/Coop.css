@@ -685,7 +685,7 @@
 /* ---------- 카카오톡 스타일 실시간 토스트 알림 ---------- */
 .coop-toast-stack {
   position: fixed;
-  top: 20px;
+  top: 76px;
   right: 20px;
   z-index: 3000;
   display: flex;
