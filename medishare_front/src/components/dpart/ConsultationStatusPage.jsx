@@ -71,25 +71,38 @@ function ConsultationStatusPage() {
   };
 
   const total = stats.totalCount || 0;
-  const periodLabel = startDate || endDate
-    ? `${startDate || "전체"} ~ ${endDate || "전체"}`
-    : "전체 기간";
+  const periodLabel =
+    startDate || endDate
+      ? `${startDate || "전체"} ~ ${endDate || "전체"}`
+      : "전체 기간";
 
   return (
     <section className="dpart-page dpart-work-page consultation-status-page">
       <div className="dpart-page-head consultation-status-head">
         <div>
-          <span className="dpart-eyebrow">MEDISHARE · CONSULTATION</span>
+          <span className="dpart-section-eyebrow">CONSULTATION STATUS</span>
           <h1>협진 현황</h1>
           <p>현재 참여 중인 협진 요청과 진행 상태를 확인할 수 있습니다.</p>
         </div>
 
         <div className="consultation-filter-box" aria-label="협진 현황 기간 필터">
-          <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+          <input
+            type="date"
+            value={startDate}
+            onChange={(event) => setStartDate(event.target.value)}
+          />
           <span>~</span>
-          <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
-          <button type="button" className="dpart-secondary" onClick={resetDates}>초기화</button>
-          <button type="button" className="dpart-secondary" onClick={setToday}>오늘</button>
+          <input
+            type="date"
+            value={endDate}
+            onChange={(event) => setEndDate(event.target.value)}
+          />
+          <button type="button" className="dpart-secondary" onClick={resetDates}>
+            초기화
+          </button>
+          <button type="button" className="dpart-secondary" onClick={setToday}>
+            오늘
+          </button>
         </div>
       </div>
 
@@ -119,7 +132,11 @@ function ConsultationStatusPage() {
             {total === 0 ? (
               <EmptyState message="등록된 협진 이력이 없습니다." />
             ) : (
-              <div className="consultation-status-table" role="table" aria-label="협진 상태 목록">
+              <div
+                className="consultation-status-table"
+                role="table"
+                aria-label="협진 상태 목록"
+              >
                 <div className="consultation-status-table-head" role="row">
                   <span>NO</span>
                   <span>협진 내용</span>
@@ -132,12 +149,18 @@ function ConsultationStatusPage() {
                   const width = total > 0 ? Math.round((value / total) * 100) : 0;
                   return (
                     <div className="consultation-status-table-row" role="row" key={key}>
-                      <span className="consultation-row-no">{String(index + 1).padStart(2, "0")}</span>
+                      <span className="consultation-row-no">
+                        {String(index + 1).padStart(2, "0")}
+                      </span>
                       <div className="consultation-row-main">
                         <strong>{label} 상태 협진</strong>
-                        <span>현재 조건에서 {value.toLocaleString()}건이 집계되었습니다.</span>
+                        <span>
+                          현재 조건에서 {value.toLocaleString()}건이 집계되었습니다.
+                        </span>
                       </div>
-                      <span className={`consultation-status-badge tone-${tone}`}>{label}</span>
+                      <span className={`consultation-status-badge tone-${tone}`}>
+                        {label}
+                      </span>
                       <div className="consultation-row-meta">
                         <strong>{width}%</strong>
                         <span>{value.toLocaleString()}건</span>

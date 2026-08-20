@@ -16,10 +16,13 @@ export const getRoles = (login = getStoredLogin()) => {
 
 export const hasAnyRole = (login, targets) => {
   const normalizedTargets = targets.map((role) => role.replace(/^ROLE_/, ""));
-  return getRoles(login).some((role) => normalizedTargets.includes(String(role).replace(/^ROLE_/, "")));
+  return getRoles(login).some((role) =>
+    normalizedTargets.includes(String(role).replace(/^ROLE_/, "")),
+  );
 };
 
-export const isAdminLogin = (login = getStoredLogin()) => hasAnyRole(login, ["ADMIN"]);
+export const isAdminLogin = (login = getStoredLogin()) =>
+  hasAnyRole(login, ["ADMIN"]);
 
 export const isDoctorLogin = (login = getStoredLogin()) => {
   if (!login || isAdminLogin(login)) return false;
@@ -32,7 +35,12 @@ export const isDoctorLogin = (login = getStoredLogin()) => {
 };
 
 const deriveDoctorId = (login) => {
-  const explicitId = login?.doctorId || login?.doctor_id || login?.memberNo || login?.memberId || login?.no;
+  const explicitId =
+    login?.doctorId ||
+    login?.doctor_id ||
+    login?.memberNo ||
+    login?.memberId ||
+    login?.no;
   if (explicitId && !Number.isNaN(Number(explicitId))) {
     return Number(explicitId);
   }
@@ -52,7 +60,8 @@ export const getCurrentUser = () => {
 
   return {
     isAuthenticated: Boolean(getAuthToken() && login),
-    memberId: login?.memberId || login?.memberNo || login?.no || doctorId || subject || null,
+    memberId:
+      login?.memberId || login?.memberNo || login?.no || doctorId || subject || null,
     doctorId,
     name: login?.name || subject || "사용자",
     department: login?.department || "진료과 미연동",
@@ -78,11 +87,14 @@ export const currentUser = getCurrentUser();
 
 export const scheduleTypeLabels = {
   AVAILABLE: "협진 가능",
-  RESERVED: "협진 예정",
+  RESERVED: "협진 예약",
   UNAVAILABLE: "협진 불가",
 };
 
-export const extractErrorMessage = (error, fallback = "요청을 처리하지 못했습니다.") => {
+export const extractErrorMessage = (
+  error,
+  fallback = "요청을 처리하지 못했습니다.",
+) => {
   const data = error?.response?.data;
   if (!data) return fallback;
   if (data.message) return data.message;
