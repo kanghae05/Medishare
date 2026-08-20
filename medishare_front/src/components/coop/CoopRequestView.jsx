@@ -226,7 +226,9 @@ function CoopRequestView() {
         </div>
       )}
 
-      {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
+      {vo.pacsStudyId && (
+        <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} coopRequestId={canChat ? vo.coopRequestId : null} />
+      )}
 
       {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
@@ -287,7 +289,9 @@ function CoopRequestView() {
         )}
       </div>
 
-      {canChat && chatOpen && <CoopChatPanel coopRequestId={vo.coopRequestId} />}
+      {canChat && chatOpen && (
+        <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} />
+      )}
 
       {modal === "reject" && (
         <CoopReasonModal

@@ -43,19 +43,23 @@ public class CoopMessageServiceImpl implements CoopMessageService {
 
     @Override
     @Transactional
-    public CoopMessageVO send(Long coopRequestId, Long senderId, String content) {
+    public CoopMessageVO send(Long coopRequestId, Long senderId, String content, String messageType) {
         if (content == null || content.isBlank()) {
             throw new RuntimeException("메시지 내용을 입력해주세요.");
         }
+        String type = (messageType == null || messageType.isBlank()) ? "TEXT" : messageType;
         CoopMessage saved = coopMessageRepository.save(
                 CoopMessage.builder()
                         .coopRequestId(coopRequestId)
                         .senderDoctorId(senderId)
-                        .content(content.trim())
+                        .content("IMAGE".equals(type) ? content : content.trim())
+                        .messageType(type)
                         .build()
         );
-        // 보낸 사람 본인 기준으로 변환해서 반환 (WebSocket 브로드캐스트 시 받는 사람마다 mine을 다시 계산해서 내려준다)
-        return toVO(saved, senderId);
+        CoopMessageVO vo = toVO(saved, senderId);
+        // 저장 즉시 그 방에 접속 중인 모든 세션한테 실시간으로 전파한다 (호출 경로 무관하게 여기서 한 번에 처리).
+        webSocketHandler.broadcast(coopRequestId, vo);
+        return vo;
     }
 
     @Override
@@ -130,6 +134,7 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         vo.setSentAt(m.getSentAt() == null ? null : m.getSentAt().format(DATETIME_FMT));
         vo.setMine(m.getSenderDoctorId().equals(viewerId));
         vo.setRead(m.isRead());
+        vo.setMessageType(m.getMessageType());
         memberRepository.findById(m.getSenderDoctorId())
                 .ifPresent(mem -> vo.setSenderName(mem.getName()));
         return vo;

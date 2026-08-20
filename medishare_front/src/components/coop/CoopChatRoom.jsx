@@ -59,7 +59,7 @@ function CoopChatRoom() {
         </button>
       </div>
 
-      <CoopChatPanel coopRequestId={vo.coopRequestId} large />
+      <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} large />
 
       <button
         type="button"
@@ -124,7 +124,7 @@ function CoopChatRoom() {
             </div>
           )}
 
-          {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
+          {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} coopRequestId={vo.coopRequestId} />}
 
           <button type="button" className="btn-coop-reset" onClick={() => navigate(`/coop/view?no=${vo.coopRequestId}`)}>
             협진 요청 화면으로 이동
