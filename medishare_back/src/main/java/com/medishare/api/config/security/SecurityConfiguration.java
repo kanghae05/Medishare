@@ -66,6 +66,7 @@ public class SecurityConfiguration {
                             .requestMatchers("/coop/admin/**").hasRole("ADMIN")
                             .requestMatchers("/ws/coop/**").permitAll()
                             .requestMatchers("/coop/**").hasAnyRole("USER", "ADMIN")
+                            .requestMatchers("/ws/coop-notify").permitAll()
                             .requestMatchers("/api/schedules/**").hasAnyRole("USER", "ADMIN")
                             .requestMatchers("/api/statistics/**").hasAnyRole("USER", "ADMIN")
                             // 공지사항 목록/상세는 회원가입 및 로그인 없이 조회할 수 있다.
