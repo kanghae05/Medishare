@@ -30,15 +30,20 @@ public class CoopMessageServiceImpl implements CoopMessageService {
     @Override
     @Transactional
     public List<CoopMessageVO> history(Long coopRequestId, Long viewerId) {
-        // 채팅방을 여는 시점 = "내가 이 방을 읽었다"는 뜻이라, 상대방이 보낸 메시지를 전부 읽음 처리한다.
+        markAsReadByViewer(coopRequestId, viewerId);
+        return coopMessageRepository.findByCoopRequestIdOrderBySentAtAsc(coopRequestId).stream()
+                .map(m -> toVO(m, viewerId))
+                .toList();
+    }
+
+    @Override
+    @Transactional
+    public void markAsReadByViewer(Long coopRequestId, Long viewerId) {
         int updated = coopMessageRepository.markAsRead(coopRequestId, viewerId);
         if (updated > 0) {
             // 실제로 새로 읽음 처리된 게 있을 때만 상대방한테 실시간으로 알려준다.
             webSocketHandler.broadcastReadEvent(coopRequestId, viewerId);
         }
-        return coopMessageRepository.findByCoopRequestIdOrderBySentAtAsc(coopRequestId).stream()
-                .map(m -> toVO(m, viewerId))
-                .toList();
     }
 
     @Override
@@ -85,6 +90,7 @@ public class CoopMessageServiceImpl implements CoopMessageService {
         for (CoopRequest c : rooms) {
             ChatRoomVO vo = new ChatRoomVO();
             vo.setCoopRequestId(c.getCoopRequestId());
+            vo.setReqDate(c.getReqTime() == null ? null : c.getReqTime().toLocalDate().toString());
 
             // 상대방 = 나 아닌 쪽 (요청자 또는 수락자)
             Long counterpartId = c.getReqDoctorId().equals(doctorId) ? c.getAcceptDoctorId() : c.getReqDoctorId();
@@ -114,6 +120,18 @@ public class CoopMessageServiceImpl implements CoopMessageService {
 
             result.add(vo);
         }
+
+        // 가장 최근에 대화가 오간 방이 위로 오도록 정렬. 아직 메시지가 없는 방(lastMessageTime=null)은 맨 아래로.
+        // "yyyy-MM-dd HH:mm:ss" 고정폭 문자열이라 문자열 비교만으로도 시간순 비교가 그대로 성립한다.
+        result.sort((a, b) -> {
+            String ta = a.getLastMessageTime();
+            String tb = b.getLastMessageTime();
+            if (ta == null && tb == null) return 0;
+            if (ta == null) return 1;
+            if (tb == null) return -1;
+            return tb.compareTo(ta);
+        });
+
         return result;
     }
 

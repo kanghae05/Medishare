@@ -6,7 +6,7 @@ import CoopStudyDetailPanel from "./CoopStudyDetailPanel";
 import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
 
-// 대화함에서 들어오는 전용 화면 - 채팅이 주인공이고, 협진 상세정보는 기본적으로 접어둔다.
+// 채팅에서 들어오는 전용 화면 - 채팅이 주인공이고, 협진 상세정보는 우측 하단 버튼으로 모달을 열어서 본다.
 function CoopChatRoom() {
   const [searchParams] = useSearchParams();
   const no = searchParams.get("no");
@@ -14,7 +14,7 @@ function CoopChatRoom() {
 
   const [vo, setVo] = useState(null);
   const [reportSummary, setReportSummary] = useState(null);
-  const [detailOpen, setDetailOpen] = useState(false);
+  const [detailModalOpen, setDetailModalOpen] = useState(false);
 
   useEffect(() => {
     if (!no) return;
@@ -51,84 +51,104 @@ function CoopChatRoom() {
     : vo.reqDoctorName;
 
   return (
-    <div className="coop-page">
+    <div className="coop-page" style={{ position: "relative" }}>
       <div className="coop-header">
         <h3 className="coop-title">{counterpartName || "대화"} 님과의 대화</h3>
-        <button type="button" className="btn-coop-reset" onClick={() => navigate("/coop/chats")}>
-          대화함으로
-        </button>
       </div>
 
       <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} large />
 
-      <button
-        type="button"
-        className="coop-detail-tech-toggle"
-        style={{ marginTop: 16 }}
-        onClick={() => setDetailOpen((v) => !v)}
-      >
-        협진 상세보기 {detailOpen ? "숨기기 ▲" : "보기 ▾"}
-      </button>
+      <div className="coop-chat-room-fab-group">
+        <button type="button" className="coop-chat-room-fab" onClick={() => navigate("/coop/chats")}>
+          채팅목록
+        </button>
+        <button type="button" className="coop-chat-room-fab primary" onClick={() => setDetailModalOpen(true)}>
+          협진 상세보기
+        </button>
+      </div>
 
-      {detailOpen && (
-        <div style={{ marginTop: 12 }}>
-          <div className="coop-view-card">
-            <div className="coop-view-grid">
-              <div>
-                <span className="coop-view-label">요청 의사</span>
-                <span className="coop-view-value">{vo.reqDoctorName}</span>
+      {detailModalOpen && (
+        <div className="modal d-block" tabIndex={-1} role="dialog" onClick={() => setDetailModalOpen(false)}>
+          <div
+            className="modal-dialog modal-dialog-centered modal-lg"
+            role="document"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="modal-content">
+              <div className="modal-header">
+                <h5 className="modal-title mb-0">협진 상세보기</h5>
+                <button type="button" className="btn-close" onClick={() => setDetailModalOpen(false)}></button>
               </div>
-              <div>
-                <span className="coop-view-label">수신 대상</span>
-                <span className="coop-view-value">
-                  {vo.recvType === "지정의사" ? vo.recvDoctorName : vo.recvDeptName}
-                  {vo.acceptDoctorId && ` → ${vo.acceptDoctorName} (수락)`}
-                </span>
+              <div className="modal-body">
+                <div className="coop-view-card">
+                  <div className="coop-view-grid">
+                    <div>
+                      <span className="coop-view-label">요청 의사</span>
+                      <span className="coop-view-value">{vo.reqDoctorName}</span>
+                    </div>
+                    <div>
+                      <span className="coop-view-label">수신 대상</span>
+                      <span className="coop-view-value">
+                        {vo.recvType === "지정의사" ? vo.recvDoctorName : vo.recvDeptName}
+                        {vo.acceptDoctorId && ` → ${vo.acceptDoctorName} (수락)`}
+                      </span>
+                    </div>
+                    <div>
+                      <span className="coop-view-label">요청 시각</span>
+                      <span className="coop-view-value">{vo.reqTime}</span>
+                    </div>
+                    <div className="coop-view-span2">
+                      <span className="coop-view-label">요청 내용</span>
+                      <span className="coop-view-value">{vo.reqContent}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
+
+                {reportSummary && (
+                  <div className="coop-detail-panel">
+                    <div className="coop-detail-section-title">
+                      첨부 소견서
+                      <span style={{ float: "right", fontWeight: 400, color: "var(--coop-faint)" }}>
+                        {reportSummary.status === "FINAL" ? "최종 확정" : reportSummary.status === "DRAFT" ? "작성 중" : reportSummary.status}
+                      </span>
+                    </div>
+                    <div className="coop-detail-section">
+                      <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{reportSummary.title}</div>
+                      {reportSummary.findings && (
+                        <div style={{ marginBottom: 10 }}>
+                          <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>소견 (Findings)</div>
+                          <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.findings}</div>
+                        </div>
+                      )}
+                      {reportSummary.impression && (
+                        <div>
+                          <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>판정 (Impression)</div>
+                          <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.impression}</div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                {/* 그리기는 채팅 입력창 "+"에서만 - 여기서는 coopRequestId를 안 넘겨서 그리기 버튼이 안 뜨게 한다 */}
+                {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
               </div>
-              <div>
-                <span className="coop-view-label">요청 시각</span>
-                <span className="coop-view-value">{vo.reqTime}</span>
-              </div>
-              <div className="coop-view-span2">
-                <span className="coop-view-label">요청 내용</span>
-                <span className="coop-view-value">{vo.reqContent}</span>
+              <div className="modal-footer">
+                <button
+                  type="button"
+                  className="btn-coop-reset"
+                  onClick={() => navigate(`/coop/view?no=${vo.coopRequestId}`)}
+                >
+                  협진 요청 화면으로 이동
+                </button>
+                <button type="button" className="btn-coop-apply" onClick={() => setDetailModalOpen(false)}>
+                  닫기
+                </button>
               </div>
             </div>
           </div>
-
-          {vo.pacsStudyId && <CoopStudyDetailPanel pacsStudyId={vo.pacsStudyId} />}
-
-          {reportSummary && (
-            <div className="coop-detail-panel">
-              <div className="coop-detail-section-title">
-                첨부 소견서
-                <span style={{ float: "right", fontWeight: 400, color: "var(--coop-faint)" }}>
-                  {reportSummary.status === "FINAL" ? "최종 확정" : reportSummary.status === "DRAFT" ? "작성 중" : reportSummary.status}
-                </span>
-              </div>
-              <div className="coop-detail-section">
-                <div style={{ fontSize: 14, fontWeight: 600, marginBottom: 10 }}>{reportSummary.title}</div>
-                {reportSummary.findings && (
-                  <div style={{ marginBottom: 10 }}>
-                    <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>소견 (Findings)</div>
-                    <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.findings}</div>
-                  </div>
-                )}
-                {reportSummary.impression && (
-                  <div>
-                    <div className="coop-detail-label" style={{ display: "block", marginBottom: 3 }}>판정 (Impression)</div>
-                    <div style={{ fontSize: 13, color: "var(--coop-ink)", whiteSpace: "pre-wrap" }}>{reportSummary.impression}</div>
-                  </div>
-                )}
-              </div>
-            </div>
-          )}
-
-          {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} coopRequestId={vo.coopRequestId} />}
-
-          <button type="button" className="btn-coop-reset" onClick={() => navigate(`/coop/view?no=${vo.coopRequestId}`)}>
-            협진 요청 화면으로 이동
-          </button>
         </div>
       )}
     </div>

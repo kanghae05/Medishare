@@ -633,3 +633,37 @@
 }
 .coop-chat-input:focus { outline: none; border-color: var(--coop-accent); }
 .coop-chat-input:disabled { background: var(--coop-paper); color: var(--coop-muted); }
+
+/* ---------- 대화방 화면 우측하단 플로팅 버튼 ---------- */
+.coop-chat-room-fab-group {
+  position: fixed;
+  right: 24px;
+  bottom: 24px;
+  display: flex;
+  gap: 8px;
+  z-index: 30;
+}
+.coop-chat-room-fab {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-line);
+  color: var(--coop-ink);
+  font-weight: 600;
+  font-size: 13px;
+  padding: 10px 16px;
+  border-radius: 24px;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(27,39,48,0.14);
+}
+.coop-chat-room-fab:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
+.coop-chat-room-fab.primary {
+  background: var(--coop-accent);
+  border-color: var(--coop-accent);
+  color: #fff;
+}
+.coop-chat-room-fab.primary:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); color: #fff; }
+
+.coop-chat-req-date {
+  font-size: 11.5px;
+  color: var(--coop-faint);
+  margin-left: 8px;
+}

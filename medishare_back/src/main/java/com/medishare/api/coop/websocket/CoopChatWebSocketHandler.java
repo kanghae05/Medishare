@@ -68,6 +68,27 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
 
         // send()가 저장 + 브로드캐스트까지 알아서 처리한다.
         coopMessageService.send(coopRequestId, senderId, content, "TEXT");
+
+        markReadForOtherOpenViewers(coopRequestId, senderId);
+    }
+
+    /**
+     * senderId가 방금 이 방에 메시지를 보냈을 때, 그 방에 접속해 있는 (senderId 본인이 아닌) 다른 사람이
+     * 있으면 즉시 읽음 처리한다. WebSocket 텍스트 전송 경로뿐 아니라, REST로 오는 이미지 메시지
+     * (CoopRequestController.sendImageMessage)에서도 저장 직후 이 메서드를 호출해서 똑같이 처리한다.
+     */
+    public void markReadForOtherOpenViewers(Long coopRequestId, Long senderId) {
+        CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
+        if (room == null) {
+            return;
+        }
+        for (WebSocketSession s : room) {
+            if (!s.isOpen()) continue;
+            Long viewerId = (Long) s.getAttributes().get("doctorId");
+            if (viewerId != null && !viewerId.equals(senderId)) {
+                coopMessageService.markAsReadByViewer(coopRequestId, viewerId);
+            }
+        }
     }
 
     /** 저장된 메시지를 그 방(coopRequestId)에 접속한 모든 세션에게 전송한다. 세션마다 mine을 다시 계산해서 보낸다. */

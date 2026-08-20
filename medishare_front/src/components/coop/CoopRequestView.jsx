@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import api from "../common/api";
 import CoopReasonModal from "./CoopReasonModal";
-import CoopChatPanel from "./CoopChatPanel";
 import CoopStudyDetailPanel from "./CoopStudyDetailPanel";
 import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
@@ -30,7 +29,6 @@ function CoopRequestView() {
   const [actionError, setActionError] = useState(null);
   const [processing, setProcessing] = useState(false);
   const [modal, setModal] = useState(null); // "reject" | "deptReject" | null
-  const [chatOpen, setChatOpen] = useState(false);
 
   const load = () => {
     let ignore = false;
@@ -226,9 +224,7 @@ function CoopRequestView() {
         </div>
       )}
 
-      {vo.pacsStudyId && (
-        <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} coopRequestId={canChat ? vo.coopRequestId : null} />
-      )}
+      {vo.pacsStudyId && <CoopStudyImageViewer pacsStudyId={vo.pacsStudyId} />}
 
       {vo.recvType === "진료과" && vo.deptRejections && vo.deptRejections.length > 0 && (
         <div className="coop-dept-reject-box">
@@ -283,15 +279,15 @@ function CoopRequestView() {
         )}
 
         {canChat && (
-          <button type="button" className="btn-coop-apply" onClick={() => setChatOpen((v) => !v)}>
-            {chatOpen ? "채팅 닫기" : "채팅"}
+          <button
+            type="button"
+            className="btn-coop-apply"
+            onClick={() => navigate(`/coop/chat?no=${vo.coopRequestId}`)}
+          >
+            채팅
           </button>
         )}
       </div>
-
-      {canChat && chatOpen && (
-        <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} />
-      )}
 
       {modal === "reject" && (
         <CoopReasonModal

@@ -9,6 +9,7 @@ import com.medishare.api.coop.repository.CoopPacsSeriesLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.repository.CoopReportLookupRepository;
 import com.medishare.api.coop.service.CoopMessageService;
+import com.medishare.api.coop.websocket.CoopChatWebSocketHandler;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.ChatRoomVO;
@@ -43,6 +44,7 @@ public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
     private final CoopMessageService coopMessageService;
+    private final CoopChatWebSocketHandler coopChatWebSocketHandler;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopPacsSeriesLookupRepository pacsSeriesRepository;
     private final OrthancImageService orthancImageService;
@@ -166,7 +168,9 @@ public class CoopRequestController {
             throw new RuntimeException("이 협진요청의 채팅에 참여할 수 있는 권한이 없습니다.");
         }
         String imageDataUrl = body.get("imageDataUrl");
-        return coopMessageService.send(coopRequestId, doctorId, imageDataUrl, "IMAGE");
+        CoopMessageVO saved = coopMessageService.send(coopRequestId, doctorId, imageDataUrl, "IMAGE");
+        coopChatWebSocketHandler.markReadForOtherOpenViewers(coopRequestId, doctorId);
+        return saved;
     }
 
     // 대화함 - 내가 참여 중인 채팅방 목록 (마지막 메시지 + 안읽은 개수 포함)
