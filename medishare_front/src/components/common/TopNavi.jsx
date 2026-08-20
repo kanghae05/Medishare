@@ -6,6 +6,7 @@ import {
 import {
   Link,
   NavLink,
+  useLocation,
   useNavigate,
 } from "react-router-dom";
 
@@ -155,6 +156,9 @@ function BrandMark() {
 function TopNavi() {
   const navigate =
     useNavigate();
+
+  const location =
+    useLocation();
 
 
   const [
@@ -404,7 +408,16 @@ function TopNavi() {
 
                 <NavLink
                   to="/coop/received"
-                  className="topnav-link"
+                  className={({ isActive }) =>
+                    `topnav-link ${
+                      isActive ||
+                      location.pathname.startsWith(
+                        "/coop/"
+                      )
+                        ? "active"
+                        : ""
+                    }`
+                  }
                 >
                   협진
                 </NavLink>

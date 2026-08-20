@@ -410,7 +410,15 @@
 .coop-image-viewer { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
 .coop-image-viewer-empty { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 20px; text-align: center; color: var(--coop-muted); font-size: 13px; margin-bottom: 16px; }
 .coop-image-viewer-series { font-size: 12.5px; color: var(--coop-muted); margin-bottom: 10px; }
-.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
+.coop-image-viewer-preload {
+  float: right;
+  font-family: var(--coop-font-mono);
+  font-size: 11px;
+  color: var(--coop-faint);
+}
+.coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; cursor: ns-resize; outline: none; }
+.coop-image-viewer-frame:focus { box-shadow: 0 0 0 2px var(--coop-accent); }
+.coop-image-viewer-hint { font-size: 11px; color: var(--coop-faint); margin-top: 6px; text-align: center; }
 .coop-image-viewer-img { max-width: 100%; max-height: 480px; display: block; }
 .coop-image-viewer-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
 .coop-image-viewer-slider { flex: 1; accent-color: var(--coop-accent); }
@@ -559,6 +567,13 @@
   border-color: var(--coop-accent);
   color: var(--coop-accent-deep);
 }
+.coop-chat-image {
+  max-width: 220px;
+  max-height: 220px;
+  border-radius: 10px;
+  border: 1px solid var(--coop-line);
+  display: block;
+}
 .coop-chat-time {
   font-family: var(--coop-font-mono);
   font-size: 10.5px;
@@ -572,7 +587,49 @@
   color: var(--coop-accent);
 }
 
-.coop-chat-input-row { display: flex; gap: 8px; }
+.coop-chat-input-row { display: flex; gap: 8px; align-items: center; }
+.coop-chat-plus {
+  flex-shrink: 0;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--coop-line);
+  background: var(--coop-paper);
+  color: var(--coop-accent);
+  font-size: 18px;
+  font-weight: 700;
+  line-height: 1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.coop-chat-plus:hover { background: var(--coop-accent-soft); border-color: var(--coop-accent); }
+
+.coop-chat-image-picker {
+  border: 1px solid var(--coop-line);
+  border-radius: 4px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: var(--coop-paper);
+}
+.coop-chat-image-picker-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  font-size: 12.5px;
+  font-weight: 700;
+  color: var(--coop-muted);
+  margin-bottom: 10px;
+}
+.coop-chat-image-picker-close {
+  background: none;
+  border: none;
+  color: var(--coop-faint);
+  font-size: 12px;
+  cursor: pointer;
+}
+.coop-chat-image-picker-close:hover { color: var(--coop-ink); }
 .coop-chat-input {
   flex: 1;
   border: 1px solid var(--coop-line);
@@ -584,3 +641,91 @@
 }
 .coop-chat-input:focus { outline: none; border-color: var(--coop-accent); }
 .coop-chat-input:disabled { background: var(--coop-paper); color: var(--coop-muted); }
+
+/* ---------- 채팅 박스 헤더 안의 "채팅목록"/"협진 상세보기" 버튼 (CoopChatRoom에서 사용) ---------- */
+.coop-chat-header-btn {
+  background: var(--coop-card);
+  border: 1px solid var(--coop-line);
+  color: var(--coop-ink);
+  font-weight: 600;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.coop-chat-header-btn:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
+.coop-chat-header-btn.primary {
+  background: var(--coop-accent);
+  border-color: var(--coop-accent);
+  color: #fff;
+}
+.coop-chat-header-btn.primary:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); color: #fff; }
+
+/* ---------- 협진 상세보기 모달 - 상단 고정 네비바에 안 가리도록 여백/최대높이 조정 ---------- */
+.coop-detail-modal {
+  z-index: 2000;
+  padding-top: 76px;
+}
+.coop-detail-modal .modal-dialog {
+  max-height: calc(100vh - 110px);
+  margin-top: 0;
+}
+.coop-detail-modal .modal-content {
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
+
+.coop-chat-req-date {
+  font-size: 11.5px;
+  color: var(--coop-faint);
+  margin-left: 8px;
+}
+
+/* ---------- 카카오톡 스타일 실시간 토스트 알림 ---------- */
+.coop-toast-stack {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  z-index: 3000;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  width: 320px;
+}
+.coop-toast {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  background: var(--coop-card);
+  border: 1px solid var(--coop-line);
+  border-radius: 8px;
+  padding: 12px 14px;
+  box-shadow: 0 8px 24px rgba(27,39,48,0.16);
+  cursor: pointer;
+  animation: coop-toast-in 0.2s ease-out;
+}
+@keyframes coop-toast-in {
+  from { transform: translateX(20px); opacity: 0; }
+  to { transform: translateX(0); opacity: 1; }
+}
+.coop-toast-icon { font-size: 20px; line-height: 1; margin-top: 2px; }
+.coop-toast-body { flex: 1; min-width: 0; }
+.coop-toast-title { font-size: 13px; font-weight: 700; color: var(--coop-ink); margin-bottom: 2px; }
+.coop-toast-message {
+  font-size: 12.5px;
+  color: var(--coop-muted);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.coop-toast-close {
+  background: none;
+  border: none;
+  color: var(--coop-faint);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 2px;
+  flex-shrink: 0;
+}
+.coop-toast-close:hover { color: var(--coop-ink); }

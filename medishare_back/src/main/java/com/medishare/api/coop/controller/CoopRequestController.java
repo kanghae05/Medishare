@@ -9,6 +9,7 @@ import com.medishare.api.coop.repository.CoopPacsSeriesLookupRepository;
 import com.medishare.api.coop.repository.CoopPacsStudyLookupRepository;
 import com.medishare.api.coop.repository.CoopReportLookupRepository;
 import com.medishare.api.coop.service.CoopMessageService;
+import com.medishare.api.coop.websocket.CoopChatWebSocketHandler;
 import com.medishare.api.coop.service.CoopRequestService;
 import com.medishare.api.coop.service.OrthancImageService;
 import com.medishare.api.coop.vo.ChatRoomVO;
@@ -43,6 +44,7 @@ public class CoopRequestController {
 
     private final CoopRequestService coopRequestService;
     private final CoopMessageService coopMessageService;
+    private final CoopChatWebSocketHandler coopChatWebSocketHandler;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopPacsSeriesLookupRepository pacsSeriesRepository;
     private final OrthancImageService orthancImageService;
@@ -152,6 +154,23 @@ public class CoopRequestController {
             throw new RuntimeException("이 협진요청의 채팅에 참여할 수 있는 권한이 없습니다.");
         }
         return coopMessageService.history(coopRequestId, doctorId);
+    }
+
+    // 영상에 그림을 그려서 채팅으로 전송 (base64 PNG data URL을 그대로 저장) - WebSocket 대신 REST로 처리.
+    // send()가 저장과 동시에 실시간 브로드캐스트까지 알아서 하므로, 채팅창이 열려있는 상대방한테도 즉시 전달된다.
+    @PostMapping("/{coopRequestId}/messages/image.do")
+    public CoopMessageVO sendImageMessage(@PathVariable Long coopRequestId,
+                                          @RequestBody Map<String, String> body,
+                                          Authentication authentication) {
+        Long doctorId = currentDoctorId(authentication);
+        Long deptId = safeCurrentDeptId(authentication);
+        if (!coopMessageService.isParticipant(coopRequestId, doctorId, deptId)) {
+            throw new RuntimeException("이 협진요청의 채팅에 참여할 수 있는 권한이 없습니다.");
+        }
+        String imageDataUrl = body.get("imageDataUrl");
+        CoopMessageVO saved = coopMessageService.send(coopRequestId, doctorId, imageDataUrl, "IMAGE");
+        coopChatWebSocketHandler.markReadForOtherOpenViewers(coopRequestId, doctorId);
+        return saved;
     }
 
     // 대화함 - 내가 참여 중인 채팅방 목록 (마지막 메시지 + 안읽은 개수 포함)

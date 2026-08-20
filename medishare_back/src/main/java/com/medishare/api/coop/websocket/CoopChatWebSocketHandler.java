@@ -62,16 +62,51 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
         Long coopRequestId = (Long) session.getAttributes().get("coopRequestId");
         Long senderId = (Long) session.getAttributes().get("doctorId");
 
-        // 프론트에서 { "content": "..." } 형태로 보낸다.
+        // 프론트에서 { "content": "..." } 형태로 보낸다. (텍스트 전송은 항상 messageType="TEXT")
         Map<String, String> payload = objectMapper.readValue(message.getPayload(), Map.class);
         String content = payload.get("content");
 
-        CoopMessageVO saved = coopMessageService.send(coopRequestId, senderId, content);
-        broadcast(coopRequestId, saved);
+        // send()가 저장 + 브로드캐스트까지 알아서 처리한다.
+        coopMessageService.send(coopRequestId, senderId, content, "TEXT");
+
+        markReadForOtherOpenViewers(coopRequestId, senderId);
+    }
+
+    /**
+     * senderId가 방금 이 방에 메시지를 보냈을 때, 그 방에 접속해 있는 (senderId 본인이 아닌) 다른 사람이
+     * 있으면 즉시 읽음 처리한다. WebSocket 텍스트 전송 경로뿐 아니라, REST로 오는 이미지 메시지
+     * (CoopRequestController.sendImageMessage)에서도 저장 직후 이 메서드를 호출해서 똑같이 처리한다.
+     */
+    public void markReadForOtherOpenViewers(Long coopRequestId, Long senderId) {
+        CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
+        if (room == null) {
+            return;
+        }
+        for (WebSocketSession s : room) {
+            if (!s.isOpen()) continue;
+            Long viewerId = (Long) s.getAttributes().get("doctorId");
+            if (viewerId != null && !viewerId.equals(senderId)) {
+                coopMessageService.markAsReadByViewer(coopRequestId, viewerId);
+            }
+        }
+    }
+
+    /** doctorId가 지금 이 채팅방(coopRequestId)에 접속해 있는지 - 토스트 알림 중복을 피하기 위한 용도 */
+    public boolean hasOpenSession(Long coopRequestId, Long doctorId) {
+        CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
+        if (room == null) {
+            return false;
+        }
+        for (WebSocketSession s : room) {
+            if (s.isOpen() && doctorId.equals(s.getAttributes().get("doctorId"))) {
+                return true;
+            }
+        }
+        return false;
     }
 
     /** 저장된 메시지를 그 방(coopRequestId)에 접속한 모든 세션에게 전송한다. 세션마다 mine을 다시 계산해서 보낸다. */
-    private void broadcast(Long coopRequestId, CoopMessageVO saved) throws IOException {
+    public void broadcast(Long coopRequestId, CoopMessageVO saved) {
         CopyOnWriteArraySet<WebSocketSession> room = rooms.get(coopRequestId);
         if (room == null) {
             return;
@@ -88,7 +123,12 @@ public class CoopChatWebSocketHandler extends TextWebSocketHandler {
             copy.setSentAt(saved.getSentAt());
             copy.setMine(saved.getSenderDoctorId().equals(viewerId));
             copy.setRead(saved.isRead());
-            s.sendMessage(new TextMessage(objectMapper.writeValueAsString(copy)));
+            copy.setMessageType(saved.getMessageType());
+            try {
+                s.sendMessage(new TextMessage(objectMapper.writeValueAsString(copy)));
+            } catch (IOException e) {
+                // 세션 하나 실패해도 나머지 세션한테는 계속 보낸다
+            }
         }
     }
 

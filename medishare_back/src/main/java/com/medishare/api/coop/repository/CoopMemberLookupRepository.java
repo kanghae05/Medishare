@@ -17,6 +17,9 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
     /** 특정 진료과(department_no) 소속의 활성 상태 의사 수 */
     long countByDepartment_NoAndStatus(Long departmentNo, String status);
 
+    /** 특정 진료과 소속의 활성 상태 의사 전체 - 진료과 요청 도착 시 소속 의사 전원한테 알림 쏘는 용도 */
+    List<Member> findByDepartment_NoAndStatus(Long departmentNo, String status);
+
     /**
      * 이름/세부전공/진료과명 중 하나라도 검색어를 포함하는 활성 의사 검색.
      * 협진 요청 등록 폼의 "받는 의사" 자동완성용.
@@ -27,12 +30,12 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
      * member_roles/role 테이블을 네이티브 SQL로 직접 조회하면 안전하게 되니까).
      */
     @Query("SELECT m FROM Member m LEFT JOIN FETCH m.department " +
-           "WHERE m.status = 'ACTIVE' " +
-           "AND m.no <> :excludeNo " +
-           "AND (m.name LIKE CONCAT('%', :q, '%') " +
-           "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
-           "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
-           "ORDER BY m.name")
+            "WHERE m.status = 'ACTIVE' " +
+            "AND m.no <> :excludeNo " +
+            "AND (m.name LIKE CONCAT('%', :q, '%') " +
+            "  OR m.specialty LIKE CONCAT('%', :q, '%') " +
+            "  OR m.department.departmentName LIKE CONCAT('%', :q, '%')) " +
+            "ORDER BY m.name")
     List<Member> searchDoctors(@Param("q") String q, @Param("excludeNo") Long excludeNo);
 
     /**
@@ -44,7 +47,7 @@ public interface CoopMemberLookupRepository extends JpaRepository<Member, Long> 
 
     /** ROLE_ADMIN을 가진 회원번호 목록 (member_roles + role 테이블 직접 조회) */
     @Query(value = "SELECT mr.member_no FROM member_roles mr " +
-                    "JOIN role r ON mr.role_no = r.no " +
-                    "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
+            "JOIN role r ON mr.role_no = r.no " +
+            "WHERE r.role_code = 'ROLE_ADMIN'", nativeQuery = true)
     List<Long> findAdminMemberIds();
 }

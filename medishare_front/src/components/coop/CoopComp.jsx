@@ -7,6 +7,7 @@ import CoopRequestView from "./CoopRequestView";
 import CoopAdminList from "./CoopAdminList";
 import CoopChatList from "./CoopChatList";
 import CoopChatRoom from "./CoopChatRoom";
+import CoopNotificationCenter from "./CoopNotificationCenter";
 import { isAdmin } from "./coopAuth";
 import "./Coop.css";
 
@@ -15,7 +16,7 @@ import "./Coop.css";
 // 받은/보낸/전체 같은 "개인용" 탭이 의미가 없다 - 무조건 전체 조회 화면 하나만 본다).
 function CoopSidebarLayout() {
   return (
-    <div className="mb-5">
+    <div className="mt-5">
       <div className="coop-module-header">
         <span className="coop-module-eyebrow">MEDISHARE · CONSULTATION</span>
         <h2 className="coop-page-title">협진함</h2>
@@ -47,21 +48,24 @@ function CoopComp() {
   }
 
   return (
-    <Routes>
-      <Route element={<CoopSidebarLayout />}>
-        <Route path="received" element={<CoopRequestList mode="received" />} />
-        <Route path="sent" element={<CoopRequestList mode="sent" />} />
-        <Route path="all" element={<CoopRequestList mode="all" />} />
-        <Route path="write" element={<CoopRequestWriteForm />} />
-        <Route path="view" element={<CoopRequestView />} />
-        <Route path="chats" element={<CoopChatList />} />
-        <Route path="chat" element={<CoopChatRoom />} />
-      </Route>
-      <Route index element={<Navigate to="/coop/received" replace />} />
-      {/* 일반 계정은 관리자 화면에 못 들어간다 (백엔드도 /coop/admin/** 를 ROLE_ADMIN으로 막아뒀지만,
-          프론트에서도 애초에 라우트 자체를 안 열어줘서 이중으로 막는다) */}
-      <Route path="*" element={<NotFoundPage />} />
-    </Routes>
+    <>
+      <CoopNotificationCenter />
+      <Routes>
+        <Route element={<CoopSidebarLayout />}>
+          <Route path="received" element={<CoopRequestList mode="received" />} />
+          <Route path="sent" element={<CoopRequestList mode="sent" />} />
+          <Route path="all" element={<CoopRequestList mode="all" />} />
+          <Route path="write" element={<CoopRequestWriteForm />} />
+          <Route path="view" element={<CoopRequestView />} />
+          <Route path="chats" element={<CoopChatList />} />
+          <Route path="chat" element={<CoopChatRoom />} />
+        </Route>
+        <Route index element={<Navigate to="/coop/received" replace />} />
+        {/* 일반 계정은 관리자 화면에 못 들어간다 (백엔드도 /coop/admin/** 를 ROLE_ADMIN으로 막아뒀지만,
+            프론트에서도 애초에 라우트 자체를 안 열어줘서 이중으로 막는다) */}
+        <Route path="*" element={<NotFoundPage />} />
+      </Routes>
+    </>
   );
 }
 

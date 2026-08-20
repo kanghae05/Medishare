@@ -842,3 +842,428 @@
     padding: 11px 10px;
   }
 }
+
+/* ---------- MediShare D-part visual refresh ---------- */
+.dpart-shell {
+  background: #f7fbfb;
+  color: #14364a;
+  margin: -8rem calc(50% - 50vw) 0;
+  min-height: calc(100vh - 58px);
+  padding: 120px max(24px, calc((100vw - 1360px) / 2)) 80px;
+}
+
+.dpart-hero {
+  align-items: center;
+  background: linear-gradient(135deg, #e9f7f5 0%, #f5fbfd 100%);
+  border: 1px solid #d8eceb;
+  border-radius: 8px;
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+  margin-bottom: 22px;
+  padding: 38px 44px;
+}
+
+.dpart-hero h1 {
+  color: #14364a;
+  font-size: 42px;
+  font-weight: 900;
+  letter-spacing: 0;
+  line-height: 1.22;
+  margin: 0 0 12px;
+}
+
+.dpart-hero p {
+  color: #7b94a1;
+  font-size: 15px;
+  line-height: 1.7;
+  margin: 0;
+}
+
+.dpart-eyebrow,
+.dpart-section-eyebrow {
+  color: #159b95;
+  display: block;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: 3px;
+  margin-bottom: 10px;
+}
+
+.dpart-hero-card {
+  background: #fff;
+  border: 1px solid #e3efef;
+  border-radius: 8px;
+  box-shadow: 0 24px 50px rgba(16, 109, 105, 0.12);
+  min-width: 240px;
+  padding: 26px 28px;
+}
+
+.dpart-hero-card span {
+  color: #159b95;
+  display: block;
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.dpart-hero-card strong {
+  color: #14364a;
+  display: block;
+  font-size: 30px;
+  font-weight: 900;
+  line-height: 1.2;
+  margin: 12px 0 6px;
+}
+
+.dpart-hero-card small {
+  color: #7b94a1;
+  font-weight: 800;
+}
+
+.dpart-layout {
+  gap: 18px;
+  grid-template-columns: 220px minmax(0, 1fr);
+  max-width: none;
+  padding: 0;
+}
+
+.dpart-sidebar,
+.dpart-table-wrap,
+.dpart-panel,
+.dpart-stat-card,
+.dpart-summary-strip,
+.dpart-filter-band,
+.consultation-filter-box,
+.consultation-summary-strip {
+  border: 1px solid #dcecec;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(28, 66, 74, 0.06);
+}
+
+.dpart-sidebar {
+  background: #fff;
+  padding: 18px;
+  top: 72px;
+}
+
+.dpart-brand {
+  border-bottom: 1px solid #e5eeee;
+  padding-bottom: 16px;
+}
+
+.dpart-brand-mark {
+  background: #159b95;
+  border-radius: 8px;
+  box-shadow: 0 10px 20px rgba(21, 155, 149, 0.16);
+}
+
+.dpart-brand strong {
+  color: #14364a;
+  font-weight: 900;
+}
+
+.dpart-brand span {
+  color: #7b94a1;
+  font-weight: 700;
+}
+
+.dpart-menu {
+  gap: 7px;
+  padding-top: 16px;
+}
+
+.dpart-menu a {
+  border: 1px solid transparent;
+  border-radius: 7px;
+  color: #607987;
+  font-weight: 900;
+  min-height: 42px;
+  padding: 11px 12px;
+}
+
+.dpart-menu a.active,
+.dpart-menu a:hover {
+  background: #e3f6f1;
+  border-color: #bee3df;
+  color: #0f7e79;
+}
+
+.dpart-main {
+  background: #fff;
+  border: 1px solid #dcecec;
+  border-radius: 8px;
+  box-shadow: 0 14px 34px rgba(28, 66, 74, 0.06);
+  padding: 26px 30px;
+}
+
+.dpart-page-head {
+  border-bottom: 1px solid #e5eeee;
+  margin-bottom: 18px;
+  padding-bottom: 18px;
+}
+
+.dpart-page-head h1 {
+  color: #14364a;
+  font-size: 30px;
+  font-weight: 900;
+}
+
+.dpart-page-head p,
+.dpart-section-head p,
+.consultation-summary-item span,
+.consultation-row-main span,
+.consultation-row-meta span {
+  color: #7b94a1;
+}
+
+.dpart-primary,
+.dpart-secondary,
+.dpart-row-actions button,
+.dpart-icon-button {
+  border-radius: 7px;
+  font-weight: 900;
+}
+
+.dpart-primary {
+  background: #159b95;
+  border-color: #159b95;
+  box-shadow: 0 8px 18px rgba(21, 155, 149, 0.14);
+}
+
+.dpart-primary:hover {
+  background: #0f7e79;
+  border-color: #0f7e79;
+}
+
+.dpart-secondary,
+.dpart-row-actions button {
+  background: #f3fbfa;
+  border-color: #b8dcda;
+  color: #0f7e79;
+}
+
+.dpart-row-actions button.danger {
+  background: #fff;
+  border-color: #e1aaa5;
+  color: #b23b35;
+}
+
+.dpart-filter-band,
+.consultation-filter-box {
+  background: #f7fbfb;
+  box-shadow: none;
+  padding: 14px;
+}
+
+.dpart-filter-band input,
+.dpart-form input,
+.dpart-form select,
+.dpart-form textarea,
+.consultation-filter-box input {
+  background: #f8fcfc;
+  border: 1px solid #cfe0e2;
+  border-radius: 7px;
+  color: #14364a;
+  min-height: 42px;
+}
+
+.dpart-filter-band input:focus,
+.dpart-form input:focus,
+.dpart-form select:focus,
+.dpart-form textarea:focus,
+.consultation-filter-box input:focus {
+  background: #fff;
+  border-color: #159b95;
+  box-shadow: 0 0 0 3px rgba(21, 155, 149, 0.14);
+  outline: none;
+}
+
+.dpart-segment {
+  background: #edf7f6;
+  border-radius: 8px;
+}
+
+.dpart-segment button {
+  color: #607987;
+  font-weight: 900;
+}
+
+.dpart-segment button.active {
+  color: #0f7e79;
+}
+
+.dpart-summary-strip,
+.consultation-summary-strip {
+  background: #fff;
+  overflow: hidden;
+}
+
+.dpart-stat-card,
+.consultation-summary-item {
+  background: #fff;
+}
+
+.dpart-stat-card span,
+.consultation-summary-item span {
+  color: #7b94a1;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.dpart-stat-card strong,
+.consultation-summary-item strong {
+  color: #14364a;
+  font-weight: 900;
+}
+
+.dpart-stat-card.tone-green strong,
+.consultation-summary-item.tone-green strong {
+  color: #159b95;
+}
+
+.dpart-stat-card.tone-blue strong,
+.consultation-summary-item.tone-blue strong {
+  color: #2563a8;
+}
+
+.dpart-stat-card.tone-warning strong,
+.consultation-summary-item.tone-warning strong {
+  color: #b26b00;
+}
+
+.dpart-stat-card.tone-red strong,
+.consultation-summary-item.tone-red strong {
+  color: #b23b35;
+}
+
+.dpart-panel,
+.dpart-table-wrap {
+  background: #fff;
+}
+
+.dpart-section-head {
+  border-bottom-color: #e5eeee;
+  padding: 18px 20px;
+}
+
+.dpart-section-head h2 {
+  color: #14364a;
+  font-size: 20px;
+  font-weight: 900;
+}
+
+.dpart-work-row,
+.dpart-status-row,
+.consultation-status-table-row {
+  border-top-color: #e5eeee;
+}
+
+.dpart-work-row:hover,
+.dpart-table tbody tr:hover,
+.consultation-status-table-row:hover {
+  background: #f3fbfa;
+}
+
+.dpart-row-time,
+.dpart-row-main strong,
+.consultation-row-main strong,
+.consultation-row-no,
+.consultation-row-meta strong {
+  color: #14364a;
+}
+
+.dpart-table th,
+.consultation-status-table-head {
+  background: #f5fbfb;
+  color: #657f8b;
+  font-weight: 900;
+}
+
+.dpart-table td,
+.dpart-table th {
+  border-bottom-color: #e5eeee;
+}
+
+.dpart-badge {
+  font-weight: 900;
+  padding: 6px 10px;
+}
+
+.dpart-badge.status-AVAILABLE {
+  background: #e3f6f1;
+  border-color: #bee3df;
+  color: #0c7565;
+}
+
+.dpart-badge.status-RESERVED {
+  background: #eef4ff;
+  border-color: #c8d7f2;
+  color: #315f9f;
+}
+
+.dpart-badge.status-UNAVAILABLE {
+  background: #eef2f4;
+  border-color: #d8e1e5;
+  color: #607987;
+}
+
+.consultation-status-table-head,
+.consultation-status-table-row {
+  grid-template-columns: 72px minmax(0, 1fr) 120px 100px;
+}
+
+.consultation-status-badge {
+  font-weight: 900;
+}
+
+.dpart-state,
+.dpart-empty {
+  background: #f7fbfb;
+  border: 1px solid #dcecec;
+  border-radius: 8px;
+  color: #7b94a1;
+}
+
+.dpart-modal {
+  border: 1px solid #dcecec;
+  border-radius: 8px;
+}
+
+.dpart-modal-head {
+  border-bottom-color: #e5eeee;
+}
+
+.dpart-modal-head h3 {
+  color: #14364a;
+  font-weight: 900;
+}
+
+.dpart-form label span {
+  color: #607987;
+  font-weight: 900;
+}
+
+@media (max-width: 900px) {
+  .dpart-shell {
+    padding-inline: 18px;
+  }
+
+  .dpart-hero {
+    align-items: stretch;
+    flex-direction: column;
+    padding: 30px 24px;
+  }
+
+  .dpart-hero h1 {
+    font-size: 32px;
+  }
+
+  .dpart-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .dpart-main {
+    padding: 22px 18px;
+  }
+}

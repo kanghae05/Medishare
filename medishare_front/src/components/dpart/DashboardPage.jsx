@@ -44,7 +44,10 @@ function DashboardPage() {
 
       const [scheduleResult, statsResult] = await Promise.allSettled([
         getDoctorSchedulesByDate(user.doctorId, today),
-        getDoctorConsultationStatistics(user.doctorId, { startDate: today, endDate: today }),
+        getDoctorConsultationStatistics(user.doctorId, {
+          startDate: today,
+          endDate: today,
+        }),
       ]);
 
       if (ignore) return;
@@ -53,14 +56,24 @@ function DashboardPage() {
         setTodaySchedules(scheduleResult.value.data || []);
       } else {
         setTodaySchedules([]);
-        setScheduleError(extractErrorMessage(scheduleResult.reason, "일정 정보를 불러오지 못했습니다."));
+        setScheduleError(
+          extractErrorMessage(
+            scheduleResult.reason,
+            "일정 정보를 불러오지 못했습니다.",
+          ),
+        );
       }
 
       if (statsResult.status === "fulfilled") {
         setStats(statsResult.value.data || emptyStats);
       } else {
         setStats(emptyStats);
-        setStatsError(extractErrorMessage(statsResult.reason, "협진 통계를 불러오지 못했습니다."));
+        setStatsError(
+          extractErrorMessage(
+            statsResult.reason,
+            "협진 통계를 불러오지 못했습니다.",
+          ),
+        );
       }
 
       setLoading(false);
@@ -76,10 +89,13 @@ function DashboardPage() {
     <section className="dpart-page dpart-work-page">
       <div className="dpart-page-head">
         <div>
-          <h1>협진 관리</h1>
+          <span className="dpart-section-eyebrow">DASHBOARD</span>
+          <h1>협진 관리 메인</h1>
           <p>
             오늘의 일정과 협진 흐름을 한 화면에서 확인합니다.
-            {user.isMock && user.doctorId && <span className="dpart-inline-note"> doctorId={user.doctorId}</span>}
+            {user.isMock && user.doctorId && (
+              <span className="dpart-inline-note"> doctorId={user.doctorId}</span>
+            )}
           </p>
         </div>
       </div>
@@ -114,7 +130,8 @@ function DashboardPage() {
                 {todaySchedules.map((schedule) => (
                   <div className="dpart-work-row" key={schedule.scheduleId}>
                     <time className="dpart-row-time">
-                      {schedule.startTime?.slice(0, 5)} ~ {schedule.endTime?.slice(0, 5)}
+                      {schedule.startTime?.slice(0, 5)} ~{" "}
+                      {schedule.endTime?.slice(0, 5)}
                     </time>
                     <div className="dpart-row-main">
                       <strong>{schedule.memo || "메모 없음"}</strong>

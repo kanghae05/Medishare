@@ -41,6 +41,12 @@ public class CoopMessage {
     @Column(name = "is_read", nullable = false)
     private boolean read = false;
 
+    // TEXT 또는 IMAGE. IMAGE면 content엔 텍스트가 아니라 base64 PNG data URL이 들어있다
+    // (영상에 그림을 그려서 보낸 것 - 별도 파일 스토리지 없이 채팅 메시지 안에 그대로 담아 간단하게 처리).
+    @Builder.Default
+    @Column(name = "message_type", nullable = false, length = 10)
+    private String messageType = "TEXT";
+
     @PrePersist
     protected void onCreate() {
         if (sentAt == null) {

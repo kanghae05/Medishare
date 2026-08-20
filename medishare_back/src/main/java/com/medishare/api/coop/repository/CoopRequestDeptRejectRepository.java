@@ -4,11 +4,15 @@ import com.medishare.api.coop.entity.CoopRequestDeptReject;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface CoopRequestDeptRejectRepository extends JpaRepository<CoopRequestDeptReject, Long> {
 
     // 같은 의사가 같은 요청에 중복 거절하지 않았는지 확인 (UNIQUE 제약과 이중 방어)
     boolean existsByCoopRequestIdAndDoctorId(Long coopRequestId, Long doctorId);
+
+    // 조회자 본인이 이 요청을 왜 거절했는지 (전원 거절 확정 전에도, 본인한테는 본인 사유를 보여줘야 함)
+    Optional<CoopRequestDeptReject> findByCoopRequestIdAndDoctorId(Long coopRequestId, Long doctorId);
 
     // 현재까지 이 요청에 거절한 의사 수 (전원 거절 여부 판단용)
     long countByCoopRequestId(Long coopRequestId);

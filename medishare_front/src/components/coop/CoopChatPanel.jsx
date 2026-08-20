@@ -1,14 +1,19 @@
 import { useEffect, useRef, useState } from "react";
 import api from "../common/api";
+import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
 
 // 협진요청 건별 실시간 채팅. WebSocket 연결 전에 REST로 이력을 먼저 불러온다.
 // large=true면 대화방 전용 화면처럼 메시지 영역을 크게 보여준다 (상세화면에 곁들일 땐 기본 크기).
-function CoopChatPanel({ coopRequestId, large = false }) {
+// pacsStudyId가 주어지면 입력창 왼쪽에 "+" 버튼이 뜨고, 눌러서 바로 영상을 열어 그림을 그려 보낼 수 있다.
+// title/headerActions: 대화방 전용 화면(CoopChatRoom)에서 이 박스 상단에 상대방 이름과
+// "채팅목록"/"협진 상세보기" 버튼을 넣기 위한 것 - 기본값은 그냥 "채팅" 라벨만.
+function CoopChatPanel({ coopRequestId, large = false, pacsStudyId, title, headerActions }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
   const [loadError, setLoadError] = useState(null);
+  const [showImagePicker, setShowImagePicker] = useState(false);
   const wsRef = useRef(null);
   const bottomRef = useRef(null);
 
@@ -73,11 +78,14 @@ function CoopChatPanel({ coopRequestId, large = false }) {
     <div className="coop-chat-panel">
       <div className="coop-chat-header">
         <span className="coop-detail-section-title" style={{ margin: 0, border: "none", padding: 0 }}>
-          채팅
+          {title || "채팅"}
         </span>
-        <span className={"coop-chat-status" + (connected ? " online" : "")}>
-          {connected ? "연결됨" : "연결 안 됨"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {headerActions}
+          <span className={"coop-chat-status" + (connected ? " online" : "")}>
+            {connected ? "연결됨" : "연결 안 됨"}
+          </span>
+        </div>
       </div>
 
       {loadError && <div className="coop-empty">{loadError}</div>}
@@ -89,7 +97,11 @@ function CoopChatPanel({ coopRequestId, large = false }) {
         {messages.map((m, i) => (
           <div key={m.coopMessageId ?? i} className={"coop-chat-bubble-row" + (m.mine ? " mine" : "")}>
             {!m.mine && <div className="coop-chat-sender">{m.senderName || `의사 #${m.senderDoctorId}`}</div>}
-            <div className="coop-chat-bubble">{m.content}</div>
+            {m.messageType === "IMAGE" ? (
+              <img src={m.content} alt="첨부 이미지" className="coop-chat-image" />
+            ) : (
+              <div className="coop-chat-bubble">{m.content}</div>
+            )}
             <div className="coop-chat-time">
               {m.mine && <span className="coop-chat-read">{m.read ? "읽음" : "안읽음"}</span>}
               {m.sentAt ? m.sentAt.slice(5, 16) : ""}
@@ -99,7 +111,33 @@ function CoopChatPanel({ coopRequestId, large = false }) {
         <div ref={bottomRef} />
       </div>
 
+      {showImagePicker && pacsStudyId && (
+        <div className="coop-chat-image-picker">
+          <div className="coop-chat-image-picker-header">
+            <span>의료 영상</span>
+            <button type="button" className="coop-chat-image-picker-close" onClick={() => setShowImagePicker(false)}>
+              닫기 ✕
+            </button>
+          </div>
+          <CoopStudyImageViewer
+            pacsStudyId={pacsStudyId}
+            coopRequestId={coopRequestId}
+            onImageSent={() => setShowImagePicker(false)}
+          />
+        </div>
+      )}
+
       <form className="coop-chat-input-row" onSubmit={handleSend}>
+        {pacsStudyId && (
+          <button
+            type="button"
+            className="coop-chat-plus"
+            onClick={() => setShowImagePicker((v) => !v)}
+            title="의료 영상 보내기"
+          >
+            +
+          </button>
+        )}
         <input
           type="text"
           className="coop-chat-input"

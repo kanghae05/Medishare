@@ -1,11 +1,14 @@
 import { useEffect, useState } from "react";
-import { NavLink } from "react-router-dom";
+import { NavLink, useLocation } from "react-router-dom";
 import api from "../common/api";
 
 function CoopSidebar() {
+  const location = useLocation();
   const [unreadCount, setUnreadCount] = useState(0);
   const [chatUnreadCount, setChatUnreadCount] = useState(0);
 
+  // location.key가 페이지 이동마다 바뀌므로, 사이드바 자체는 안 사라져도(레이아웃 공용)
+  // 화면 이동할 때마다 배지 개수를 새로 불러온다 - 새로고침 없이도 방금 읽은 게 바로 반영되게.
   useEffect(() => {
     api
       .get("/coop/unreadCount.do")
@@ -15,7 +18,7 @@ function CoopSidebar() {
       .get("/coop/chats/unreadCount.do")
       .then((res) => setChatUnreadCount(res.data.unreadCount || 0))
       .catch(() => {});
-  }, []);
+  }, [location.key]);
 
   const linkClass = ({ isActive }) => "coop-tab" + (isActive ? " active" : "");
 
@@ -36,7 +39,7 @@ function CoopSidebar() {
           <span className="coop-tab-label">전체 협진 내역</span>
         </NavLink>
         <NavLink to="/coop/chats" className={linkClass}>
-          <span className="coop-tab-label">대화함</span>
+          <span className="coop-tab-label">채팅</span>
           {chatUnreadCount > 0 && <span className="count-badge">{chatUnreadCount}</span>}
         </NavLink>
       </nav>

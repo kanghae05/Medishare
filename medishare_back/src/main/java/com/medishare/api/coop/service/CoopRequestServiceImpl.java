@@ -12,6 +12,7 @@ import com.medishare.api.coop.repository.CoopDepartmentLookupRepository;
 import com.medishare.api.coop.vo.CoopRequestDeptRejectVO;
 import com.medishare.api.coop.vo.CoopRequestVO;
 import com.medishare.api.coop.vo.UnreadCountVO;
+import com.medishare.api.coop.websocket.CoopNotificationWebSocketHandler;
 import com.medishare.api.util.page.PageObject;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -38,6 +39,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     private final CoopRequestRepository coopRequestRepository;
     private final CoopRequestDeptRejectRepository deptRejectRepository;
+    private final CoopNotificationWebSocketHandler notificationHandler;
     private final CoopPacsStudyLookupRepository pacsStudyRepository;
     private final CoopMemberLookupRepository memberRepository;
     private final CoopDepartmentLookupRepository departmentRepository;
@@ -52,8 +54,8 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> receivedList(Long doctorId, Long deptId, PageObject pageObject,
-                                             List<String> statuses,
-                                             LocalDate from, LocalDate to) {
+                                            List<String> statuses,
+                                            LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, DEFAULT_RECEIVED_STATUSES);
 
         long total = coopRequestRepository.findReceivedCount(doctorId, deptId, statusList, from, to);
@@ -75,7 +77,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> sentList(Long doctorId, PageObject pageObject,
-                                         List<String> statuses, LocalDate from, LocalDate to) {
+                                        List<String> statuses, LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
         long total = coopRequestRepository.findSentCount(doctorId, statusList, from, to);
@@ -98,7 +100,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> allList(Long doctorId, Long deptId, PageObject pageObject,
-                                        List<String> statuses, LocalDate from, LocalDate to) {
+                                       List<String> statuses, LocalDate from, LocalDate to) {
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
         long total = coopRequestRepository.findAllRelatedCount(doctorId, deptId, statusList, from, to);
@@ -200,11 +202,35 @@ public class CoopRequestServiceImpl implements CoopRequestService {
                 .status(CoopStatus.요청)
                 .build();
 
-        return toVO(coopRequestRepository.save(entity), vo.getReqDoctorId());
+        CoopRequest saved = coopRequestRepository.save(entity);
+        notifyNewRequest(saved);
+        return toVO(saved, vo.getReqDoctorId());
+    }
+
+    /** 새 협진요청이 왔다는 걸, 받는 사람(들)한테 실시간 토스트로 알린다. */
+    private void notifyNewRequest(CoopRequest c) {
+        String reqDoctorName = memberRepository.findById(c.getReqDoctorId())
+                .map(Member::getName).orElse("의사");
+        String message = c.getReqContent();
+        if (message != null && message.length() > 40) {
+            message = message.substring(0, 40) + "...";
+        }
+        String linkUrl = "/coop/view?no=" + c.getCoopRequestId();
+
+        if (c.getRecvType() == RecvType.지정의사) {
+            notificationHandler.notify(c.getRecvDoctorId(), "coop_request",
+                    reqDoctorName + "님의 협진 요청", message, linkUrl);
+        } else {
+            // 진료과 요청 - 소속 의사 전원한테 (누가 먼저 확인하고 수락할지 모르니까)
+            for (Member m : memberRepository.findByDepartment_NoAndStatus(c.getRecvDeptId(), "ACTIVE")) {
+                notificationHandler.notify(m.getNo(), "coop_request",
+                        reqDoctorName + "님의 협진 요청", message, linkUrl);
+            }
+        }
     }
 
     private void validateCreate(RecvType recvType, Long reqDoctorId, Long recvDoctorId, Long recvDeptId,
-                                 Long pacsStudyId, String reqContent) {
+                                Long pacsStudyId, String reqContent) {
         if (recvType == RecvType.지정의사) {
             if (recvDoctorId == null) {
                 throw new RuntimeException("지정의사 요청은 수신 의사를 선택해야 합니다.");
@@ -327,7 +353,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     @Override
     public List<CoopRequestVO> adminList(Long reqDoctorId, Long recvDoctorId, Long deptId, PageObject pageObject,
-                                          List<String> statuses, LocalDate from, LocalDate to) {
+                                         List<String> statuses, LocalDate from, LocalDate to) {
         // 관리자 화면은 기본값으로 취소 포함 전체 상태를 다 보여준다 (감사/조회 목적이라 숨길 이유가 없음)
         List<CoopStatus> statusList = resolveStatuses(statuses, List.of(CoopStatus.values()));
 
@@ -363,11 +389,11 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         Map<Long, Member> memberMap = doctorIds.isEmpty()
                 ? Map.of()
                 : memberRepository.findAllByIdWithDepartment(doctorIds).stream()
-                        .collect(Collectors.toMap(Member::getNo, m -> m));
+                .collect(Collectors.toMap(Member::getNo, m -> m));
         Map<Long, String> deptNameMap = deptIds.isEmpty()
                 ? Map.of()
                 : departmentRepository.findAllById(deptIds).stream()
-                        .collect(Collectors.toMap(d -> d.getNo(), d -> d.getDepartmentName()));
+                .collect(Collectors.toMap(d -> d.getNo(), d -> d.getDepartmentName()));
 
         List<CoopRequestVO> result = new ArrayList<>();
         for (CoopRequest c : list) {
@@ -405,7 +431,7 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     /** memberMap에서 이미 조회해둔 Member로 이름+메타를 채운다 (DB 재조회 없음) */
     private void applyNameFromMap(Member m, java.util.function.Consumer<String> nameSetter,
-                                   java.util.function.Consumer<String> metaSetter) {
+                                  java.util.function.Consumer<String> metaSetter) {
         if (m == null) {
             return;
         }
@@ -471,6 +497,9 @@ public class CoopRequestServiceImpl implements CoopRequestService {
         if (viewerRejected) {
             vo.setDisplayStatus("거절");
             vo.setCanRespond(false);
+            // 전원 거절 확정 전엔 c.getRejectReason()이 비어있어서, 본인이 쓴 사유를 따로 채워준다.
+            deptRejectRepository.findByCoopRequestIdAndDoctorId(c.getCoopRequestId(), viewerDoctorId)
+                    .ifPresent(r -> vo.setViewerRejectReason(r.getRejectReason()));
             return;
         }
         if (c.getStatus() == CoopStatus.수락) {
@@ -540,8 +569,8 @@ public class CoopRequestServiceImpl implements CoopRequestService {
 
     /** 요청자/수신자/수락자 이름 - 조회자와 무관하게 항상 실제 이름+메타를 채운다. */
     private void applyRealDoctorName(Long doctorId,
-                                      java.util.function.Consumer<String> nameSetter,
-                                      java.util.function.Consumer<String> metaSetter) {
+                                     java.util.function.Consumer<String> nameSetter,
+                                     java.util.function.Consumer<String> metaSetter) {
         memberRepository.findById(doctorId).ifPresent(m -> {
             nameSetter.accept(m.getName());
             List<String> metaParts = new ArrayList<>();

@@ -73,6 +73,9 @@ public class CoopRequestVO {
 
     // 지정의사 요청 거절 사유
     private String rejectReason;
+    // 진료과 요청에서, 조회자 본인이 개인적으로 거절한 사유. 아직 전원 거절 확정 전(rejectReason이 비어있을 때)에도
+    // 본인한테는 자기가 쓴 사유를 지정의사 거절 화면처럼 보여주기 위함. (다른 동료들 사유는 여전히 sender한테만 공개)
+    private String viewerRejectReason;
 
     // 전체 협진 내역 조회 시: "received" 또는 "sent"
     private String direction;

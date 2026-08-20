@@ -393,6 +393,7 @@ public class PacsServiceImpl implements PacsService {
 
 
         int savedCount = 0;
+        int updatedCount = 0;
         int skippedCount = 0;
         int failedCount = 0;
 
@@ -592,7 +593,7 @@ public class PacsServiceImpl implements PacsService {
                     );
 
 
-                    savedCount++;
+                    updatedCount++;
 
 
                     continue;
@@ -689,6 +690,9 @@ public class PacsServiceImpl implements PacsService {
                 )
                 .savedCount(
                         savedCount
+                )
+                .updatedCount(
+                        updatedCount
                 )
                 .skippedCount(
                         skippedCount

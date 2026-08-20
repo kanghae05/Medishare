@@ -41,7 +41,11 @@ function SchedulePage() {
       if (filterMode === "date") {
         response = await getDoctorSchedulesByDate(user.doctorId, date);
       } else if (filterMode === "period") {
-        response = await getDoctorSchedulesByPeriod(user.doctorId, startDate, endDate);
+        response = await getDoctorSchedulesByPeriod(
+          user.doctorId,
+          startDate,
+          endDate,
+        );
       } else {
         response = await getDoctorSchedules(user.doctorId);
       }
@@ -116,31 +120,64 @@ function SchedulePage() {
     <section className="dpart-page dpart-work-page">
       <div className="dpart-page-head">
         <div>
+          <span className="dpart-section-eyebrow">SCHEDULE</span>
           <h1>의사 일정</h1>
           <p>진료 가능 시간, 예약 시간, 불가 시간을 등록하고 관리합니다.</p>
         </div>
         <button type="button" className="dpart-primary" onClick={openCreate}>
-          + 일정 등록
+          일정 등록
         </button>
       </div>
 
       <div className="dpart-filter-band compact">
         <div className="dpart-segment">
-          <button type="button" className={filterMode === "all" ? "active" : ""} onClick={() => setFilterMode("all")}>전체</button>
-          <button type="button" className={filterMode === "date" ? "active" : ""} onClick={() => setFilterMode("date")}>날짜</button>
-          <button type="button" className={filterMode === "period" ? "active" : ""} onClick={() => setFilterMode("period")}>기간</button>
+          <button
+            type="button"
+            className={filterMode === "all" ? "active" : ""}
+            onClick={() => setFilterMode("all")}
+          >
+            전체
+          </button>
+          <button
+            type="button"
+            className={filterMode === "date" ? "active" : ""}
+            onClick={() => setFilterMode("date")}
+          >
+            날짜
+          </button>
+          <button
+            type="button"
+            className={filterMode === "period" ? "active" : ""}
+            onClick={() => setFilterMode("period")}
+          >
+            기간
+          </button>
         </div>
         {filterMode === "date" && (
-          <input type="date" value={date} onChange={(event) => setDate(event.target.value)} />
+          <input
+            type="date"
+            value={date}
+            onChange={(event) => setDate(event.target.value)}
+          />
         )}
         {filterMode === "period" && (
           <>
-            <input type="date" value={startDate} onChange={(event) => setStartDate(event.target.value)} />
+            <input
+              type="date"
+              value={startDate}
+              onChange={(event) => setStartDate(event.target.value)}
+            />
             <span>~</span>
-            <input type="date" value={endDate} onChange={(event) => setEndDate(event.target.value)} />
+            <input
+              type="date"
+              value={endDate}
+              onChange={(event) => setEndDate(event.target.value)}
+            />
           </>
         )}
-        <button type="button" className="dpart-secondary" onClick={resetFilter}>초기화</button>
+        <button type="button" className="dpart-secondary" onClick={resetFilter}>
+          초기화
+        </button>
       </div>
 
       {message && <div className="dpart-alert success">{message}</div>}
@@ -166,13 +203,26 @@ function SchedulePage() {
               {schedules.map((schedule) => (
                 <tr key={schedule.scheduleId}>
                   <td>{schedule.scheduleDate}</td>
-                  <td>{schedule.startTime?.slice(0, 5)} ~ {schedule.endTime?.slice(0, 5)}</td>
-                  <td><StatusBadge type={schedule.scheduleType} /></td>
+                  <td>
+                    {schedule.startTime?.slice(0, 5)} ~{" "}
+                    {schedule.endTime?.slice(0, 5)}
+                  </td>
+                  <td>
+                    <StatusBadge type={schedule.scheduleType} />
+                  </td>
                   <td>{schedule.memo || "-"}</td>
                   <td>
                     <div className="dpart-row-actions">
-                      <button type="button" onClick={() => openEdit(schedule)}>수정</button>
-                      <button type="button" className="danger" onClick={() => removeSchedule(schedule.scheduleId)}>삭제</button>
+                      <button type="button" onClick={() => openEdit(schedule)}>
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        className="danger"
+                        onClick={() => removeSchedule(schedule.scheduleId)}
+                      >
+                        삭제
+                      </button>
                     </div>
                   </td>
                 </tr>
