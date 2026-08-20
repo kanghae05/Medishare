@@ -187,10 +187,10 @@ function CoopRequestView() {
               </span>
             </div>
           )}
-          {vo.rejectReason && (
+          {(vo.rejectReason || vo.viewerRejectReason) && (
             <div className="coop-view-span2">
               <span className="coop-view-label">거절 사유</span>
-              <span className="coop-view-value coop-view-danger">{vo.rejectReason}</span>
+              <span className="coop-view-value coop-view-danger">{vo.rejectReason || vo.viewerRejectReason}</span>
             </div>
           )}
         </div>

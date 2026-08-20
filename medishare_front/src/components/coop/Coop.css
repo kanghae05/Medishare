@@ -410,6 +410,12 @@
 .coop-image-viewer { background: var(--coop-card); border: 1px solid var(--coop-line); border-radius: 4px; padding: 16px 20px; margin-bottom: 16px; }
 .coop-image-viewer-empty { background: var(--coop-paper); border: 1px solid var(--coop-line); border-radius: 4px; padding: 20px; text-align: center; color: var(--coop-muted); font-size: 13px; margin-bottom: 16px; }
 .coop-image-viewer-series { font-size: 12.5px; color: var(--coop-muted); margin-bottom: 10px; }
+.coop-image-viewer-preload {
+  float: right;
+  font-family: var(--coop-font-mono);
+  font-size: 11px;
+  color: var(--coop-faint);
+}
 .coop-image-viewer-frame { background: #0A0F12; border-radius: 3px; min-height: 320px; display: flex; align-items: center; justify-content: center; overflow: hidden; position: relative; }
 .coop-image-viewer-img { max-width: 100%; max-height: 480px; display: block; }
 .coop-image-viewer-controls { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
@@ -634,33 +640,39 @@
 .coop-chat-input:focus { outline: none; border-color: var(--coop-accent); }
 .coop-chat-input:disabled { background: var(--coop-paper); color: var(--coop-muted); }
 
-/* ---------- 대화방 화면 우측하단 플로팅 버튼 ---------- */
-.coop-chat-room-fab-group {
-  position: fixed;
-  right: 24px;
-  bottom: 24px;
-  display: flex;
-  gap: 8px;
-  z-index: 30;
-}
-.coop-chat-room-fab {
+/* ---------- 채팅 박스 헤더 안의 "채팅목록"/"협진 상세보기" 버튼 (CoopChatRoom에서 사용) ---------- */
+.coop-chat-header-btn {
   background: var(--coop-card);
   border: 1px solid var(--coop-line);
   color: var(--coop-ink);
   font-weight: 600;
-  font-size: 13px;
-  padding: 10px 16px;
-  border-radius: 24px;
+  font-size: 12px;
+  padding: 5px 12px;
+  border-radius: 4px;
   cursor: pointer;
-  box-shadow: 0 4px 14px rgba(27,39,48,0.14);
+  white-space: nowrap;
 }
-.coop-chat-room-fab:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
-.coop-chat-room-fab.primary {
+.coop-chat-header-btn:hover { border-color: var(--coop-accent); color: var(--coop-accent); }
+.coop-chat-header-btn.primary {
   background: var(--coop-accent);
   border-color: var(--coop-accent);
   color: #fff;
 }
-.coop-chat-room-fab.primary:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); color: #fff; }
+.coop-chat-header-btn.primary:hover { background: var(--coop-accent-deep); border-color: var(--coop-accent-deep); color: #fff; }
+
+/* ---------- 협진 상세보기 모달 - 상단 고정 네비바에 안 가리도록 여백/최대높이 조정 ---------- */
+.coop-detail-modal {
+  z-index: 2000;
+  padding-top: 76px;
+}
+.coop-detail-modal .modal-dialog {
+  max-height: calc(100vh - 110px);
+  margin-top: 0;
+}
+.coop-detail-modal .modal-content {
+  max-height: calc(100vh - 110px);
+  overflow-y: auto;
+}
 
 .coop-chat-req-date {
   font-size: 11.5px;

@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import api from "../common/api";
 import CoopImageAnnotator from "./CoopImageAnnotator";
 import "./Coop.css";
@@ -7,6 +7,12 @@ import "./Coop.css";
 // axios로 이미지를 blob으로 받아서 브라우저 메모리 URL로 변환해 사용한다.
 // coopRequestId가 주어지면(=채팅이 가능한 화면이면) "그리기" 버튼을 같이 보여준다.
 // onImageSent: 그림 전송 성공 시 호출 - 채팅창에서 인라인으로 띄웠을 때 자동으로 접는 용도.
+//
+// 슬라이더를 영상처럼 매끄럽게 넘기기 위해, 시리즈를 고르는 순간 전체 프레임을
+// 백그라운드에서 동시에 여러 장씩 미리 받아둔다. 이미 받은 프레임은 네트워크 요청
+// 없이 즉시 표시되고, 아직 안 받은 프레임으로 점프하면 그것부터 우선 받아온다.
+const PRELOAD_CONCURRENCY = 6;
+
 function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
   const [annotating, setAnnotating] = useState(false);
   const [seriesList, setSeriesList] = useState(null); // null = 아직 확인 전
@@ -16,6 +22,10 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
   const [totalCount, setTotalCount] = useState(null);
   const [index, setIndex] = useState(0);
   const [imageUrl, setImageUrl] = useState(null);
+  const [loadedCount, setLoadedCount] = useState(0);
+
+  const framesRef = useRef([]); // 인덱스별 object URL. 아직 안 받아온 자리는 null.
+  const indexRef = useRef(0); // 이펙트 콜백 안에서 "지금 보고 있는 인덱스"를 최신값으로 참조하기 위함
 
   // 1) 검사에 속한 시리즈 목록 조회 - 검사 하나에 시리즈가 여러 개일 수 있다.
   useEffect(() => {
@@ -59,29 +69,99 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
     };
   }, [seriesNo]);
 
-  // 3) 현재 인덱스의 이미지를 blob으로 받아와서 표시.
-  // 새 이미지가 도착하기 전까지는 imageUrl을 건드리지 않아 이전 이미지가 그대로 남아있는다.
+  // 3) 시리즈+개수가 확정되면, 전체 프레임을 백그라운드에서 동시 6장씩 미리 받기 시작한다.
+  // 다 받아두면 그 뒤로는 슬라이더를 아무리 빨리 움직여도 네트워크 지연 없이 바로바로 바뀐다.
   useEffect(() => {
     if (!seriesNo || !totalCount) return;
-    let ignore = false;
-    let objectUrl = null;
+    let cancelled = false;
 
+    framesRef.current = new Array(totalCount).fill(null);
+    queueMicrotask(() => {
+      if (!cancelled) {
+        setLoadedCount(0);
+        setImageUrl(null);
+      }
+    });
+
+    let nextToFetch = 0;
+    let inFlight = 0;
+    let loaded = 0;
+
+    const fetchOne = (i) => {
+      inFlight++;
+      api
+        .get(`/coop/series/${seriesNo}/instance/${i}/preview.do`, { responseType: "blob" })
+        .then((res) => {
+          if (cancelled) return;
+          const url = URL.createObjectURL(res.data);
+          if (!framesRef.current[i]) {
+            framesRef.current[i] = url;
+            loaded++;
+            setLoadedCount(loaded);
+          } else {
+            URL.revokeObjectURL(url); // 우선요청이랑 겹쳐서 이미 있으면 방금 받은 건 버림
+          }
+          if (indexRef.current === i) {
+            setImageUrl(framesRef.current[i]);
+          }
+        })
+        .catch(() => {})
+        .finally(() => {
+          inFlight--;
+          if (!cancelled) pump();
+        });
+    };
+
+    const pump = () => {
+      while (!cancelled && inFlight < PRELOAD_CONCURRENCY && nextToFetch < totalCount) {
+        fetchOne(nextToFetch);
+        nextToFetch++;
+      }
+    };
+    pump();
+
+    return () => {
+      cancelled = true;
+      framesRef.current.forEach((u) => u && URL.revokeObjectURL(u));
+    };
+  }, [seriesNo, totalCount]);
+
+  // 4) 보고 있는 인덱스가 바뀌면: 이미 받아둔 프레임이면 즉시 표시.
+  // 아직 안 받아둔 프레임으로 점프한 거면, 백그라운드 순서를 기다리지 않고 그것부터 바로 요청한다.
+  useEffect(() => {
+    indexRef.current = index;
+    if (!seriesNo) return;
+
+    let ignore = false;
+    const cached = framesRef.current[index];
+    if (cached) {
+      queueMicrotask(() => {
+        if (!ignore) setImageUrl(cached);
+      });
+      return () => {
+        ignore = true;
+      };
+    }
+
+    queueMicrotask(() => {
+      if (!ignore) setImageUrl(null);
+    });
     api
       .get(`/coop/series/${seriesNo}/instance/${index}/preview.do`, { responseType: "blob" })
       .then((res) => {
-        if (ignore) return;
-        objectUrl = URL.createObjectURL(res.data);
-        setImageUrl(objectUrl);
+        if (ignore || indexRef.current !== index) return;
+        const url = URL.createObjectURL(res.data);
+        if (!framesRef.current[index]) {
+          framesRef.current[index] = url;
+          setLoadedCount((c) => c + 1);
+        }
+        setImageUrl(framesRef.current[index]);
       })
-      .catch(() => {
-        if (!ignore) setImageUrl(null);
-      });
-
+      .catch(() => {});
     return () => {
       ignore = true;
-      if (objectUrl) URL.revokeObjectURL(objectUrl);
     };
-  }, [seriesNo, index, totalCount]);
+  }, [index, seriesNo]);
 
   if (seriesList === null) {
     return <div className="coop-image-viewer-empty">이미지 정보 확인 중...</div>;
@@ -91,6 +171,7 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
   }
 
   const currentSeries = seriesList.find((s) => s.seriesNo === seriesNo);
+  const stillLoading = totalCount > 0 && loadedCount < totalCount;
 
   return (
     <div className="coop-image-viewer">
@@ -116,6 +197,11 @@ function CoopStudyImageViewer({ pacsStudyId, coopRequestId, onImageSent }) {
             <span className="coop-pill status-요청" style={{ marginRight: 8 }}>{currentSeries.modality}</span>
           )}
           {currentSeries.seriesDescription}
+          {stillLoading && (
+            <span className="coop-image-viewer-preload">
+              불러오는 중 {loadedCount}/{totalCount}장
+            </span>
+          )}
         </div>
       )}
 

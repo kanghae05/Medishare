@@ -6,7 +6,7 @@ import CoopStudyDetailPanel from "./CoopStudyDetailPanel";
 import CoopStudyImageViewer from "./CoopStudyImageViewer";
 import "./Coop.css";
 
-// 채팅에서 들어오는 전용 화면 - 채팅이 주인공이고, 협진 상세정보는 우측 하단 버튼으로 모달을 열어서 본다.
+// 채팅에서 들어오는 전용 화면 - 채팅이 주인공이고, 협진 상세정보는 페이지 상단 버튼으로 모달을 열어서 본다.
 function CoopChatRoom() {
   const [searchParams] = useSearchParams();
   const no = searchParams.get("no");
@@ -51,24 +51,27 @@ function CoopChatRoom() {
     : vo.reqDoctorName;
 
   return (
-    <div className="coop-page" style={{ position: "relative" }}>
+    <div className="coop-page">
       <div className="coop-header">
         <h3 className="coop-title">{counterpartName || "대화"} 님과의 대화</h3>
+        <div style={{ display: "flex", gap: 8 }}>
+          <button type="button" className="coop-chat-header-btn" onClick={() => navigate("/coop/chats")}>
+            채팅목록
+          </button>
+          <button
+            type="button"
+            className="coop-chat-header-btn primary"
+            onClick={() => setDetailModalOpen(true)}
+          >
+            협진 상세보기
+          </button>
+        </div>
       </div>
 
       <CoopChatPanel coopRequestId={vo.coopRequestId} pacsStudyId={vo.pacsStudyId} large />
 
-      <div className="coop-chat-room-fab-group">
-        <button type="button" className="coop-chat-room-fab" onClick={() => navigate("/coop/chats")}>
-          채팅목록
-        </button>
-        <button type="button" className="coop-chat-room-fab primary" onClick={() => setDetailModalOpen(true)}>
-          협진 상세보기
-        </button>
-      </div>
-
       {detailModalOpen && (
-        <div className="modal d-block" tabIndex={-1} role="dialog" onClick={() => setDetailModalOpen(false)}>
+        <div className="modal d-block coop-detail-modal" tabIndex={-1} role="dialog" onClick={() => setDetailModalOpen(false)}>
           <div
             className="modal-dialog modal-dialog-centered modal-lg"
             role="document"
@@ -97,10 +100,24 @@ function CoopChatRoom() {
                       <span className="coop-view-label">요청 시각</span>
                       <span className="coop-view-value">{vo.reqTime}</span>
                     </div>
+                    <div>
+                      <span className="coop-view-label">상태</span>
+                      <span className={"coop-pill status-" + (vo.displayStatus || vo.status)}>
+                        {vo.displayStatus || vo.status}
+                      </span>
+                    </div>
                     <div className="coop-view-span2">
                       <span className="coop-view-label">요청 내용</span>
                       <span className="coop-view-value">{vo.reqContent}</span>
                     </div>
+                    {(vo.rejectReason || vo.viewerRejectReason) && (
+                      <div className="coop-view-span2">
+                        <span className="coop-view-label">거절 사유</span>
+                        <span className="coop-view-value coop-view-danger">
+                          {vo.rejectReason || vo.viewerRejectReason}
+                        </span>
+                      </div>
+                    )}
                   </div>
                 </div>
 

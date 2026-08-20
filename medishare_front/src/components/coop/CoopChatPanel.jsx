@@ -6,7 +6,9 @@ import "./Coop.css";
 // 협진요청 건별 실시간 채팅. WebSocket 연결 전에 REST로 이력을 먼저 불러온다.
 // large=true면 대화방 전용 화면처럼 메시지 영역을 크게 보여준다 (상세화면에 곁들일 땐 기본 크기).
 // pacsStudyId가 주어지면 입력창 왼쪽에 "+" 버튼이 뜨고, 눌러서 바로 영상을 열어 그림을 그려 보낼 수 있다.
-function CoopChatPanel({ coopRequestId, large = false, pacsStudyId }) {
+// title/headerActions: 대화방 전용 화면(CoopChatRoom)에서 이 박스 상단에 상대방 이름과
+// "채팅목록"/"협진 상세보기" 버튼을 넣기 위한 것 - 기본값은 그냥 "채팅" 라벨만.
+function CoopChatPanel({ coopRequestId, large = false, pacsStudyId, title, headerActions }) {
   const [messages, setMessages] = useState([]);
   const [input, setInput] = useState("");
   const [connected, setConnected] = useState(false);
@@ -76,11 +78,14 @@ function CoopChatPanel({ coopRequestId, large = false, pacsStudyId }) {
     <div className="coop-chat-panel">
       <div className="coop-chat-header">
         <span className="coop-detail-section-title" style={{ margin: 0, border: "none", padding: 0 }}>
-          채팅
+          {title || "채팅"}
         </span>
-        <span className={"coop-chat-status" + (connected ? " online" : "")}>
-          {connected ? "연결됨" : "연결 안 됨"}
-        </span>
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          {headerActions}
+          <span className={"coop-chat-status" + (connected ? " online" : "")}>
+            {connected ? "연결됨" : "연결 안 됨"}
+          </span>
+        </div>
       </div>
 
       {loadError && <div className="coop-empty">{loadError}</div>}
@@ -145,7 +150,7 @@ function CoopChatPanel({ coopRequestId, large = false, pacsStudyId }) {
           전송
         </button>
       </form>
-    </div> 
+    </div>
   );
 }
 
