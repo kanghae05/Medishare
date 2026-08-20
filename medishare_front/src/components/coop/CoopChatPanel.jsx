@@ -145,7 +145,7 @@ function CoopChatPanel({ coopRequestId, large = false, pacsStudyId }) {
           전송
         </button>
       </form>
-    </div>
+    </div> 
   );
 }
 
