@@ -1,7 +1,11 @@
 import axios from "axios";
 
+const apiBaseURL =
+  import.meta.env.VITE_DPART_API_BASE_URL ||
+  `http://${window.location.hostname}`;
+
 const dpartApi = axios.create({
-  baseURL: "http://10.15.21.45:8080",
+  baseURL: apiBaseURL,
 });
 
 dpartApi.interceptors.request.use((config) => {
