@@ -12,8 +12,9 @@
 
 .case-page {
   margin: 0 auto;
-  max-width: 1056px;
+  max-width: 1600px;
   position: relative;
+  width: calc(100% - 64px);
 }
 
 .case-page-head {
@@ -409,6 +410,9 @@
 @media (max-width: 600px) {
   .case-shell {
     padding: 20px 0 40px;
+  }
+  .case-page {
+    width: calc(100% - 32px);
   }
   .case-page-head {
     align-items: stretch;
