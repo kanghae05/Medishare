@@ -3,7 +3,10 @@ package com.medishare.api.coop.repository;
 import com.medishare.api.coop.entity.CoopRequest;
 import com.medishare.api.coop.entity.CoopStatus;
 import com.medishare.api.coop.entity.QCoopRequest;
+import com.medishare.api.coop.entity.QCoopRequestDeptReject;
 import com.querydsl.core.BooleanBuilder;
+import com.querydsl.core.types.dsl.BooleanExpression;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
@@ -17,11 +20,12 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     private final JPAQueryFactory queryFactory;
     QCoopRequest c = QCoopRequest.coopRequest;
+    QCoopRequestDeptReject drj = QCoopRequestDeptReject.coopRequestDeptReject;
 
     @Override
     public List<CoopRequest> findReceived(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                           LocalDate from, LocalDate to,
-                                           long offset, long limit) {
+                                          LocalDate from, LocalDate to,
+                                          long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(receivedCondition(doctorId, deptId),
                         statusIn(statuses),
@@ -34,7 +38,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findReceivedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                   LocalDate from, LocalDate to) {
+                                  LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(receivedCondition(doctorId, deptId),
@@ -46,7 +50,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findSent(Long doctorId, List<CoopStatus> statuses,
-                                       LocalDate from, LocalDate to, long offset, long limit) {
+                                      LocalDate from, LocalDate to, long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(c.reqDoctorId.eq(doctorId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -68,7 +72,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public List<CoopRequest> findAllRelated(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                             LocalDate from, LocalDate to, long offset, long limit) {
+                                            LocalDate from, LocalDate to, long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(allRelatedCondition(doctorId, deptId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -80,7 +84,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findAllRelatedCount(Long doctorId, Long deptId, List<CoopStatus> statuses,
-                                     LocalDate from, LocalDate to) {
+                                    LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(allRelatedCondition(doctorId, deptId),
@@ -93,15 +97,28 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
     public long countUnread(Long doctorId, Long deptId, List<CoopStatus> statuses) {
         Long count = queryFactory.select(c.count())
                 .from(c)
-                .where(receivedCondition(doctorId, deptId), statusIn(statuses))
+                .where(receivedCondition(doctorId, deptId), statusIn(statuses), notPersonallyRejected(doctorId))
                 .fetchOne();
         return count == null ? 0 : count;
     }
 
+    /**
+     * 진료과 요청에서, 본인이 이미 개인적으로 거절한 건은 제외한다.
+     * (전체 status는 아직 '요청'으로 남아있을 수 있음 - 다른 동료들이 아직 응답 안 한 상태라서.
+     * 하지만 본인은 이미 처리했으니 "응답 대기" 배지에는 안 잡혀야 한다.)
+     */
+    private BooleanExpression notPersonallyRejected(Long doctorId) {
+        return c.coopRequestId.notIn(
+                JPAExpressions.select(drj.coopRequestId)
+                        .from(drj)
+                        .where(drj.doctorId.eq(doctorId))
+        );
+    }
+
     @Override
     public List<CoopRequest> findAllForAdmin(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                                              List<CoopStatus> statuses, LocalDate from, LocalDate to,
-                                              long offset, long limit) {
+                                             List<CoopStatus> statuses, LocalDate from, LocalDate to,
+                                             long offset, long limit) {
         return queryFactory.selectFrom(c)
                 .where(adminCondition(reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId),
                         statusIn(statuses), dateFrom(from), dateTo(to))
@@ -113,7 +130,7 @@ public class CoopRequestRepositoryCustomImpl implements CoopRequestRepositoryCus
 
     @Override
     public long findAllForAdminCount(Long reqDoctorId, Long recvDoctorId, Long recvDoctorDeptId, Long deptId,
-                                      List<CoopStatus> statuses, LocalDate from, LocalDate to) {
+                                     List<CoopStatus> statuses, LocalDate from, LocalDate to) {
         Long count = queryFactory.select(c.count())
                 .from(c)
                 .where(adminCondition(reqDoctorId, recvDoctorId, recvDoctorDeptId, deptId),

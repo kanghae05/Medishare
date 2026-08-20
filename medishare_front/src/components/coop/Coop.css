@@ -726,3 +726,21 @@
   flex-shrink: 0;
 }
 .coop-toast-close:hover { color: var(--coop-ink); }
+
+/* ---------- 탑네비 협진 메뉴 배지 (CoopNavBadge) ---------- */
+.coop-nav-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 16px;
+  height: 16px;
+  padding: 0 4px;
+  margin-left: 5px;
+  border-radius: 999px;
+  background: #e0433a;
+  color: #fff;
+  font-size: 10.5px;
+  font-weight: 700;
+  line-height: 1;
+  vertical-align: middle;
+}

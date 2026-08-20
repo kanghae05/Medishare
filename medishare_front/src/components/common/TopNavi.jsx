@@ -17,6 +17,7 @@ import {
 } from "../dpart/dpartUtils";
 
 import "./TopNavi.css";
+import CoopNavBadge from "../coop/CoopNavBadge";
 
 
 /* =========================================================
@@ -419,7 +420,10 @@ function TopNavi() {
                     }`
                   }
                 >
-                  협진
+                  <Link to="/coop">
+                    협진
+                    <CoopNavBadge />
+                  </Link>
                 </NavLink>
 
               </>
